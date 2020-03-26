@@ -262,7 +262,7 @@ void camlsnark_bn382_fp_verifier_index_delete(void*);
 void *camlsnark_bn382_fp_verifier_index_urs(void*);
 
 void *camlsnark_bn382_fp_verifier_index_make(
-    size_t, size_t, size_t, size_t, size_t,
+    size_t, size_t, size_t, size_t,
     void*,
     void*, void*, void*, void*,
     void*, void*, void*, void*,
@@ -274,7 +274,7 @@ void camlsnark_bn382_fq_verifier_index_delete(void*);
 void *camlsnark_bn382_fq_verifier_index_urs(void*);
 
 void *camlsnark_bn382_fq_verifier_index_make(
-    size_t, size_t, size_t, size_t, size_t,
+    size_t, size_t, size_t, size_t,
     void*,
     void*, void*, void*, void*,
     void*, void*, void*, void*,

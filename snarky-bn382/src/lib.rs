@@ -24,7 +24,7 @@ use evaluation_domains::EvaluationDomains;
 use circuits_pairing::index::{Index, VerifierIndex, MatrixValues, URSSpec};
 use ff_fft::{Evaluations, DensePolynomial, EvaluationDomain};
 use num_bigint::BigUint;
-use oracle::{self, marlin_sponge::{DefaultFqSponge, DefaultFrSponge}, FqSponge, poseidon, poseidon::Sponge};
+use oracle::{marlin_sponge::{DefaultFqSponge, DefaultFrSponge}, poseidon, poseidon::Sponge};
 use protocol_pairing::{prover::{ ProverProof, ProofEvaluations, RandomOracles}};
 use rand::rngs::StdRng;
 use rand_core;
@@ -39,14 +39,6 @@ use circuits_dlog::index::{Index as DlogIndex, VerifierIndex as DlogVerifierInde
 use protocol_dlog::prover::{ProverProof as DlogProof, ProofEvaluations as DlogProofEvaluations};
 
 use algebra::curves::bn_382::g::Affine;
-
-fn ceil_pow2(x : usize) -> usize {
-    let mut res = 1;
-    while x > res {
-        res *= 2;
-    }
-    res
-}
 
 fn witness_position_to_index(public_inputs: usize, h_to_x_ratio: usize, w: usize) -> usize {
     if w % h_to_x_ratio == 0 {
@@ -1665,7 +1657,6 @@ pub extern "C" fn camlsnark_bn382_fq_verifier_index_urs<'a>(
 pub extern "C" fn camlsnark_bn382_fq_verifier_index_make<'a>(
     public_inputs: usize,
     variables: usize,
-    constraints: usize,
     nonzero_entries: usize,
     max_poly_size: usize,
     urs: *const SRS<GAffine>,
