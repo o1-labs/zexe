@@ -615,13 +615,13 @@ struct
 
     let make =
       foreign (prefix "make")
-        ( ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
+        ( FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
         @-> returning typ )
   end
 
