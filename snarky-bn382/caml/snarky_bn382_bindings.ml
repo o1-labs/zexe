@@ -1079,6 +1079,7 @@ module Full (F : Ctypes.FOREIGN) = struct
       (Fq.Vector)
       (Fq_vector_triple)
       (Fq_opening_proof)
+      (Fq_poly_comm)
       (F)
 
   module Fq_oracles =
