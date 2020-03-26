@@ -109,7 +109,7 @@ struct
 
   let make =
     foreign (prefix "make")
-      ( size_t @-> size_t @-> size_t @-> size_t @-> Urs.typ
+      ( size_t @-> size_t @-> size_t @-> Urs.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
@@ -181,7 +181,7 @@ struct
 
   let create =
     foreign (prefix "create")
-      ( M.typ @-> M.typ @-> M.typ @-> size_t @-> size_t @-> URS.typ
+      ( M.typ @-> M.typ @-> M.typ @-> size_t @-> size_t @-> size_t @-> URS.typ
       @-> returning typ )
 
   let m_poly_comm m f =
@@ -734,7 +734,7 @@ module Dlog_oracles
     end)
     (VerifierIndex : Type)
     (Proof : Type)
-    (FieldTriple : Type)
+    (FieldVectorTriple : Type)
     (F : Ctypes.FOREIGN) =
 struct
   include (
@@ -781,7 +781,7 @@ struct
   let evals = element "evals"
 
   let x_hat_nocopy =
-    foreign (prefix "x_hat_nocopy") (typ @-> returning FieldTriple.typ)
+    foreign (prefix "x_hat_nocopy") (typ @-> returning FieldVectorTriple.typ)
 
   let digest_before_evaluations = element "digest_before_evaluations"
 end
@@ -1056,7 +1056,7 @@ module Full (F : Ctypes.FOREIGN) = struct
         let prefix = with_prefix (prefix "fq_index")
       end)
       (Fq.Constraint_matrix)
-      (G.Affine)
+      (Fq_poly_comm)
       (Fq_urs)
       (F)
 
@@ -1066,7 +1066,7 @@ module Full (F : Ctypes.FOREIGN) = struct
       end)
       (Fq_index)
       (Fq_urs)
-      (G.Affine)
+      (Fq_poly_comm)
       (F)
 
   module Fq_proof =
@@ -1089,6 +1089,6 @@ module Full (F : Ctypes.FOREIGN) = struct
       (Fq)
       (Fq_verifier_index)
       (Fq_proof)
-      (Fq_triple)
+      (Fq_vector_triple)
       (F)
 end
