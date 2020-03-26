@@ -332,7 +332,7 @@ size_t camlsnark_bn382_fp_index_max_degree(void*);
 size_t camlsnark_bn382_fq_index_domain_h_size(void*);
 size_t camlsnark_bn382_fq_index_domain_k_size(void*);
 
-void *camlsnark_bn382_fq_index_create(void*, void*, void*, size_t, size_t, void*);
+void *camlsnark_bn382_fq_index_create(void*, void*, void*, size_t, size_t, size_t, void*);
 
 void camlsnark_bn382_fq_index_delete(void *);
 
@@ -404,7 +404,7 @@ void *camlsnark_bn382_fp_proof_evals_2(void *);
 // Fq proof
 
 void camlsnark_bn382_fq_proof_delete(void *);
-void *camlsnark_bn382_fq_proof_create(void *, void* , void*, void*, void*);
+void *camlsnark_bn382_fq_proof_create(void *, void* , void*, void*);
 void *camlsnark_bn382_fq_proof_make(
     void*,
     void*, void*, void*,
