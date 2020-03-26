@@ -119,7 +119,7 @@ end
 module URS
     (P : Prefix)
     (G1Affine : Type)
-    (FieldVector : Type)
+    (ScalarFieldVector : Type)
     (F : Ctypes.FOREIGN) =
 struct
   include (
@@ -147,7 +147,7 @@ struct
   let commit_evaluations =
     foreign
       (prefix "commit_evaluations")
-      (typ @-> size_t @-> FieldVector.typ @-> returning G1Affine.typ)
+      (typ @-> size_t @-> ScalarFieldVector.typ @-> returning G1Affine.typ)
 end
 
 module Index
@@ -321,7 +321,7 @@ module Pairing_marlin_proof
     (AffineCurve : Type)
     (ScalarField : Type)
     (Index : Type)
-    (FieldVector : Type)
+    (ScalarFieldVector : Type)
     (F : Ctypes.FOREIGN) =
 struct
   open F
@@ -358,11 +358,11 @@ struct
 
   let create =
     foreign (prefix "create")
-      (Index.typ @-> FieldVector.typ @-> FieldVector.typ @-> returning typ)
+      (Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> returning typ)
 
   let make =
     foreign (prefix "make")
-      ( FieldVector.typ @-> AffineCurve.typ @-> AffineCurve.typ
+      ( ScalarFieldVector.typ @-> AffineCurve.typ @-> AffineCurve.typ
       @-> AffineCurve.typ @-> AffineCurve.typ @-> AffineCurve.typ
       @-> AffineCurve.typ @-> AffineCurve.typ @-> AffineCurve.typ
       @-> AffineCurve.typ @-> AffineCurve.typ @-> AffineCurve.typ
@@ -549,7 +549,7 @@ module Dlog_marlin_proof
     end)
     (ScalarField : Type)
     (Index : Type)
-    (FieldVector : Type)
+    (ScalarFieldVector : Type)
     (FieldVectorTriple : Type)
     (OpeningProof : Type)
     (PolyComm : Type)
@@ -576,7 +576,7 @@ struct
 
     let prefix = with_prefix (P.prefix "evaluations")
 
-    let f s = foreign (prefix s) (typ @-> returning FieldVector.typ)
+    let f s = foreign (prefix s) (typ @-> returning ScalarFieldVector.typ)
 
     let w = f "w"
 
@@ -615,13 +615,13 @@ struct
 
     let make =
       foreign (prefix "make")
-        ( FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
-        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
-        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
-        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
-        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
-        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
-        @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+        ( ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
         @-> returning typ )
   end
 
@@ -629,18 +629,18 @@ struct
 
   let make =
     foreign (prefix "make")
-      ( FieldVector.typ @-> PolyComm.typ @-> PolyComm.typ
+      ( ScalarFieldVector.typ @-> PolyComm.typ @-> PolyComm.typ
       @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
       @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
       @-> PolyComm.typ @-> ScalarField.typ @-> ScalarField.typ
       @-> AffineCurve.Pair.Vector.typ @-> ScalarField.typ @-> ScalarField.typ
       @-> AffineCurve.typ @-> AffineCurve.typ @-> Evaluations.typ
-      @-> Evaluations.typ @-> Evaluations.typ @-> FieldVector.typ
+      @-> Evaluations.typ @-> Evaluations.typ @-> ScalarFieldVector.typ
       @-> returning typ )
 
   let create =
     foreign (prefix "create")
-      ( Index.typ @-> FieldVector.typ @-> FieldVector.typ @-> FieldVector.typ
+      ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
       @-> returning typ )
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
