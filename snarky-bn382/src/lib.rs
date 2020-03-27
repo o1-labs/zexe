@@ -621,6 +621,27 @@ pub extern "C" fn camlsnark_bn382_fp_proof_create(
 }
 
 #[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_proof_verify(
+    index: *const VerifierIndex<Bn_382>,
+    proof: *const ProverProof<Bn_382>,
+) -> bool {
+
+    let index = unsafe { &(*index) };
+    let proof = unsafe { (*proof).clone() };
+
+    match ProverProof::verify::<DefaultFqSponge<Bn_382G1Parameters>, DefaultFrSponge<Fp>>
+    (
+        &[proof].to_vec(),
+        &index,
+        &mut rand_core::OsRng
+    )
+    {
+        Ok(status) => status,
+        _ => false
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn camlsnark_bn382_fp_proof_make(
     primary_input : *const Vec<Fp>,
 
@@ -2549,6 +2570,25 @@ pub extern "C" fn camlsnark_bn382_fq_proof_create(
         (&map, &witness, &index, vec![prev], rng).unwrap();
 
     return Box::into_raw(Box::new(proof));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_proof_verify(
+    index: *const DlogVerifierIndex<GAffine>,
+    proof: *const DlogProof<GAffine>,
+) -> bool {
+
+    let index = unsafe { &(*index) };
+    let proof = unsafe { (*proof).clone() };
+    let group_map = <Affine as CommitmentCurve>::Map::setup();
+
+    DlogProof::verify::<DefaultFqSponge<Bn_382GParameters>, DefaultFrSponge<Fq>>
+    (
+        &group_map,
+        &[proof].to_vec(),
+        &index,
+        &mut rand_core::OsRng
+    )
 }
 
 #[no_mangle]

@@ -360,6 +360,7 @@ size_t camlsnark_bn382_fq_index_max_degree(void*);
 
 void camlsnark_bn382_fp_proof_delete(void *);
 void *camlsnark_bn382_fp_proof_create(void *, void* , void*);
+bool *camlsnark_bn382_fp_proof_verify(void *, void*);
 void *camlsnark_bn382_fp_proof_make(void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *);
 
 void *camlsnark_bn382_fp_proof_w_comm(void *);
@@ -405,6 +406,7 @@ void *camlsnark_bn382_fp_proof_evals_2(void *);
 
 void camlsnark_bn382_fq_proof_delete(void *);
 void *camlsnark_bn382_fq_proof_create(void *, void* , void*, void*);
+bool *camlsnark_bn382_fq_proof_verify(void *, void*);
 void *camlsnark_bn382_fq_proof_make(
     void*,
     void*, void*, void*,
