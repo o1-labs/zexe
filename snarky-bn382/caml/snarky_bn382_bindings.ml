@@ -321,6 +321,7 @@ module Pairing_marlin_proof
     (AffineCurve : Type)
     (ScalarField : Type)
     (Index : Type)
+    (VerifierIndex : Type)
     (ScalarFieldVector : Type)
     (F : Ctypes.FOREIGN) =
 struct
@@ -359,6 +360,10 @@ struct
   let create =
     foreign (prefix "create")
       (Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> returning typ)
+
+  let verify =
+    foreign (prefix "verify")
+      (VerifierIndex.typ @-> typ @-> returning bool)
 
   let make =
     foreign (prefix "make")
@@ -982,6 +987,7 @@ module Full (F : Ctypes.FOREIGN) = struct
       (G1.Affine)
       (Fp)
       (Fp_index)
+      (Fp_verifier_index)
       (Fp.Vector)
       (F)
 
