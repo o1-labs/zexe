@@ -254,10 +254,15 @@ struct
 
     open Prefix
 
-    module T : Type = struct
-      type t = unit ptr
+    module Underlying : Type = struct
+      type t = unit
+      let typ = void
+    end
 
-      let typ = ptr void
+    module T = struct
+      type t = Underlying.t ptr
+
+      let typ = ptr Underlying.typ
     end
 
     module Pair = struct
@@ -484,7 +489,8 @@ end
 module Dlog_poly_comm
     (P : Prefix)
     (AffineCurve : sig
-        include Type
+        module Underlying : Type
+        include Type with type t = Underlying.t ptr
         module Vector : Type
     end)
     (F : Ctypes.FOREIGN) =
@@ -503,7 +509,8 @@ struct
 
   let unshifted = foreign (prefix "unshifted") (typ @-> returning AffineCurve.Vector.typ)
 
-  let shifted = foreign (prefix "shifted") (typ @-> returning AffineCurve.typ)
+  let shifted : (t -> AffineCurve.t option return) result =
+    foreign (prefix "shifted") (typ @-> returning (ptr_opt AffineCurve.Underlying.typ))
 end
 
 module Dlog_opening_proof

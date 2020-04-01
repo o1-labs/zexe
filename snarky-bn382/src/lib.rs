@@ -2926,3 +2926,18 @@ pub extern "C" fn camlsnark_bn382_fq_proof_evaluations_make(
     return Box::into_raw(Box::new(res));
 }
 
+// fq poly comm
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_poly_comm_unshifted(c: *const PolyComm<GAffine>) -> *const Vec<GAffine> {
+    let c = unsafe {& (*c) };
+    return Box::into_raw(Box::new(c.unshifted.clone()));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_poly_comm_shifted(c: *const PolyComm<GAffine>) -> *const GAffine {
+    let c = unsafe {& (*c) };
+    match c.shifted {
+        Some(g) => Box::into_raw(Box::new(g.clone())),
+        None =>  std::ptr::null()
+    }
+}

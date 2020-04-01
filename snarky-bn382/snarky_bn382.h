@@ -546,3 +546,7 @@ void camlsnark_bn382_g1_affine_pair_vector_delete(void *);
 void *camlsnark_bn382_fq_triple_0(void *);
 void *camlsnark_bn382_fq_triple_1(void *);
 void *camlsnark_bn382_fq_triple_2(void *);
+
+// Fq poly comm
+void *camlsnark_bn382_fq_poly_comm_shifted(void *);
+void *camlsnark_bn382_fq_poly_comm_unshifted(void *);
