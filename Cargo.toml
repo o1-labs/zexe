@@ -9,6 +9,7 @@ members = [
   , "gm17"
   , "crypto-primitives"
   , "dpc"
+  , "snarky-bn382"
   , "bench-utils"
   , "groupmap"]
 
