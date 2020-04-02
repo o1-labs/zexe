@@ -3,7 +3,6 @@ use algebra::{
     curves::{
         bn_382::G1Affine,
         bn_382::g1::Bn_382G1Parameters,
-        models::SWModelParameters
     },
     fields::bn_382::Fq,
 };
@@ -22,7 +21,7 @@ fn test_group_map_on_curve() {
 
 fn first_xy(xs: & [Fq; 3]) -> (Fq, Fq) {
     for x in xs.iter() {
-        match groupmap::get_y::<G>(*x) {
+        match BWParameters::<G>::get_y(*x) {
             Some(y) => return (*x, y),
             None => ()
         }

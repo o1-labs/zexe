@@ -5,8 +5,9 @@ use algebra::{
 
 pub trait GroupMap<F> {
     fn setup() -> Self;
-    fn to_group(p: &Self, u: F) -> (F, F);
-    fn batch_to_group_x(p: &Self, ts: Vec<F>) -> Vec<[F; 3]>;
+    fn to_group(&self, u: F) -> (F, F);
+    fn batch_to_group_x(&self, ts: Vec<F>) -> Vec<[F; 3]>;
+    fn get_y(x: F) -> Option<F>;
 }
 
 pub struct BWParameters<G: SWModelParameters> {
@@ -80,26 +81,6 @@ fn potential_xs<G: SWModelParameters>(
     potential_xs_helper(params, t2, alpha)
 }
 
-pub fn get_y<G:SWModelParameters>(x: G::BaseField) -> Option<G::BaseField> {
-    let fx = curve_eqn::<G>(x);
-    if let Some(y) = fx.sqrt() {
-        Some(y)
-    } else {
-        None
-    }
-}
-
-fn get_xy<G:SWModelParameters>(params: &BWParameters<G>, t: G::BaseField) -> (G::BaseField, G::BaseField) {
-    let xvec = potential_xs(&params, t);
-    for x in xvec.iter() {
-        match get_y::<G>(*x) {
-            Some(y) => return (*x, y),
-            None => ()
-        }
-    }
-    panic!("get_xy")
-}
-
 impl<G: SWModelParameters> GroupMap<G::BaseField> for BWParameters<G> {
     fn setup() -> Self {
         assert!(G::COEFF_A.is_zero());
@@ -131,11 +112,11 @@ impl<G: SWModelParameters> GroupMap<G::BaseField> for BWParameters<G> {
         }
     }
 
-    fn batch_to_group_x(p: &BWParameters<G>, ts: Vec<G::BaseField>) -> Vec<[G::BaseField; 3]> {
+    fn batch_to_group_x(&self, ts: Vec<G::BaseField>) -> Vec<[G::BaseField; 3]> {
         let t2_alpha_invs : Vec<_> = ts.iter().map(|t| {
             let t2 = t.square();
             let mut alpha_inv = t2;
-            alpha_inv += &p.fu;
+            alpha_inv += &self.fu;
             alpha_inv *= &t2;
             (t2, alpha_inv)
         }).collect();
@@ -144,12 +125,28 @@ impl<G: SWModelParameters> GroupMap<G::BaseField> for BWParameters<G> {
         algebra::fields::batch_inversion::<G::BaseField>(&mut alphas);
 
         let potential_xs = t2_alpha_invs.iter().zip(alphas).map(|((t2,_), alpha)| {
-            potential_xs_helper(p, t2.clone(), alpha.clone())
+            potential_xs_helper(&self, t2.clone(), alpha.clone())
         });
         potential_xs.collect()
     }
 
-    fn to_group(p: &BWParameters<G>, t: G::BaseField) -> (G::BaseField, G::BaseField) {
-        get_xy(p, t)
+    fn get_y(x: G::BaseField) -> Option<G::BaseField> {
+        let fx = curve_eqn::<G>(x);
+        if let Some(y) = fx.sqrt() {
+            Some(y)
+        } else {
+            None
+        }
+    }
+
+    fn to_group(&self, t: G::BaseField) -> (G::BaseField, G::BaseField) {
+        let xvec = potential_xs(&self, t);
+        for x in xvec.iter() {
+            match Self::get_y(*x) {
+                Some(y) => return (*x, y),
+                None => ()
+            }
+        }
+        panic!("get_xy")
     }
 }
