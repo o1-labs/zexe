@@ -511,6 +511,11 @@ struct
 
   let shifted : (t -> AffineCurve.t option return) result =
     foreign (prefix "shifted") (typ @-> returning (ptr_opt AffineCurve.Underlying.typ))
+
+  let make : (AffineCurve.Vector.t -> AffineCurve.t option -> t return) result =
+    foreign (prefix "make")
+      ( AffineCurve.Vector.typ @-> ptr_opt AffineCurve.Underlying.typ
+      @-> returning typ )
 end
 
 module Dlog_opening_proof
