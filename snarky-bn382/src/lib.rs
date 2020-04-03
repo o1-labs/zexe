@@ -2941,3 +2941,26 @@ pub extern "C" fn camlsnark_bn382_fq_poly_comm_shifted(c: *const PolyComm<GAffin
         None =>  std::ptr::null()
     }
 }
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_poly_comm_make
+(
+    unshifted: *const Vec<GAffine>,
+    shifted: *const GAffine
+) -> *const PolyComm<GAffine>
+{
+    let unsh = unsafe {& (*unshifted) };
+
+    let commitment = PolyComm
+    {
+        unshifted: unsh.clone(),
+        shifted: if shifted == std::ptr::null() {None} else {Some ({let sh = unsafe {& (*shifted) }; *sh})}
+    };
+
+    Box::into_raw(Box::new(commitment))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_poly_comm_delete(c: *mut PolyComm<GAffine>) {
+    let _box = unsafe { Box::from_raw(c) };
+}

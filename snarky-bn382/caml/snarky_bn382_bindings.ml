@@ -516,6 +516,8 @@ struct
     foreign (prefix "make")
       ( AffineCurve.Vector.typ @-> ptr_opt AffineCurve.Underlying.typ
       @-> returning typ )
+
+  let delete = foreign (prefix "delete") (typ @-> returning void)
 end
 
 module Dlog_opening_proof
