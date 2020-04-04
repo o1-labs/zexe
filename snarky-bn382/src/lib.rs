@@ -27,6 +27,7 @@ use num_bigint::BigUint;
 use oracle::{marlin_sponge::{DefaultFqSponge, DefaultFrSponge}, poseidon, poseidon::Sponge};
 use protocol_pairing::{prover::{ ProverProof, ProofEvaluations, RandomOracles}};
 use rand::rngs::StdRng;
+use rand_core::OsRng;
 use rand_core;
 use sprs::{CsMat, CsVecView, CSR};
 use std::os::raw::c_char;
@@ -2544,7 +2545,6 @@ pub extern "C" fn camlsnark_bn382_fq_proof_create(
     index: *const DlogIndex<GAffine>,
     primary_input: *const Vec<Fq>,
     auxiliary_input: *const Vec<Fq>,
-    prev_challenges: *const Vec<Fq>,
 ) -> *const DlogProof<GAffine> {
     let index = unsafe { &(*index) };
     let primary_input = unsafe { &(*primary_input) };
@@ -2553,8 +2553,18 @@ pub extern "C" fn camlsnark_bn382_fq_proof_create(
     let witness = prepare_witness(index.domains, primary_input, auxiliary_input);
 
     let prev = {
-        let chals = (unsafe { &*prev_challenges}).clone();
-        let comm = {
+    pub fn ceil_log2(d: usize) -> usize {
+        let mut pow2 = 1;
+        let mut ceil_log2 = 0;
+        while d > pow2 {
+            ceil_log2 += 1;
+            pow2 *= 2;
+        }
+        ceil_log2
+        }
+    let k = ceil_log2(index.srs.get_ref().g.len());
+    let chals : Vec<_> = (0..k).map(|_| Fq::rand(&mut OsRng)).collect();
+    let comm = {
             let chal_squareds = chals.iter().map(|x| x.square()).collect();
             let s0 = product(chals.iter().map(|x| *x) ).inverse().unwrap();
             let b = DensePolynomial::from_coefficients_vec(b_poly_coefficients(s0, &chal_squareds));
@@ -2964,3 +2974,16 @@ pub extern "C" fn camlsnark_bn382_fq_poly_comm_make
 pub extern "C" fn camlsnark_bn382_fq_poly_comm_delete(c: *mut PolyComm<GAffine>) {
     let _box = unsafe { Box::from_raw(c) };
 }
+
+// fq challenge polynomial
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_challenges(c: *const (Vec<Fq>, PolyComm<Affine>)) -> *const Vec<Fq> {
+    let c = unsafe {&(*c)};
+    return Box::into_raw(Box::new(c.0.clone()));
+}
+
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_commitment(c: *const (Vec<Fq>, PolyComm<Affine>)) -> *const PolyComm<Affine> {
+    let c = unsafe {&(*c)};
+    return Box::into_raw(Box::new(c.1.clone()));
+}
+

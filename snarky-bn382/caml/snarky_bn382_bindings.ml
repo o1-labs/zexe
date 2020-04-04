@@ -520,6 +520,50 @@ struct
   let delete = foreign (prefix "delete") (typ @-> returning void)
 end
 
+module Dlog_challenge_polynomial
+    (P : Prefix)
+    (PolyComm : Type)
+    (ScalarField : sig
+        module Vector : Type
+    end)
+    (F : Ctypes.FOREIGN) = struct
+
+  include (
+    struct
+        type t = unit ptr
+
+        let typ = ptr void
+      end :
+      Type )
+
+    module T : Type = struct
+      type t = unit ptr
+
+      let typ = ptr void
+    end
+
+  let prefix = P.prefix
+
+  open F
+
+  let challenges = foreign (prefix "challenges") (typ @-> returning ScalarField.Vector.typ)
+
+  let commitment = foreign (prefix "commitment") (typ @-> returning PolyComm.typ)
+
+  let create =
+    foreign (prefix "create")
+      (ScalarField.Vector.typ @-> PolyComm.typ @-> returning typ)
+
+  let delete = foreign (prefix "delete") (typ @-> returning void)
+
+  module Vector =
+    Vector (struct
+        let prefix = prefix
+      end)
+      (T)
+      (F)
+end
+
 module Dlog_opening_proof
     (P : Prefix)
     (ScalarField : Type) (AffineCurve : sig
@@ -572,6 +616,7 @@ module Dlog_marlin_proof
     (FieldVectorTriple : Type)
     (OpeningProof : Type)
     (PolyComm : Type)
+    (ChalPolys : Type)
     (F : Ctypes.FOREIGN) =
 struct
   open F
@@ -654,12 +699,12 @@ struct
       @-> PolyComm.typ @-> ScalarField.typ @-> ScalarField.typ
       @-> AffineCurve.Pair.Vector.typ @-> ScalarField.typ @-> ScalarField.typ
       @-> AffineCurve.typ @-> AffineCurve.typ @-> Evaluations.typ
-      @-> Evaluations.typ @-> Evaluations.typ @-> ScalarFieldVector.typ
+      @-> Evaluations.typ @-> Evaluations.typ @-> ChalPolys.typ
       @-> returning typ )
 
   let create =
     foreign (prefix "create")
-      ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+      ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
       @-> returning typ )
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
@@ -691,6 +736,8 @@ struct
   let sigma2 = f "sigma2" ScalarField.typ
 
   let sigma3 = f "sigma3" ScalarField.typ
+
+  let challenges = f "challenges" ChalPolys.typ
 end
 
 module Pairing_oracles
@@ -1033,6 +1080,14 @@ module Full (F : Ctypes.FOREIGN) = struct
       (G.Affine)
       (F)
 
+  module Fq_chal_poly =
+    Dlog_challenge_polynomial (struct
+        let prefix = with_prefix (prefix "fq_chal_poly")
+      end)
+      (Fq)
+      (G.Affine)
+      (F)
+
   module Fq_urs = struct
 
     let prefix = with_prefix (prefix "fq_urs")
@@ -1100,6 +1155,7 @@ module Full (F : Ctypes.FOREIGN) = struct
       (Fq_vector_triple)
       (Fq_opening_proof)
       (Fq_poly_comm)
+      (Fq_chal_poly.Vector)
       (F)
 
   module Fq_oracles =

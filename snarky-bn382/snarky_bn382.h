@@ -405,11 +405,11 @@ void *camlsnark_bn382_fp_proof_evals_2(void *);
 // Fq proof
 
 void camlsnark_bn382_fq_proof_delete(void *);
-void *camlsnark_bn382_fq_proof_create(void *, void* , void*, void*);
+void *camlsnark_bn382_fq_proof_create(void *, void* , void*);
 bool *camlsnark_bn382_fq_proof_verify(void *, void*);
 void *camlsnark_bn382_fq_proof_make(
     void*,
-    void*, void*, void*,
+
     void*, void*, void*,
     void*, void*, void*,
     void*, void*, void*,
@@ -419,7 +419,7 @@ void *camlsnark_bn382_fq_proof_make(
     void*, void*, void*, void*, void*,
 
     void*, void*, void*,
-    void*, void*
+    void*
 );
 
 void *camlsnark_bn382_fq_proof_w_comm(void *);
@@ -552,3 +552,7 @@ void *camlsnark_bn382_fq_poly_comm_shifted(void *);
 void *camlsnark_bn382_fq_poly_comm_unshifted(void *);
 void *camlsnark_bn382_fq_poly_comm_make(void *, void *);
 void camlsnark_bn382_fq_poly_comm_delete(void *);
+
+// Fq challenge polynomial
+void *camlsnark_bn382_fq_chal_poly_challenges(void *);
+void *camlsnark_bn382_fq_chal_poly_commitment(void *);
