@@ -181,7 +181,7 @@ struct
 
   let create =
     foreign (prefix "create")
-      ( M.typ @-> M.typ @-> M.typ @-> size_t @-> size_t @-> size_t @-> URS.typ
+      ( M.typ @-> M.typ @-> M.typ @-> size_t @-> size_t @-> URS.typ
       @-> returning typ )
 
   let m_poly_comm m f =

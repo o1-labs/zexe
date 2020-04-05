@@ -332,7 +332,7 @@ size_t camlsnark_bn382_fp_index_max_degree(void*);
 size_t camlsnark_bn382_fq_index_domain_h_size(void*);
 size_t camlsnark_bn382_fq_index_domain_k_size(void*);
 
-void *camlsnark_bn382_fq_index_create(void*, void*, void*, size_t, size_t, size_t, void*);
+void *camlsnark_bn382_fq_index_create(void*, void*, void*, size_t, size_t, void*);
 
 void camlsnark_bn382_fq_index_delete(void *);
 
