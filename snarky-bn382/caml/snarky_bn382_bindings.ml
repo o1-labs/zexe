@@ -521,29 +521,22 @@ struct
 end
 
 module Dlog_challenge_polynomial
-    (P : Prefix)
-    (PolyComm : Type)
-    (ScalarField : sig
-        module Vector : Type
-    end)
-    (F : Ctypes.FOREIGN) = struct
+  (P : Prefix)
+  (PolyComm : Type)
+  (ScalarField : sig
+      module Vector : Type
+  end)
+  (F : Ctypes.FOREIGN) = struct
 
-  include (
-    struct
-        type t = unit ptr
+  module T = struct
+    type t = unit ptr
 
-        let typ = ptr void
-      end :
-      Type )
-
-    module T : Type = struct
-      type t = unit ptr
-
-      let typ = ptr void
-    end
+    let typ = ptr void
+  end
 
   let prefix = P.prefix
 
+  include T
   open F
 
   let challenges = foreign (prefix "challenges") (typ @-> returning ScalarField.Vector.typ)
@@ -1084,8 +1077,8 @@ module Full (F : Ctypes.FOREIGN) = struct
     Dlog_challenge_polynomial (struct
         let prefix = with_prefix (prefix "fq_chal_poly")
       end)
+      (Fq_poly_comm)
       (Fq)
-      (G.Affine)
       (F)
 
   module Fq_urs = struct
