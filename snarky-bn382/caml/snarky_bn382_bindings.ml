@@ -109,7 +109,7 @@ struct
 
   let make =
     foreign (prefix "make")
-      ( size_t @-> size_t @-> size_t @-> Urs.typ
+      ( size_t @-> size_t @-> size_t @-> size_t @-> Urs.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
@@ -1073,7 +1073,7 @@ module Full (F : Ctypes.FOREIGN) = struct
 
   module Fq_poly_comm =
     Dlog_poly_comm (struct
-        let prefix = with_prefix (prefix "fq_poly_com")
+        let prefix = with_prefix (prefix "fq_poly_comm")
       end)
       (G.Affine)
       (F)

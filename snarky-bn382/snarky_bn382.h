@@ -439,6 +439,7 @@ void *camlsnark_bn382_fq_proof_proof(void *);
 
 void *camlsnark_bn382_fq_proof_sigma2(void *);
 void *camlsnark_bn382_fq_proof_sigma3(void *);
+void *camlsnark_bn382_fq_proof_challenges(void *);
 
 // Fq proof evaluations
 
@@ -546,6 +547,9 @@ void camlsnark_bn382_g1_affine_pair_vector_delete(void *);
 void *camlsnark_bn382_fq_triple_0(void *);
 void *camlsnark_bn382_fq_triple_1(void *);
 void *camlsnark_bn382_fq_triple_2(void *);
+void *camlsnark_bn382_fq_vector_triple_0(void *);
+void *camlsnark_bn382_fq_vector_triple_1(void *);
+void *camlsnark_bn382_fq_vector_triple_2(void *);
 
 // Fq poly comm
 void *camlsnark_bn382_fq_poly_comm_shifted(void *);
@@ -556,3 +560,5 @@ void camlsnark_bn382_fq_poly_comm_delete(void *);
 // Fq challenge polynomial
 void *camlsnark_bn382_fq_chal_poly_challenges(void *);
 void *camlsnark_bn382_fq_chal_poly_commitment(void *);
+void *camlsnark_bn382_fq_chal_poly_create(void *, void *);
+void camlsnark_bn382_fq_chal_poly_delete(void *);

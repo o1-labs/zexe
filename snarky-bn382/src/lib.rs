@@ -2313,7 +2313,25 @@ pub extern "C" fn camlsnark_bn382_fq_triple_2(evals: *const [Fq; 3]) -> *const F
     return Box::into_raw(Box::new(x));
 }
 
-// G1 affine pair
+// G1 affine pair#[no_mangle]
+pub extern "C" fn camlsnark_bn382_vector_fq_triple_0(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
+    let x = (unsafe { &(*evals) })[0].clone();
+    return Box::into_raw(Box::new(x));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_vector_triple_1(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
+    let x = (unsafe { &(*evals) })[1].clone();
+    return Box::into_raw(Box::new(x));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_vector_triple_2(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
+    let x = (unsafe { &(*evals) })[2].clone();
+    return Box::into_raw(Box::new(x));
+}
+
+
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_g1_affine_pair_0(
     p: *const (G1Affine, G1Affine)) -> *const G1Affine {
@@ -2731,6 +2749,12 @@ pub extern "C" fn camlsnark_bn382_fq_proof_sigma3(p: *mut DlogProof<GAffine>) ->
 }
 
 #[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_proof_challenges(p: *mut DlogProof<GAffine>) -> *const Vec<(Vec<Fq>, PolyComm<Affine>)> {
+    let x = (unsafe { &(*p).prev_challenges }).clone();
+    return Box::into_raw(Box::new(x));
+}
+
+#[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_proof_proof(p: *mut DlogProof<GAffine>) -> *const OpeningProof<GAffine> {
     let x = (unsafe { &(*p).proof }).clone();
     return Box::into_raw(Box::new(x));
@@ -2987,3 +3011,20 @@ pub extern "C" fn camlsnark_bn382_fq_chal_poly_commitment(c: *const (Vec<Fq>, Po
     return Box::into_raw(Box::new(c.1.clone()));
 }
 
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_create
+(
+    challenges: *const Vec<Fq>,
+    commitment: *const PolyComm<Affine>
+) -> *const (Vec<Fq>, PolyComm<Affine>)
+{
+    let chal = unsafe { &(*challenges) };
+    let comm = unsafe { &(*commitment) };
+
+    Box::into_raw(Box::new((chal.clone(), comm.clone())))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_delete(c: *mut (Vec<Fq>, PolyComm<Affine>)) {
+    let _box = unsafe { Box::from_raw(c) };
+}
