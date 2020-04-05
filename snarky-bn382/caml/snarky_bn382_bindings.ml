@@ -605,6 +605,7 @@ module Dlog_marlin_proof
     end)
     (ScalarField : Type)
     (Index : Type)
+    (VerifierIndex : Type)
     (ScalarFieldVector : Type)
     (FieldVectorTriple : Type)
     (OpeningProof : Type)
@@ -699,6 +700,10 @@ struct
     foreign (prefix "create")
       ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
       @-> returning typ )
+
+  let verify =
+    foreign (prefix "verify")
+      (VerifierIndex.typ @-> typ @-> returning bool)
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
@@ -1144,6 +1149,7 @@ module Full (F : Ctypes.FOREIGN) = struct
       (G.Affine)
       (Fq)
       (Fq_index)
+      (Fq_verifier_index)
       (Fq.Vector)
       (Fq_vector_triple)
       (Fq_opening_proof)
