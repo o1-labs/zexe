@@ -2313,8 +2313,8 @@ pub extern "C" fn camlsnark_bn382_fq_triple_2(evals: *const [Fq; 3]) -> *const F
     return Box::into_raw(Box::new(x));
 }
 
-// G1 affine pair#[no_mangle]
-pub extern "C" fn camlsnark_bn382_vector_fq_triple_0(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_vector_triple_0(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
     let x = (unsafe { &(*evals) })[0].clone();
     return Box::into_raw(Box::new(x));
 }
@@ -2332,6 +2332,7 @@ pub extern "C" fn camlsnark_bn382_fq_vector_triple_2(evals: *const [Vec<Fq>; 3])
 }
 
 
+// G1 affine pair#[no_mangle]
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_g1_affine_pair_0(
     p: *const (G1Affine, G1Affine)) -> *const G1Affine {
@@ -3006,6 +3007,7 @@ pub extern "C" fn camlsnark_bn382_fq_chal_poly_challenges(c: *const (Vec<Fq>, Po
     return Box::into_raw(Box::new(c.0.clone()));
 }
 
+#[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_chal_poly_commitment(c: *const (Vec<Fq>, PolyComm<Affine>)) -> *const PolyComm<Affine> {
     let c = unsafe {&(*c)};
     return Box::into_raw(Box::new(c.1.clone()));
@@ -3027,4 +3029,35 @@ pub extern "C" fn camlsnark_bn382_fq_chal_poly_create
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_chal_poly_delete(c: *mut (Vec<Fq>, PolyComm<Affine>)) {
     let _box = unsafe { Box::from_raw(c) };
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_vector_create() -> *mut Vec<(Vec<Fq>, PolyComm<Affine>)> {
+    return Box::into_raw(Box::new(Vec::new()));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_vector_length(v: *const Vec<(Vec<Fq>, PolyComm<Affine>)>) -> i32 {
+    let v_ = unsafe { &(*v) };
+    return v_.len() as i32;
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_vector_emplace_back(v: *mut Vec<(Vec<Fq>, PolyComm<Affine>)>, x: *const (Vec<Fq>, PolyComm<Affine>)) {
+    let v_ = unsafe { &mut (*v) };
+    let x_ = unsafe { &(*x) }.clone();
+    v_.push(x_);
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_vector_get(v: *mut Vec<(Vec<Fq>, PolyComm<Affine>)>, i: u32) -> *mut (Vec<Fq>, PolyComm<Affine>) {
+    let v_ = unsafe { &mut (*v) };
+    return Box::into_raw(Box::new(((*v_)[i as usize]).clone()));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_chal_poly_vector_delete(v: *mut Vec<(Vec<Fq>, PolyComm<Affine>)>) {
+    // Deallocation happens automatically when a box variable goes out of
+    // scope.
+    let _box = unsafe { Box::from_raw(v) };
 }

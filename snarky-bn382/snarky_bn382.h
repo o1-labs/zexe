@@ -169,6 +169,16 @@ void camlsnark_bn382_fq_mut_sub(void *, void *);
 void camlsnark_bn382_fq_copy(void *, void *);
 
 void *camlsnark_bn382_fq_rng(int i);
+void *camlsnark_bn382_fq_vector_create();
+
+int camlsnark_bn382_fq_vector_length(void *);
+
+void camlsnark_bn382_fq_vector_emplace_back(void *, void *);
+
+void *camlsnark_bn382_fq_vector_get(void *, int);
+
+void camlsnark_bn382_fq_vector_delete(void *);
+
 
 void camlsnark_bn382_fq_delete(void *);
 
@@ -562,3 +572,9 @@ void *camlsnark_bn382_fq_chal_poly_challenges(void *);
 void *camlsnark_bn382_fq_chal_poly_commitment(void *);
 void *camlsnark_bn382_fq_chal_poly_create(void *, void *);
 void camlsnark_bn382_fq_chal_poly_delete(void *);
+
+void *camlsnark_bn382_fq_chal_poly_vector_create();
+int camlsnark_bn382_fq_chal_poly_vector_length(void *);
+void camlsnark_bn382_fq_chal_poly_vector_emplace_back(void *, void *);
+void *camlsnark_bn382_fq_chal_poly_vector_get(void *, int);
+void camlsnark_bn382_fq_chal_poly_vector_delete(void *);
