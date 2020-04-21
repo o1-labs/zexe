@@ -1236,7 +1236,6 @@ pub extern "C" fn camlsnark_bn382_fp_verifier_index_urs(
 pub extern "C" fn camlsnark_bn382_fp_verifier_index_make(
     public_inputs: usize,
     variables: usize,
-    constraints: usize,
     nonzero_entries: usize,
     max_degree: usize,
     urs: *const URS<Bn_382>,
@@ -1258,7 +1257,7 @@ pub extern "C" fn camlsnark_bn382_fp_verifier_index_make(
     let urs : URS<Bn_382> = (unsafe { &*urs }).clone();
     let (endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
     let index = VerifierIndex {
-        domains: EvaluationDomains::create(variables, constraints, public_inputs, nonzero_entries).unwrap(),
+        domains: EvaluationDomains::create(variables, public_inputs, nonzero_entries).unwrap(),
         matrix_commitments: [
             MatrixValues { row: (unsafe {*row_a}).clone(), col: (unsafe {*col_a}).clone(), val: (unsafe {*val_a}).clone(), rc: (unsafe {*rc_a}).clone() },
             MatrixValues { row: (unsafe {*row_b}).clone(), col: (unsafe {*col_b}).clone(), val: (unsafe {*val_b}).clone(), rc: (unsafe {*rc_b}).clone() },
@@ -1842,7 +1841,6 @@ pub extern "C" fn camlsnark_bn382_fq_verifier_index_urs<'a>(
 pub extern "C" fn camlsnark_bn382_fq_verifier_index_make<'a>(
     public_inputs: usize,
     variables: usize,
-    constraints: usize,
     nonzero_entries: usize,
     max_poly_size: usize,
     urs: *const SRS<GAffine>,
@@ -1863,7 +1861,7 @@ pub extern "C" fn camlsnark_bn382_fq_verifier_index_make<'a>(
 ) -> *const DlogVerifierIndex<'a, GAffine> {
     let srs : SRS<GAffine> = (unsafe { &*urs }).clone();
     let index = DlogVerifierIndex::<GAffine> {
-        domains: EvaluationDomains::create(variables, constraints, public_inputs, nonzero_entries).unwrap(),
+        domains: EvaluationDomains::create(variables, public_inputs, nonzero_entries).unwrap(),
         matrix_commitments: [
             circuits_dlog::index::MatrixValues { row: (unsafe {&*row_a}).clone(), col: (unsafe {&*col_a}).clone(), val: (unsafe {&*val_a}).clone(), rc: (unsafe {&*rc_a}).clone() },
             circuits_dlog::index::MatrixValues { row: (unsafe {&*row_b}).clone(), col: (unsafe {&*col_b}).clone(), val: (unsafe {&*val_b}).clone(), rc: (unsafe {&*rc_b}).clone() },
@@ -2172,14 +2170,14 @@ pub extern "C" fn camlsnark_bn382_g1_affine_vector_delete(v: *mut Vec<G1Affine>)
 
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_endo_base() -> *const Fp {
-    let (endo_q, _endo_r) = commitment_dlog::srs::endos::<GAffine>();
-    return Box::into_raw(Box::new(endo_q));
+    let (_, endo_r) = commitment_dlog::srs::endos::<GAffine>();
+    return Box::into_raw(Box::new(endo_r));
 }
 
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_endo_scalar() -> *const Fq {
-    let (_endo_q, endo_r) = commitment_dlog::srs::endos::<GAffine>();
-    return Box::into_raw(Box::new(endo_r));
+    let (endo_q, _) = commitment_dlog::srs::endos::<GAffine>();
+    return Box::into_raw(Box::new(endo_q));
 }
 
 #[no_mangle]
@@ -2770,19 +2768,6 @@ pub extern "C" fn camlsnark_bn382_fq_proof_create(
         (&map, &witness, &index, prev, rng).unwrap();
 
     return Box::into_raw(Box::new(proof));
-}
-
-// TODO: Batch verify across different indexes
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_proof_batch_verify(
-    index: *const DlogVerifierIndex<GAffine>,
-    proofs: *const Vec<DlogProof<GAffine>>,
-) -> bool {
-    let index = unsafe { &(*index) };
-    let proofs = unsafe { &(*proofs) };
-
-    DlogProof::<GAffine>::verify::<DefaultFqSponge<Bn_382GParameters>, DefaultFrSponge<Fq> >(
-        proofs, index, &mut rand_core::OsRng)
 }
 
 #[no_mangle]
