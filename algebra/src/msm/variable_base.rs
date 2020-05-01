@@ -253,13 +253,13 @@ mod test {
             let num_pairs = (actual_bucket_size * buckets) / 2;
 
             for b in 0..buckets {
-                for within_bucket_pr in 0..(actual_bucket_size / 2) {
+                for pair in 0..(actual_bucket_size / 2) {
                     // operating on
-                    // v[b * actual_bucket_size + 2*i] and v[b * actual_bucket_size + 2*i + 1]
-                    let i = b * actual_bucket_size + 2*within_bucket_pr;
-                    let j = b * actual_bucket_size + 2*within_bucket_pr + 1;
+                    // v[b * actual_bucket_size + 2*pair] and v[b * actual_bucket_size + 2*pair + 1]
+                    let i = b * actual_bucket_size + 2*pair;
+                    let j = b * actual_bucket_size + 2*pair + 1;
 
-                    denominators[b * (actual_bucket_size/2) + within_bucket_pr] = 
+                    denominators[b * (actual_bucket_size/2) + pair] = 
                         if v[i].x == v[j].x
                         {
                             if v[j].y == Fq::zero() {Fq::one()} else {v[j].y.double()}
@@ -270,13 +270,13 @@ mod test {
             crate::fields::batch_inversion::<_>(&mut denominators);
 
             for b in 0..buckets {
-                for within_bucket_pr in 0..(actual_bucket_size / 2) {
+                for pair in 0..(actual_bucket_size / 2) {
                     // operating on
-                    // v[b * actual_bucket_size + 2*i] and v[b * actual_bucket_size + 2*i + 1]
-                    let i = b * actual_bucket_size + 2*within_bucket_pr;
+                    // v[b * actual_bucket_size + 2*pair] and v[b * actual_bucket_size + 2*pair + 1]
+                    let i = b * actual_bucket_size + 2*pair;
                     let j = i + 1;
 
-                    let d = denominators[b*(actual_bucket_size/2) + within_bucket_pr];
+                    let d = denominators[b*(actual_bucket_size/2) + pair];
 
                     if v[j].is_zero() == true
                     {
@@ -311,12 +311,8 @@ mod test {
             }
 
             // squish step
-            let next_actual_bucket_size = actual_bucket_size / 2;
-
-            for b in 1..buckets {
-                for i in 0..next_actual_bucket_size {
-                    v[b * next_actual_bucket_size + i] = v[b * actual_bucket_size + 2*i];
-                }
+            for i in 0..((buckets * actual_bucket_size) / 2) {
+                v[i] = v[2 * i];
             }
 
             denominators.truncate(denominators.len() / 2);
@@ -324,15 +320,22 @@ mod test {
         let t = start.elapsed();
         println!("{} = {} * {}, {:?} izzy time ", n, buckets, per_bucket, t);
 
-        let v = v0.iter().map(|e| e.into_affine()).collect::<Vec<_>>();
+        let p = v0.iter().map(|e| e.into_affine()).collect::<Vec<_>>();
 
         let start = Instant::now();
-        let mut acc = G1Projective::zero();
-        for x in v.iter() {
-            acc.add_assign_mixed(&x);
+        let mut accs = vec![G1Projective::zero(); buckets];
+
+        for b in 0..buckets {
+            for i in 0..per_bucket {
+                accs[i].add_assign_mixed(&p[b*per_bucket + i]);
+            }
         }
         let t = start.elapsed();
         println!("{} = {} * {}, {:?} mixed time ", n, buckets, per_bucket, t);
+
+        for i in 0..buckets {
+            assert_eq!(accs[i].into_affine(), v[i]);
+        }
     }
 
     #[test]
