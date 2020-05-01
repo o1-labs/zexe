@@ -161,8 +161,8 @@ impl VariableBaseMSM {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::curves::bn_382::G1Projective;
-    use crate::fields::bn_382::Fp;
+    use crate::curves::{SWModelParameters, bn_382::{G1Projective, G1Affine, g1::Bn_382G1Parameters}};
+    use crate::fields::bn_382::{Fp, Fq,};
     use rand::SeedableRng;
     use rand_xorshift::XorShiftRng;
     use crate::UniformRand;
@@ -226,6 +226,119 @@ mod test {
 
         assert_eq!(naive, fast);
         assert_eq!(naive, affine)
+    }
+
+    fn add_batch(buckets_log2 : usize, per_bucket_log2: usize) {
+        let buckets = 1 << buckets_log2;
+        let per_bucket = 1 << per_bucket_log2;
+
+        let g = G1Projective::prime_subgroup_generator().into_affine();
+        let n = buckets * per_bucket;
+        let mut v0 = vec![G1Projective::prime_subgroup_generator(); n];
+
+        for i in 1..n {
+            v0[i] = v0[i - 1].clone();
+            v0[i].add_assign_mixed(&g);
+        }
+        ProjectiveCurve::batch_normalization(&mut v0);
+
+        let mut v = v0.iter().map(|e| e.into_affine()).collect::<Vec<_>>();
+
+        let mut denominators = vec![Fq::zero(); n / 2];
+
+        let start = Instant::now();
+        for d in 0..per_bucket_log2 {
+            // reduce step
+            let actual_bucket_size = 1 << (per_bucket_log2 - d);
+            let num_pairs = (actual_bucket_size * buckets) / 2;
+
+            for b in 0..buckets {
+                for within_bucket_pr in 0..(actual_bucket_size / 2) {
+                    // operating on
+                    // v[b * actual_bucket_size + 2*i] and v[b * actual_bucket_size + 2*i + 1]
+                    let i = b * actual_bucket_size + 2*within_bucket_pr;
+                    let j = b * actual_bucket_size + 2*within_bucket_pr + 1;
+
+                    denominators[b * (actual_bucket_size/2) + within_bucket_pr] = 
+                        if v[i].x == v[j].x
+                        {
+                            if v[j].y == Fq::zero() {Fq::one()} else {v[j].y.double()}
+                        } else {v[i].x - &v[j].x};
+                    
+                }
+            }
+            crate::fields::batch_inversion::<_>(&mut denominators);
+
+            for b in 0..buckets {
+                for within_bucket_pr in 0..(actual_bucket_size / 2) {
+                    // operating on
+                    // v[b * actual_bucket_size + 2*i] and v[b * actual_bucket_size + 2*i + 1]
+                    let i = b * actual_bucket_size + 2*within_bucket_pr;
+                    let j = i + 1;
+
+                    let d = denominators[b*(actual_bucket_size/2) + within_bucket_pr];
+
+                    if v[j].is_zero() == true
+                    {
+                    }
+                    else if v[i].is_zero() == true
+                    {
+                        v[i] = v[j];
+                    }
+                    else if v[j].x == v[i].x && (v[j].y != v[i].y || v[j].y.is_zero() )
+                    {
+                        v[i] = G1Affine::zero();
+                    }
+                    else if v[j].x == v[i].x && v[j].y == v[i].y
+                    {
+                        let sq = v[i].x.square();
+                        let s = (sq.double() + &sq + &Bn_382G1Parameters::COEFF_A) * &d;
+                        let x = s.square() - &v[i].x.double();
+                        let y = -v[i].y - &(s * &(x - &v[i].x));
+                        v[i].x = x;
+                        v[i].y = y;
+                    }
+                    else
+                    {
+                        let s = (v[i].y - &v[j].y) * &d;
+                        let x = s.square() - &v[i].x - &v[j].x;
+                        let y = -v[i].y - &(s * &(x - &v[i].x));
+
+                        v[i].x = x;
+                        v[i].y = y;
+                    }
+                }
+            }
+
+            // squish step
+            let next_actual_bucket_size = actual_bucket_size / 2;
+
+            for b in 1..buckets {
+                for i in 0..next_actual_bucket_size {
+                    v[b * next_actual_bucket_size + i] = v[b * actual_bucket_size + 2*i];
+                }
+            }
+
+            denominators.truncate(denominators.len() / 2);
+        }
+        let t = start.elapsed();
+        println!("{} = {} * {}, {:?} izzy time ", n, buckets, per_bucket, t);
+
+        let v = v0.iter().map(|e| e.into_affine()).collect::<Vec<_>>();
+
+        let start = Instant::now();
+        let mut acc = G1Projective::zero();
+        for x in v.iter() {
+            acc.add_assign_mixed(&x);
+        }
+        let t = start.elapsed();
+        println!("{} = {} * {}, {:?} mixed time ", n, buckets, per_bucket, t);
+    }
+
+    #[test]
+    fn izzy_addition()
+    {
+        add_batch(17, 3);
     }
 
     #[test]
