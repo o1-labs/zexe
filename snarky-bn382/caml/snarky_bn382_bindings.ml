@@ -101,6 +101,8 @@ struct
 
   let prefix = P.prefix
 
+  let write = foreign (prefix "write") (typ @-> string @-> returning void)
+
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
   let create = foreign (prefix "create") (Index.typ @-> returning typ)
@@ -114,6 +116,19 @@ struct
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
       @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ @-> G1Affine.typ
       @-> returning typ )
+
+  let m_poly_comm m f =
+    foreign
+      (prefix (Format.sprintf "%s_%s_comm" m f))
+      (typ @-> returning G1Affine.typ)
+
+  let ( (a_row_comm, a_col_comm, a_val_comm, a_rc_comm)
+      , (b_row_comm, b_col_comm, b_val_comm, b_rc_comm)
+      , (c_row_comm, c_col_comm, c_val_comm, c_rc_comm) ) =
+    let map3 (a, b, c) f = (f a, f b, f c) in
+    let map4 (a, b, c, d) f = (f a, f b, f c, f d) in
+    let polys = ("row", "col", "val", "rc") and mats = ("a", "b", "c") in
+    map3 mats (fun m -> map4 polys (fun p -> m_poly_comm m p))
 end
 
 module URS
@@ -171,6 +186,13 @@ struct
 
   module M = Constraint_matrix
 
+  let read =
+    foreign (prefix "read")
+      ( URS.typ @-> Constraint_matrix.typ @-> Constraint_matrix.typ
+      @-> Constraint_matrix.typ @-> size_t @-> string @-> returning typ )
+
+  let write = foreign (prefix "write") (typ @-> string @-> returning void)
+
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
   let domain_h_size =
@@ -183,19 +205,6 @@ struct
     foreign (prefix "create")
       ( M.typ @-> M.typ @-> M.typ @-> size_t @-> size_t @-> URS.typ
       @-> returning typ )
-
-  let m_poly_comm m f =
-    foreign
-      (prefix (Format.sprintf "%s_%s_comm" m f))
-      (typ @-> returning G1Affine.typ)
-
-  let ( (a_row_comm, a_col_comm, a_val_comm, a_rc_comm)
-      , (b_row_comm, b_col_comm, b_val_comm, b_rc_comm)
-      , (c_row_comm, c_col_comm, c_val_comm, c_rc_comm) ) =
-    let map3 (a, b, c) f = (f a, f b, f c) in
-    let map4 (a, b, c, d) f = (f a, f b, f c, f d) in
-    let polys = ("row", "col", "val", "rc") and mats = ("a", "b", "c") in
-    map3 mats (fun m -> map4 polys (fun p -> m_poly_comm m p))
 
   let metadata s = foreign (prefix s) (typ @-> returning size_t)
 
@@ -303,6 +312,8 @@ struct
       (BaseField.typ @-> BaseField.typ @-> returning typ)
 
   let add = foreign (prefix "add") (typ @-> typ @-> returning typ)
+
+  let double = foreign (prefix "double") (typ @-> returning typ)
 
   let scale =
     foreign (prefix "scale") (typ @-> ScalarField.typ @-> returning typ)
@@ -841,6 +852,15 @@ struct
 
   let of_bigint = foreign (prefix "of_bigint") (Bigint.typ @-> returning typ)
 
+  let to_bigint_raw =
+    foreign (prefix "to_bigint_raw") (typ @-> returning Bigint.typ)
+
+  let to_bigint_raw_noalloc =
+    foreign (prefix "to_bigint_raw_noalloc") (typ @-> returning Bigint.typ)
+
+  let of_bigint_raw =
+    foreign (prefix "of_bigint_raw") (Bigint.typ @-> returning typ)
+
   module Vector =
     Vector (struct
         let prefix = prefix
@@ -953,14 +973,19 @@ module Full (F : Ctypes.FOREIGN) = struct
       (Fp_urs)
       (F)
 
-  module Fp_verifier_index =
-    VerifierIndex (struct
-        let prefix = with_prefix (prefix "fp_verifier_index")
-      end)
-      (Fp_index)
-      (Fp_urs)
-      (G1.Affine)
-      (F)
+  module Fp_verifier_index = struct
+    include VerifierIndex (struct
+                let prefix = with_prefix (prefix "fp_verifier_index")
+              end)
+              (Fp_index)
+              (Fp_urs)
+              (G1.Affine)
+              (F)
+
+    open F
+
+    let read = foreign (prefix "read") (string @-> returning typ)
+  end
 
   module Fp_proof =
     Pairing_marlin_proof (struct
@@ -1011,14 +1036,19 @@ module Full (F : Ctypes.FOREIGN) = struct
       (Fq_urs)
       (F)
 
-  module Fq_verifier_index =
-    VerifierIndex (struct
-        let prefix = with_prefix (prefix "fq_verifier_index")
-      end)
-      (Fq_index)
-      (Fq_urs)
-      (G.Affine)
-      (F)
+  module Fq_verifier_index = struct
+    include VerifierIndex (struct
+                let prefix = with_prefix (prefix "fq_verifier_index")
+              end)
+              (Fq_index)
+              (Fq_urs)
+              (G.Affine)
+              (F)
+
+    open F
+
+    let read = foreign (prefix "read") (Fq_urs.typ @-> string @-> returning typ)
+  end
 
   module Fq_triple = Triple (Fq) (Fq) (F)
 
@@ -1060,11 +1090,13 @@ module Full (F : Ctypes.FOREIGN) = struct
 
     module Pairing = struct
       let base = endo Fq.typ "fp_endo_base"
+
       let scalar = endo Fp.typ "fp_endo_scalar"
     end
 
     module Dlog = struct
       let base = endo Fp.typ "fq_endo_base"
+
       let scalar = endo Fq.typ "fq_endo_scalar"
     end
   end

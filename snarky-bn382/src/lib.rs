@@ -1,5 +1,6 @@
 extern crate libc;
 use algebra::{
+    ToBytes, FromBytes,
     biginteger::{BigInteger, BigInteger384},
     curves::{
         PairingCurve, PairingEngine,
@@ -33,6 +34,7 @@ use sprs::{CsMat, CsVecView, CSR};
 use std::os::raw::c_char;
 use std::ffi::CStr;
 use std::fs::File;
+use std::io::{Read, Result as IoResult, Write, BufReader, BufWriter};
 
 use commitment_dlog::{commitment::{product, b_poly_coefficients, OpeningProof}, srs::{SRS}};
 use circuits_dlog::index::{Index as DlogIndex, VerifierIndex as DlogVerifierIndex, SRSSpec, SRSValue};
@@ -44,6 +46,145 @@ fn ceil_pow2(x : usize) -> usize {
         res *= 2;
     }
     res
+}
+
+fn write_vec<A: ToBytes, W: Write>(v : & Vec<A>, mut writer: W) -> IoResult<()> {
+    u64::write(&(v.len() as u64), &mut writer)?;
+    for x in v {
+        x.write(&mut writer)?;
+    };
+    Ok(())
+}
+
+fn read_vec<A: FromBytes, R: Read>(mut reader: R) -> IoResult<Vec<A>> {
+    let mut v = vec![];
+    let n = u64::read(&mut reader)? as usize;
+    for i in 0..n {
+        v.push(A::read(&mut reader)?);
+    }
+    Ok(v)
+}
+
+fn write_cs_mat<A: ToBytes + Clone, W:Write >(m: &CsMat<A>, mut w: W) -> IoResult<()> {
+    fn v(s: &[usize]) -> Vec<u64> {
+        s.iter().map(|x| *x as u64).collect()
+    }
+
+    let (a, b) = m.shape();
+    u64::write(&(a as u64), &mut w)?;
+    u64::write(&(b as u64), &mut w)?;
+
+    write_vec::<u64, _>(&v(m.indptr()), &mut w)?;
+    write_vec(&v(m.indices()), &mut w)?;
+    write_vec(& m.data().to_vec(), &mut w)?;
+    Ok(())
+}
+
+fn read_cs_mat<A: FromBytes + Copy, R: Read>(mut r: R) -> IoResult<CsMat<A>> {
+    fn v(s: Vec<u64>) -> Vec<usize> {
+        s.iter().map(|x| *x as usize).collect()
+    }
+
+    let a = u64::read(&mut r)? as usize;
+    let b = u64::read(&mut r)? as usize;
+    let shape = (a, b);
+
+    let indptr = v(read_vec(&mut r)?);
+    let indices = v(read_vec(&mut r)?);
+    let data : Vec<A> = read_vec(&mut r)?;
+    Ok(CsMat::new(shape, indptr, indices, data))
+}
+
+fn write_matrix_values<A: ToBytes, W: Write>(m : &MatrixValues<A>, mut w: W) -> IoResult<()> {
+    A::write(&m.row, &mut w)?;
+    A::write(&m.col, &mut w)?;
+    A::write(&m.val, &mut w)?;
+    A::write(&m.rc, &mut w)?;
+    Ok(())
+}
+
+fn read_matrix_values<A: FromBytes, R: Read>(mut r: R) -> IoResult<MatrixValues<A>> {
+    let row = A::read(&mut r)?;
+    let col = A::read(&mut r)?;
+    let val = A::read(&mut r)?;
+    let rc = A::read(&mut r)?;
+    Ok(MatrixValues {row, col, val, rc})
+}
+
+fn write_dlog_matrix_values<A: ToBytes, W: Write>(m : &circuits_dlog::index::MatrixValues<A>, mut w: W) -> IoResult<()> {
+    A::write(&m.row, &mut w)?;
+    A::write(&m.col, &mut w)?;
+    A::write(&m.val, &mut w)?;
+    A::write(&m.rc, &mut w)?;
+    Ok(())
+}
+
+fn read_dlog_matrix_values<A: FromBytes, R: Read>(mut r: R) -> IoResult<circuits_dlog::index::MatrixValues<A>> {
+    let row = A::read(&mut r)?;
+    let col = A::read(&mut r)?;
+    let val = A::read(&mut r)?;
+    let rc = A::read(&mut r)?;
+    Ok(circuits_dlog::index::MatrixValues {row, col, val, rc})
+}
+
+fn write_dense_polynomial<A: ToBytes + Field, W: Write>(p : &DensePolynomial<A>, mut w: W) -> IoResult<()> {
+    write_vec(&p.coeffs, w)
+}
+
+fn read_dense_polynomial<A: ToBytes + Field, R: Read>(mut r: R) -> IoResult<DensePolynomial<A>> {
+    let coeffs = read_vec(r)?;
+    Ok(DensePolynomial { coeffs })
+}
+
+fn write_domain<A: ToBytes + PrimeField, W: Write>(d : &EvaluationDomain<A>, mut w: W) -> IoResult<()> {
+    d.size.write(&mut w)?;
+    d.log_size_of_group.write(&mut w)?;
+    d.size_as_field_element.write(&mut w)?;
+    d.size_inv.write(&mut w)?;
+    d.group_gen.write(&mut w)?;
+    d.group_gen_inv.write(&mut w)?;
+    d.generator_inv.write(&mut w)?;
+    Ok(())
+}
+
+fn read_domain<A: ToBytes + PrimeField, R: Read>(mut r: R) -> IoResult<EvaluationDomain<A>> {
+    let size = u64::read(&mut r)?;
+    let log_size_of_group = u32::read(&mut r)?;
+
+    let size_as_field_element = A::read(&mut r)?;
+    let size_inv = A::read(&mut r)?;
+    let group_gen = A::read(&mut r)?;
+    let group_gen_inv = A::read(&mut r)?;
+    let generator_inv = A::read(&mut r)?;
+    Ok(EvaluationDomain { size, log_size_of_group, size_as_field_element, size_inv, group_gen, group_gen_inv, generator_inv })
+}
+
+fn write_evaluations<A: ToBytes + PrimeField, W: Write>(e : &Evaluations<A>, mut w: W) -> IoResult<()> {
+    write_vec(&e.evals, &mut w)?;
+    Ok(())
+}
+
+fn read_evaluations<A: ToBytes + PrimeField, R: Read>(mut r: R) -> IoResult<Evaluations<A>> {
+    let evals = read_vec(&mut r)?;
+    let domain = EvaluationDomain::new(evals.len()).unwrap();
+    assert_eq!(evals.len(), domain.size());
+    Ok( Evaluations::from_vec_and_domain(evals, domain) )
+}
+
+fn write_evaluation_domains<A: PrimeField, W: Write>(d : &EvaluationDomains<A>, mut w: W) -> IoResult<()> {
+    u64::write(&(d.h.size() as u64), &mut w)?;
+    u64::write(&(d.k.size() as u64), &mut w)?;
+    u64::write(&(d.b.size() as u64), &mut w)?;
+    u64::write(&(d.x.size() as u64), &mut w)?;
+    Ok(())
+}
+
+fn read_evaluation_domains<A: PrimeField, R: Read>(mut r: R) -> IoResult<EvaluationDomains<A>> {
+    let h = EvaluationDomain::new(u64::read(&mut r)? as usize).unwrap();
+    let k = EvaluationDomain::new(u64::read(&mut r)? as usize).unwrap();
+    let b = EvaluationDomain::new(u64::read(&mut r)? as usize).unwrap();
+    let x = EvaluationDomain::new(u64::read(&mut r)? as usize).unwrap();
+    Ok(EvaluationDomains { h, k, b, x })
 }
 
 fn witness_position_to_index(public_inputs: usize, h_to_x_ratio: usize, w: usize) -> usize {
@@ -507,6 +648,24 @@ pub extern "C" fn camlsnark_bn382_fp_to_bigint(x: *const Fp) -> *mut BigInteger3
 pub extern "C" fn camlsnark_bn382_fp_of_bigint(x: *const BigInteger384) -> *mut Fp {
     let x_ = unsafe { &(*x) };
     return Box::into_raw(Box::new(Fp::from_repr(*x_)));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_to_bigint_raw(x: *const Fp) -> *mut BigInteger384 {
+    let x_ = unsafe { &(*x) };
+    return Box::into_raw(Box::new(x_.into_repr_raw()));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_to_bigint_raw_noalloc(x: *const Fp) -> *const BigInteger384 {
+    let x_ = unsafe { &(*x) };
+    &x_.0 as *const BigInteger384
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_of_bigint_raw(x: *const BigInteger384) -> *mut Fp {
+    let x_ = unsafe { &(*x) };
+    return Box::into_raw(Box::new(Fp::from_repr_raw(*x_)));
 }
 
 // Fp vector stubs
@@ -1260,6 +1419,141 @@ pub extern "C" fn camlsnark_bn382_fp_verifier_index_delete(
     let _box = unsafe { Box::from_raw(x) };
 }
 
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_write<'a>(
+    index : *const VerifierIndex<Bn_382>,
+    path: *const c_char) {
+    let index = unsafe { & *index };
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut w = BufWriter::new(File::create(path).unwrap());
+
+    let t : IoResult<()> = (|| {
+        for c in index.matrix_commitments.iter() {
+            write_matrix_values(c, &mut w)?;
+        }
+        write_evaluation_domains(&index.domains, &mut w)?;
+        u64::write(&(index.public_inputs as u64), &mut w)?;
+        u64::write(&(index.max_degree as u64), &mut w)?;
+        index.urs.write(&mut w)?;
+        Ok(())
+    })();
+    t.unwrap()
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_read<'a>(
+    path: *const c_char) -> *const VerifierIndex<Bn_382> {
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut r = BufReader::new(File::open(path).unwrap());
+
+    let t : IoResult<_> = (|| {
+        let m0 = read_matrix_values(&mut r)?;
+        let m1 = read_matrix_values(&mut r)?;
+        let m2 = read_matrix_values(&mut r)?;
+        let domains = read_evaluation_domains(&mut r)?;
+        let public_inputs = u64::read(&mut r)? as usize;
+        let max_degree = u64::read(&mut r)? as usize;
+        let urs = URS::<Bn_382>::read(&mut r)?;
+        let (endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
+        Ok(VerifierIndex {
+            matrix_commitments: [m0, m1, m2],
+            domains,
+            public_inputs,
+            max_degree,
+            urs,
+            endo_q, endo_r,
+            fr_sponge_params: oracle::bn_382::fp::params(),
+            fq_sponge_params: oracle::bn_382::fq::params(),
+        })
+    })();
+    Box::into_raw(Box::new(t.unwrap()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_a_row_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].row }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_a_col_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].col }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_a_val_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].val }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_a_rc_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].rc }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_b_row_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].row }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_b_col_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].col }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_b_val_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].val }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_b_rc_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].rc }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_c_row_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].row }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_c_col_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].col }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_c_val_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].val }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_verifier_index_c_rc_comm(
+    index: *const VerifierIndex<Bn_382>,
+) -> *const G1Affine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].rc }).clone()))
+}
+
 // Fp URS stubs
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fp_urs_create(depth : usize) -> *const URS<Bn_382> {
@@ -1269,7 +1563,7 @@ pub extern "C" fn camlsnark_bn382_fp_urs_create(depth : usize) -> *const URS<Bn_
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fp_urs_write(urs : *mut URS<Bn_382>, path: *mut c_char) {
     let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
-    let file = File::create(path).unwrap();
+    let file = BufWriter::new(File::create(path).unwrap());
     let urs = unsafe { &*urs };
     let _ = urs.write(file);
 }
@@ -1277,7 +1571,7 @@ pub extern "C" fn camlsnark_bn382_fp_urs_write(urs : *mut URS<Bn_382>, path: *mu
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fp_urs_read(path: *mut c_char) -> *const URS<Bn_382> {
     let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
-    let file = File::open(path).unwrap();
+    let file = BufReader::new(File::open(path).unwrap());
     let res = URS::<Bn_382>::read(file).unwrap();
     return Box::into_raw(Box::new(res));
 }
@@ -1384,7 +1678,7 @@ pub extern "C" fn camlsnark_bn382_fq_urs_create(depth : usize) -> *const SRS<GAf
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_urs_write(urs : *mut SRS<GAffine>, path: *mut c_char) {
     let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
-    let file = File::create(path).unwrap();
+    let file = BufWriter::new(File::create(path).unwrap());
     let urs = unsafe { &*urs };
     let _ = urs.write(file);
 }
@@ -1392,7 +1686,7 @@ pub extern "C" fn camlsnark_bn382_fq_urs_write(urs : *mut SRS<GAffine>, path: *m
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_urs_read(path: *mut c_char) -> *const SRS<GAffine> {
     let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
-    let file = File::open(path).unwrap();
+    let file = BufReader::new(File::open(path).unwrap());
     let res = SRS::<GAffine>::read(file).unwrap();
     return Box::into_raw(Box::new(res));
 }
@@ -1514,90 +1808,6 @@ pub extern "C" fn camlsnark_bn382_fp_index_delete(x: *mut Index<Bn_382>) {
 }
 
 #[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_a_row_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].row_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_a_col_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].col_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_a_val_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].val_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_a_rc_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].rc_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_b_row_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].row_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_b_col_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].col_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_b_val_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].val_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_b_rc_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].rc_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_c_row_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].row_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_c_col_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].col_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_c_val_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].val_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fp_index_c_rc_comm(
-    index: *const Index<Bn_382>,
-) -> *const G1Affine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].rc_comm }).clone()))
-}
-
-#[no_mangle]
 pub extern "C" fn camlsnark_bn382_fp_index_nonzero_entries(
     index: *const Index<Bn_382>,
 ) -> usize {
@@ -1627,6 +1837,123 @@ pub extern "C" fn camlsnark_bn382_fp_index_public_inputs(
 ) -> usize {
     let index = unsafe { &*index };
     index.public_inputs
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_index_write<'a>(
+    index : *const Index<'a, Bn_382>,
+    path: *const c_char) {
+
+    fn write_compiled<W:Write>(c: &circuits_pairing::compiled::Compiled<Bn_382>, mut w:W) -> IoResult<()> {
+        c.col_comm.write(&mut w)?;
+        c.row_comm.write(&mut w)?;
+        c.val_comm.write(&mut w)?;
+        c.rc_comm.write(&mut w)?;
+        write_dense_polynomial(&c.rc, &mut w)?;
+        write_dense_polynomial(&c.row, &mut w)?;
+        write_dense_polynomial(&c.col, &mut w)?;
+        write_dense_polynomial(&c.val, &mut w)?;
+        write_evaluations(& c.row_eval_k, &mut w)?;
+        write_evaluations(& c.col_eval_k, &mut w)?;
+        write_evaluations(& c.val_eval_k, &mut w)?;
+        write_evaluations(& c.row_eval_b, &mut w)?;
+        write_evaluations(& c.col_eval_b, &mut w)?;
+        write_evaluations(& c.val_eval_b, &mut w)?;
+        write_evaluations(& c.rc_eval_b , &mut w)?;
+        Ok(())
+    }
+
+    let index = unsafe { & *index };
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut w = BufWriter::new(File::create(path).unwrap());
+
+    let t : IoResult<()> = (|| {
+        write_evaluation_domains(&index.domains, &mut w)?;
+
+        for c in index.compiled.iter() {
+            write_compiled(c, &mut w)?;
+        }
+
+        u64::write(&(index.public_inputs as u64), &mut w)?;
+        Ok(())
+    })();
+    t.unwrap()
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fp_index_read<'a>(
+    srs : *const URS<Bn_382>,
+    a: *const Vec<(Vec<usize>, Vec<Fp>)>,
+    b: *const Vec<(Vec<usize>, Vec<Fp>)>,
+    c: *const Vec<(Vec<usize>, Vec<Fp>)>,
+    public_inputs : usize,
+    path: *const c_char) -> *const Index<'a, Bn_382> {
+
+    fn read_compiled<R:Read>(public_inputs: usize, ds: EvaluationDomains<Fp>, m: *const Vec<(Vec<usize>, Vec<Fp>)>, mut r: R) -> IoResult<circuits_pairing::compiled::Compiled<Bn_382>> {
+        let constraints = rows_to_csmat(public_inputs, ds.h.size(), ds.h.size() / ds.x.size(), unsafe { &*m });
+
+        let col_comm = G1Affine::read(&mut r)?;
+        let row_comm = G1Affine::read(&mut r)?;
+        let val_comm = G1Affine::read(&mut r)?;
+        let rc_comm = G1Affine::read(&mut r)?;
+        let rc  = read_dense_polynomial(&mut r)?;
+        let row = read_dense_polynomial(&mut r)?;
+        let col = read_dense_polynomial(&mut r)?;
+        let val = read_dense_polynomial(&mut r)?;
+        let row_eval_k = read_evaluations(&mut r)?;
+        let col_eval_k = read_evaluations(&mut r)?;
+        let val_eval_k = read_evaluations(&mut r)?;
+        let row_eval_b = read_evaluations(&mut r)?;
+        let col_eval_b = read_evaluations(&mut r)?;
+        let val_eval_b = read_evaluations(&mut r)?;
+        let rc_eval_b  = read_evaluations(&mut r)?;
+
+        Ok(circuits_pairing::compiled::Compiled {
+            constraints,
+            col_comm   ,
+            row_comm   ,
+            val_comm   ,
+            rc_comm    ,
+            rc         ,
+            row        ,
+            col        ,
+            val        ,
+            row_eval_k ,
+            col_eval_k ,
+            val_eval_k ,
+            row_eval_b ,
+            col_eval_b ,
+            val_eval_b ,
+            rc_eval_b   })
+    }
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut r = BufReader::new(File::open(path).unwrap());
+
+    let srs = unsafe { &*srs };
+
+    let t : IoResult<_> = (|| {
+        let domains = read_evaluation_domains(&mut r)?;
+
+        let c0 = read_compiled(public_inputs, domains, a, &mut r)?;
+        let c1 = read_compiled(public_inputs, domains, b, &mut r)?;
+        let c2 = read_compiled(public_inputs, domains, c, &mut r)?;
+
+        let public_inputs = u64::read(&mut r)? as usize;
+        let (endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
+        Ok( Index::<Bn_382> {
+            compiled: [c0, c1, c2],
+            domains,
+            public_inputs,
+            urs: circuits_pairing::index::URSValue::Ref(srs),
+            fr_sponge_params: oracle::bn_382::fp::params(),
+            fq_sponge_params: oracle::bn_382::fq::params(),
+            endo_q,
+            endo_r
+        })
+    })();
+    Box::into_raw(Box::new(t.unwrap()))
 }
 
 // Fq index stubs
@@ -1687,90 +2014,6 @@ pub extern "C" fn camlsnark_bn382_fq_index_delete(x: *mut DlogIndex<GAffine>) {
 }
 
 #[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_a_row_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].row_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_a_col_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].col_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_a_val_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].val_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_a_rc_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[0].rc_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_b_row_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].row_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_b_col_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].col_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_b_val_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].val_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_b_rc_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[1].rc_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_c_row_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].row_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_c_col_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].col_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_c_val_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].val_comm }).clone()))
-}
-
-#[no_mangle]
-pub extern "C" fn camlsnark_bn382_fq_index_c_rc_comm(
-    index: *const DlogIndex<GAffine>,
-) -> *const GAffine {
-    Box::into_raw(Box::new((unsafe { (*index).compiled[2].rc_comm }).clone()))
-}
-
-#[no_mangle]
 pub extern "C" fn camlsnark_bn382_fq_index_nonzero_entries(
     index: *const DlogIndex<GAffine>,
 ) -> usize {
@@ -1800,6 +2043,122 @@ pub extern "C" fn camlsnark_bn382_fq_index_public_inputs(
 ) -> usize {
     let index = unsafe { &*index };
     index.public_inputs
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_index_write<'a>(
+    index : *const DlogIndex<'a, GAffine>,
+    path: *const c_char) {
+
+    fn write_compiled<W:Write>(c: &circuits_dlog::compiled::Compiled<GAffine>, mut w:W) -> IoResult<()> {
+        c.col_comm.write(&mut w)?;
+        c.row_comm.write(&mut w)?;
+        c.val_comm.write(&mut w)?;
+        c.rc_comm.write(&mut w)?;
+        write_dense_polynomial(&c.rc, &mut w)?;
+        write_dense_polynomial(&c.row, &mut w)?;
+        write_dense_polynomial(&c.col, &mut w)?;
+        write_dense_polynomial(&c.val, &mut w)?;
+        write_evaluations(& c.row_eval_k, &mut w)?;
+        write_evaluations(& c.col_eval_k, &mut w)?;
+        write_evaluations(& c.val_eval_k, &mut w)?;
+        write_evaluations(& c.row_eval_b, &mut w)?;
+        write_evaluations(& c.col_eval_b, &mut w)?;
+        write_evaluations(& c.val_eval_b, &mut w)?;
+        write_evaluations(& c.rc_eval_b , &mut w)?;
+        Ok(())
+    }
+
+    let index = unsafe { & *index };
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut w = BufWriter::new(File::create(path).unwrap());
+
+    let t : IoResult<()> = (|| {
+        write_evaluation_domains(&index.domains, &mut w)?;
+
+        for c in index.compiled.iter() {
+            write_compiled(c, &mut w)?;
+        }
+
+        u64::write(&(index.public_inputs as u64), &mut w)?;
+        Ok(())
+    })();
+    t.unwrap()
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_index_read<'a>(
+    srs : *const SRS<GAffine>,
+    a: *const Vec<(Vec<usize>, Vec<Fq>)>,
+    b: *const Vec<(Vec<usize>, Vec<Fq>)>,
+    c: *const Vec<(Vec<usize>, Vec<Fq>)>,
+    public_inputs : usize,
+    path: *const c_char) -> *const DlogIndex<'a, GAffine> {
+
+    fn read_compiled<R:Read>(public_inputs: usize, ds: EvaluationDomains<Fq>, m: *const Vec<(Vec<usize>, Vec<Fq>)>, mut r: R) -> IoResult<circuits_dlog::compiled::Compiled<GAffine>> {
+        let constraints = rows_to_csmat(public_inputs, ds.h.size(), ds.h.size() / ds.x.size(), unsafe { &*m });
+
+        let col_comm = GAffine::read(&mut r)?;
+        let row_comm = GAffine::read(&mut r)?;
+        let val_comm = GAffine::read(&mut r)?;
+        let rc_comm = GAffine::read(&mut r)?;
+        let rc  = read_dense_polynomial(&mut r)?;
+        let row = read_dense_polynomial(&mut r)?;
+        let col = read_dense_polynomial(&mut r)?;
+        let val = read_dense_polynomial(&mut r)?;
+        let row_eval_k = read_evaluations(&mut r)?;
+        let col_eval_k = read_evaluations(&mut r)?;
+        let val_eval_k = read_evaluations(&mut r)?;
+        let row_eval_b = read_evaluations(&mut r)?;
+        let col_eval_b = read_evaluations(&mut r)?;
+        let val_eval_b = read_evaluations(&mut r)?;
+        let rc_eval_b  = read_evaluations(&mut r)?;
+
+        Ok(circuits_dlog::compiled::Compiled {
+            constraints,
+            col_comm   ,
+            row_comm   ,
+            val_comm   ,
+            rc_comm    ,
+            rc         ,
+            row        ,
+            col        ,
+            val        ,
+            row_eval_k ,
+            col_eval_k ,
+            val_eval_k ,
+            row_eval_b ,
+            col_eval_b ,
+            val_eval_b ,
+            rc_eval_b   })
+    }
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut r = BufReader::new(File::open(path).unwrap());
+
+    let srs = unsafe { &*srs };
+
+    let t : IoResult<_> = (|| {
+        let domains = read_evaluation_domains(&mut r)?;
+
+        let c0 = read_compiled(public_inputs, domains, a, &mut r)?;
+        let c1 = read_compiled(public_inputs, domains, b, &mut r)?;
+        let c2 = read_compiled(public_inputs, domains, c, &mut r)?;
+
+        let public_inputs = u64::read(&mut r)? as usize;
+
+        Ok( DlogIndex::<GAffine> {
+            compiled: [c0, c1, c2],
+            domains,
+            public_inputs,
+            srs: SRSValue::Ref(srs),
+            fr_sponge_params: oracle::bn_382::fq::params(),
+            fq_sponge_params: oracle::bn_382::fp::params(),
+        })
+    })();
+    let res = Box::into_raw(Box::new(t.unwrap()));
+    res
 }
 
 // Fq verifier index stubs
@@ -1866,6 +2225,140 @@ pub extern "C" fn camlsnark_bn382_fq_verifier_index_delete(
     let _box = unsafe { Box::from_raw(x) };
 }
 
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_write<'a>(
+    index : *const DlogVerifierIndex<GAffine>,
+    path: *const c_char) {
+    let index = unsafe { & *index };
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut w = BufWriter::new(File::create(path).unwrap());
+
+    let t : IoResult<()> = (|| {
+        for c in index.matrix_commitments.iter() {
+            write_dlog_matrix_values(c, &mut w)?;
+        }
+        write_evaluation_domains(&index.domains, &mut w)?;
+        u64::write(&(index.public_inputs as u64), &mut w)?;
+        u64::write(&(index.max_degree as u64), &mut w)?;
+        Ok(())
+    })();
+    t.unwrap()
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_read<'a>(
+    srs : *const SRS<GAffine>,
+    path: *const c_char) -> *const DlogVerifierIndex<'a, GAffine> {
+    let srs = unsafe { &*srs };
+
+    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+    let mut r = BufReader::new(File::open(path).unwrap());
+
+    let t : IoResult<_> = (|| {
+        let m0 = read_dlog_matrix_values(&mut r)?;
+        let m1 = read_dlog_matrix_values(&mut r)?;
+        let m2 = read_dlog_matrix_values(&mut r)?;
+        let domains = read_evaluation_domains(&mut r)?;
+        let public_inputs = u64::read(&mut r)? as usize;
+        let max_degree = u64::read(&mut r)? as usize;
+        Ok(DlogVerifierIndex {
+            matrix_commitments: [m0, m1, m2],
+            domains,
+            public_inputs,
+            max_degree,
+            srs: SRSValue::Ref(srs),
+            fr_sponge_params: oracle::bn_382::fq::params(),
+            fq_sponge_params: oracle::bn_382::fp::params(),
+        })
+    })();
+    Box::into_raw(Box::new(t.unwrap()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_a_row_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].row }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_a_col_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].col }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_a_val_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].val }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_a_rc_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[0].rc }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_b_row_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].row }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_b_col_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].col }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_b_val_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].val }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_b_rc_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[1].rc }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_c_row_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].row }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_c_col_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].col }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_c_val_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].val }).clone()))
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_verifier_index_c_rc_comm(
+    index: *const DlogVerifierIndex<GAffine>,
+) -> *const GAffine {
+    Box::into_raw(Box::new((unsafe { (*index).matrix_commitments[2].rc }).clone()))
+}
+
 // G / Fp stubs
 #[no_mangle]
 pub extern "C" fn camlsnark_bn382_g_random() -> *const GProjective {
@@ -1892,6 +2385,15 @@ pub extern "C" fn camlsnark_bn382_g_add(
     let x_ = unsafe { &(*x) };
     let y_ = unsafe { &(*y) };
     let ret = *x_ + &y_;
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_g_double(
+    x: *const GProjective,
+) -> *const GProjective {
+    let x_ = unsafe { &(*x) };
+    let ret = x_.double();
     return Box::into_raw(Box::new(ret));
 }
 
@@ -2033,6 +2535,15 @@ pub extern "C" fn camlsnark_bn382_g1_add(
     let x_ = unsafe { &(*x) };
     let y_ = unsafe { &(*y) };
     let ret = *x_ + &y_;
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_g1_double(
+    x: *const G1Projective,
+) -> *const G1Projective {
+    let x_ = unsafe { &(*x) };
+    let ret = x_.double();
     return Box::into_raw(Box::new(ret));
 }
 
@@ -2338,6 +2849,24 @@ pub extern "C" fn camlsnark_bn382_fq_to_bigint(x: *const Fq) -> *mut BigInteger3
 pub extern "C" fn camlsnark_bn382_fq_of_bigint(x: *const BigInteger384) -> *mut Fq {
     let x_ = unsafe { &(*x) };
     return Box::into_raw(Box::new(Fq::from_repr(*x_)));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_to_bigint_raw(x: *const Fq) -> *mut BigInteger384 {
+    let x_ = unsafe { &(*x) };
+    return Box::into_raw(Box::new(x_.into_repr_raw()));
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_to_bigint_raw_noalloc(x: *const Fq) -> *const BigInteger384 {
+    let x_ = unsafe { &(*x) };
+    &x_.0 as *const BigInteger384
+}
+
+#[no_mangle]
+pub extern "C" fn camlsnark_bn382_fq_of_bigint_raw(x: *const BigInteger384) -> *mut Fq {
+    let x_ = unsafe { &(*x) };
+    return Box::into_raw(Box::new(Fq::from_repr_raw(*x_)));
 }
 
 // Fq vector stubs
