@@ -46,6 +46,10 @@ void *camlsnark_bn382_bigint_find_wnaf(size_t, void *);
 
 int camlsnark_bn382_fp_size_in_bits();
 
+void* camlsnark_bn382_fp_endo_base();
+
+void* camlsnark_bn382_fp_endo_scalar();
+
 void *camlsnark_bn382_fp_size();
 
 bool camlsnark_bn382_fp_is_square(void *);
@@ -94,6 +98,11 @@ void *camlsnark_bn382_fp_to_bigint(void *);
 
 void *camlsnark_bn382_fp_of_bigint(void *);
 
+void *camlsnark_bn382_fp_to_bigint_raw(void *);
+
+void *camlsnark_bn382_fp_to_bigint_raw_noalloc(void *);
+
+void *camlsnark_bn382_fp_of_bigint_raw(void *);
 // Fp vector
 
 void *camlsnark_bn382_fp_vector_create();
@@ -131,6 +140,10 @@ void *camlsnark_bn382_fp_sponge_squeeze(void *, void *);
 // Fq
 
 int camlsnark_bn382_fq_size_in_bits();
+
+void* camlsnark_bn382_fq_endo_base();
+
+void* camlsnark_bn382_fq_endo_scalar();
 
 void *camlsnark_bn382_fq_size();
 
@@ -179,6 +192,12 @@ bool camlsnark_bn382_fq_equal(void *, void *);
 void *camlsnark_bn382_fq_to_bigint(void *);
 
 void *camlsnark_bn382_fq_of_bigint(void *);
+
+void *camlsnark_bn382_fq_to_bigint_raw(void *);
+
+void *camlsnark_bn382_fq_to_bigint_raw_noalloc(void *);
+
+void *camlsnark_bn382_fq_of_bigint_raw(void *);
 
 // Fq vector
 
@@ -262,11 +281,29 @@ void camlsnark_bn382_fp_verifier_index_delete(void*);
 void *camlsnark_bn382_fp_verifier_index_urs(void*);
 
 void *camlsnark_bn382_fp_verifier_index_make(
-    size_t, size_t, size_t, size_t,
+    size_t, size_t, size_t, size_t, size_t,
     void*,
     void*, void*, void*, void*,
     void*, void*, void*, void*,
     void*, void*, void*, void* );
+
+void camlsnark_bn382_fp_verifier_index_write(void*, void*);
+void* camlsnark_bn382_fp_verifier_index_read(void*);
+
+void *camlsnark_bn382_fp_verifier_index_a_row_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_a_col_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_a_val_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_a_rc_comm(void*);
+
+void *camlsnark_bn382_fp_verifier_index_b_row_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_b_col_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_b_val_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_b_rc_comm(void*);
+
+void *camlsnark_bn382_fp_verifier_index_c_row_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_c_col_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_c_val_comm(void*);
+void *camlsnark_bn382_fp_verifier_index_c_rc_comm(void*);
 
 // Fq verifier index
 void *camlsnark_bn382_fq_verifier_index_create(void*);
@@ -274,11 +311,29 @@ void camlsnark_bn382_fq_verifier_index_delete(void*);
 void *camlsnark_bn382_fq_verifier_index_urs(void*);
 
 void *camlsnark_bn382_fq_verifier_index_make(
-    size_t, size_t, size_t, size_t,
+    size_t, size_t, size_t, size_t, size_t,
     void*,
     void*, void*, void*, void*,
     void*, void*, void*, void*,
     void*, void*, void*, void* );
+
+void camlsnark_bn382_fq_verifier_index_write(void*, void*);
+void* camlsnark_bn382_fq_verifier_index_read(void*, void*);
+
+void *camlsnark_bn382_fq_verifier_index_a_row_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_a_col_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_a_val_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_a_rc_comm(void*);
+
+void *camlsnark_bn382_fq_verifier_index_b_row_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_b_col_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_b_val_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_b_rc_comm(void*);
+
+void *camlsnark_bn382_fq_verifier_index_c_row_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_c_col_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_c_val_comm(void*);
+void *camlsnark_bn382_fq_verifier_index_c_rc_comm(void*);
 
 // Fp URS
 void *camlsnark_bn382_fp_urs_create(size_t);
@@ -287,7 +342,7 @@ void* camlsnark_bn382_fp_urs_read(char*);
 void* camlsnark_bn382_fp_urs_lagrange_commitment(void*, size_t, size_t);
 void* camlsnark_bn382_fp_urs_commit_evaluations(void*, size_t, void*);
 void* camlsnark_bn382_fp_urs_dummy_opening_check(void*);
-void* camlsnark_bn382_fp_urs_dummy_degree_bound_checks(void*, size_t, size_t);
+void* camlsnark_bn382_fp_urs_dummy_degree_bound_checks(void*, void*);
 
 // Fq URS
 void *camlsnark_bn382_fq_urs_create(size_t);
@@ -307,26 +362,13 @@ void *camlsnark_bn382_fp_index_create(void*, void*, void*, size_t, size_t, void*
 
 void camlsnark_bn382_fp_index_delete(void *);
 
-void *camlsnark_bn382_fp_index_a_row_comm(void*);
-void *camlsnark_bn382_fp_index_a_col_comm(void*);
-void *camlsnark_bn382_fp_index_a_val_comm(void*);
-void *camlsnark_bn382_fp_index_a_rc_comm(void*);
-
-void *camlsnark_bn382_fp_index_b_row_comm(void*);
-void *camlsnark_bn382_fp_index_b_col_comm(void*);
-void *camlsnark_bn382_fp_index_b_val_comm(void*);
-void *camlsnark_bn382_fp_index_b_rc_comm(void*);
-
-void *camlsnark_bn382_fp_index_c_row_comm(void*);
-void *camlsnark_bn382_fp_index_c_col_comm(void*);
-void *camlsnark_bn382_fp_index_c_val_comm(void*);
-void *camlsnark_bn382_fp_index_c_rc_comm(void*);
-
 size_t camlsnark_bn382_fp_index_num_variables(void*);
 size_t camlsnark_bn382_fp_index_public_inputs(void*);
 size_t camlsnark_bn382_fp_index_nonzero_entries(void*);
 size_t camlsnark_bn382_fp_index_max_degree(void*);
 
+void camlsnark_bn382_fp_index_write(void*, char*);
+void* camlsnark_bn382_fp_index_read(void*, void*, void*, void*, size_t, char*);
 // Fq index
 
 size_t camlsnark_bn382_fq_index_domain_h_size(void*);
@@ -336,30 +378,19 @@ void *camlsnark_bn382_fq_index_create(void*, void*, void*, size_t, size_t, void*
 
 void camlsnark_bn382_fq_index_delete(void *);
 
-void *camlsnark_bn382_fq_index_a_row_comm(void*);
-void *camlsnark_bn382_fq_index_a_col_comm(void*);
-void *camlsnark_bn382_fq_index_a_val_comm(void*);
-void *camlsnark_bn382_fq_index_a_rc_comm(void*);
-
-void *camlsnark_bn382_fq_index_b_row_comm(void*);
-void *camlsnark_bn382_fq_index_b_col_comm(void*);
-void *camlsnark_bn382_fq_index_b_val_comm(void*);
-void *camlsnark_bn382_fq_index_b_rc_comm(void*);
-
-void *camlsnark_bn382_fq_index_c_row_comm(void*);
-void *camlsnark_bn382_fq_index_c_col_comm(void*);
-void *camlsnark_bn382_fq_index_c_val_comm(void*);
-void *camlsnark_bn382_fq_index_c_rc_comm(void*);
-
 size_t camlsnark_bn382_fq_index_num_variables(void*);
 size_t camlsnark_bn382_fq_index_public_inputs(void*);
 size_t camlsnark_bn382_fq_index_nonzero_entries(void*);
 size_t camlsnark_bn382_fq_index_max_degree(void*);
 
+void camlsnark_bn382_fq_index_write(void*, char*);
+void* camlsnark_bn382_fq_index_read(void*, void*, void*, void*, size_t, char*);
+
 // Fp proof
 
 void camlsnark_bn382_fp_proof_delete(void *);
 void *camlsnark_bn382_fp_proof_create(void *, void* , void*);
+bool camlsnark_bn382_fp_proof_batch_verify(void *, void*);
 void *camlsnark_bn382_fp_proof_make(void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *,void *);
 
 void *camlsnark_bn382_fp_proof_w_comm(void *);
@@ -401,10 +432,23 @@ void *camlsnark_bn382_fp_proof_evals_0(void *);
 void *camlsnark_bn382_fp_proof_evals_1(void *);
 void *camlsnark_bn382_fp_proof_evals_2(void *);
 
+// Fp proof vector
+
+void *camlsnark_bn382_fp_proof_vector_create();
+
+int camlsnark_bn382_fp_proof_vector_length(void *);
+
+void camlsnark_bn382_fp_proof_vector_emplace_back(void *, void *);
+
+void *camlsnark_bn382_fp_proof_vector_get(void *, int);
+
+void camlsnark_bn382_fp_proof_vector_delete(void *);
+
 // Fq proof
 
 void camlsnark_bn382_fq_proof_delete(void *);
 void *camlsnark_bn382_fq_proof_create(void *, void* , void*, void*, void*);
+bool camlsnark_bn382_fq_proof_batch_verify(void *, void*);
 void *camlsnark_bn382_fq_proof_make(
     void*,
     void*, void*, void*,
@@ -437,6 +481,18 @@ void *camlsnark_bn382_fq_proof_proof(void *);
 
 void *camlsnark_bn382_fq_proof_sigma2(void *);
 void *camlsnark_bn382_fq_proof_sigma3(void *);
+
+// Fp proof vector
+
+void *camlsnark_bn382_fq_proof_vector_create();
+
+int camlsnark_bn382_fq_proof_vector_length(void *);
+
+void camlsnark_bn382_fq_proof_vector_emplace_back(void *, void *);
+
+void *camlsnark_bn382_fq_proof_vector_get(void *, int);
+
+void camlsnark_bn382_fq_proof_vector_delete(void *);
 
 // Fq proof evaluations
 
@@ -481,6 +537,7 @@ void *camlsnark_bn382_g_one();
 void *camlsnark_bn382_g_random();
 void camlsnark_bn382_g_delete(void *);
 void *camlsnark_bn382_g_add(void *, void *);
+void *camlsnark_bn382_g_double(void *);
 void *camlsnark_bn382_g_scale(void *, void *);
 void *camlsnark_bn382_g_sub(void *, void *);
 void *camlsnark_bn382_g_negate(void *);
@@ -513,6 +570,7 @@ void *camlsnark_bn382_g1_one();
 void *camlsnark_bn382_g1_random();
 void camlsnark_bn382_g1_delete(void *);
 void *camlsnark_bn382_g1_add(void *, void *);
+void *camlsnark_bn382_g1_double(void *);
 void *camlsnark_bn382_g1_scale(void *, void *);
 void *camlsnark_bn382_g1_sub(void *, void *);
 void *camlsnark_bn382_g1_negate(void *);
@@ -544,3 +602,6 @@ void camlsnark_bn382_g1_affine_pair_vector_delete(void *);
 void *camlsnark_bn382_fq_triple_0(void *);
 void *camlsnark_bn382_fq_triple_1(void *);
 void *camlsnark_bn382_fq_triple_2(void *);
+
+// Misc
+bool camlsnark_bn382_batch_pairing_check(void *,void *,void *,void *,void *,void *);
