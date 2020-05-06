@@ -9,8 +9,8 @@ use crate::{DensePolynomial, EvaluationDomain};
 pub struct Evaluations<F: PrimeField> {
     /// The evaluations of a polynomial over the domain `D`
     pub evals: Vec<F>,
-    #[doc(hidden)]
-    domain: EvaluationDomain<F>,
+    /// The domain of evaluations
+    pub domain: EvaluationDomain<F>,
 }
 
 
