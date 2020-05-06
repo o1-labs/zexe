@@ -452,14 +452,14 @@ impl_prime_field_standard_sample!(Fp384, Fp384Parameters);
 impl<P: Fp384Parameters> ToBytes for Fp384<P> {
     #[inline]
     fn write<W: Write>(&self, writer: W) -> IoResult<()> {
-        self.into_repr().write(writer)
+        self.into_repr_raw().write(writer)
     }
 }
 
 impl<P: Fp384Parameters> FromBytes for Fp384<P> {
     #[inline]
     fn read<R: Read>(reader: R) -> IoResult<Self> {
-        BigInteger::read(reader).map(Fp384::from_repr)
+        BigInteger::read(reader).map(Fp384::from_repr_raw)
     }
 }
 
