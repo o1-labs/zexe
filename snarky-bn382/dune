@@ -19,7 +19,7 @@
    (source_tree ../r1cs-std))
  (action
   (progn
-   (run cargo build --release)
+   (run env CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --release)
    (run cp ../target/release/libsnarky_bn382_stubs_stubs.a .))))
 
 (rule
