@@ -15,8 +15,8 @@ crate-type = ["staticlib"]
 
 [dependencies]
 libc = { version = "0.2.0" }
-algebra = { git = "https://github.com/o1-labs/zexe/" }
-ff-fft = { git = "https://github.com/o1-labs/zexe/" }
+algebra = { git = "https://github.com/o1-labs/zexe" }
+ff-fft = { git = "https://github.com/o1-labs/zexe" }
 
 rand = { version = "0.7" }
 num-bigint = { version = "0.2.3" }
