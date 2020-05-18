@@ -2,7 +2,8 @@ use crate::{
     biginteger::BigInteger256,
     curves::{
         models::short_weierstrass_jacobian::{GroupAffine, GroupProjective},
-        ModelParameters, SWModelParameters},
+        ModelParameters, SWModelParameters,
+    },
     field_new,
     fields::tweedle::{Fp, Fq},
     Field,
@@ -27,7 +28,10 @@ impl SWModelParameters for TweedledeeParameters {
     const COEFF_B: Fq = field_new!(
         Fq,
         BigInteger256([
-        0x30aef343ffffffed, 0xbcb60a132dafff0b, 0xffffffffffffffff, 0x3fffffffffffffff
+            0x30aef343ffffffed,
+            0xbcb60a132dafff0b,
+            0xffffffffffffffff,
+            0x3fffffffffffffff
         ])
     );
 
@@ -37,7 +41,11 @@ impl SWModelParameters for TweedledeeParameters {
     /// COFACTOR_INV = 1
     const COFACTOR_INV: Fp = field_new!(
         Fp,
-        BigInteger256([0x1c3ed159fffffffd, 0xf5601c89bb41f2d3, 0xffffffffffffffff, 0x3fffffffffffffff
+        BigInteger256([
+            0x1c3ed159fffffffd,
+            0xf5601c89bb41f2d3,
+            0xffffffffffffffff,
+            0x3fffffffffffffff
         ])
     );
 
@@ -55,7 +63,11 @@ impl SWModelParameters for TweedledeeParameters {
 /// 1
 pub const G_GENERATOR_X: Fq = field_new!(
     Fq,
-    BigInteger256([0x7379f083fffffffd, 0xf5601c89c3d86ba3, 0xffffffffffffffff, 0x3fffffffffffffff
+    BigInteger256([
+        0x7379f083fffffffd,
+        0xf5601c89c3d86ba3,
+        0xffffffffffffffff,
+        0x3fffffffffffffff
     ])
 );
 
@@ -64,6 +76,9 @@ pub const G_GENERATOR_X: Fq = field_new!(
 pub const G_GENERATOR_Y: Fq = field_new!(
     Fq,
     BigInteger256([
-0x1e28b41c4fc25056, 0x544abc778a8b7ce5, 0xe133d9afa567f32b, 0x37705e17172ff461
+        0x1e28b41c4fc25056,
+        0x544abc778a8b7ce5,
+        0xe133d9afa567f32b,
+        0x37705e17172ff461
     ])
 );

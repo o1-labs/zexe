@@ -33,17 +33,17 @@ impl crate::fields::FpParameters for FpParameters {
     ]);
 
     const MODULUS_MINUS_ONE_DIV_TWO: BigInteger = BigInteger([
-        0xd0a0327100000000, 0x1c55093b61facdc, 0x0, 0x2000000000000000
+        0xd0a0327100000000,
+        0x1c55093b61facdc,
+        0x0,
+        0x2000000000000000,
     ]);
 
     // T and T_MINUS_ONE_DIV_TWO, where MODULUS - 1 = 2^S * T
-    const T: BigInteger = BigInteger([
-        0xb61facdcd0a03271, 0x1c55093, 0x0, 0x20000000
-    ]);
+    const T: BigInteger = BigInteger([0xb61facdcd0a03271, 0x1c55093, 0x0, 0x20000000]);
 
-    const T_MINUS_ONE_DIV_TWO: BigInteger = BigInteger([
-        0xdb0fd66e68501938, 0xe2a849, 0x0, 0x10000000
-    ]);
+    const T_MINUS_ONE_DIV_TWO: BigInteger =
+        BigInteger([0xdb0fd66e68501938, 0xe2a849, 0x0, 0x10000000]);
 
     // GENERATOR = 5
     const GENERATOR: BigInteger = BigInteger([
@@ -54,7 +54,10 @@ impl crate::fields::FpParameters for FpParameters {
     ]);
 
     const ROOT_OF_UNITY: BigInteger = BigInteger([
-        0xa189b4c6deb5f0b4, 0x84b1839059d394b6, 0x62394c58292596e9, 0x3017cc8a62e742c4
+        0xa189b4c6deb5f0b4,
+        0x84b1839059d394b6,
+        0x62394c58292596e9,
+        0x3017cc8a62e742c4,
     ]);
 
     const MODULUS_BITS: u32 = 255;
