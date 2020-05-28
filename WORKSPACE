@@ -1,8 +1,13 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-local_repository(
+# use this until cfg_flags support is upstreamed:
+git_repository(
     name = "io_bazel_rules_rust",
-    path = "/Users/gar/bazel/rules_rust"
+    remote = "https://github.com/mobileink/rules_rust.git",
+    # branch = "cfg_flags",
+    commit = "7fda95cff7ea44b97417e2abd344768fed6c0daa",
+    shallow_since = "1590675478 -0500",
 )
 
 # http_archive(
