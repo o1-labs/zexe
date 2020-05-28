@@ -1,0 +1,15 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    edition = "2018",
+    name = "r1cs_std",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        "//algebra",
+        "//r1cs-core:r1cs_core",
+        "//cargo:derivative",
+        "//cargo:radix_trie"
+    ],
+    crate_features = ["std", "use_core"]
+)

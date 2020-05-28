@@ -1,0 +1,18 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    name = "groth16",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        "//algebra",
+        "//ff-fft:ff_fft",
+        "//r1cs-core:r1cs_core",
+        "//bench-utils:bench_utils",
+
+        "//cargo:rand",
+        "//cargo:rayon",
+        "//cargo:smallvec"
+    ],
+    # crate_features = ["std", "algebra-core/std", "proc-macro"]
+)

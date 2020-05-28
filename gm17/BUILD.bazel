@@ -1,0 +1,17 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    name = "gm17",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        "//algebra",
+        "//bench-utils:bench_utils",
+        "//ff-fft:ff_fft",  # default-features = false
+        "//r1cs-core:r1cs_core", # default-features = false
+        "//cargo:rand", #default-features = false
+        "//cargo:rayon", # optional
+        "//cargo:smallvec",
+    ],
+    crate_features = ["parallel", "std", "algebra-core/std", "proc-macro"]
+)

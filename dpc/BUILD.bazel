@@ -1,0 +1,25 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    edition = "2018",
+    name = "dpc",
+    srcs = glob(["src/**/*.rs"]),
+    # + glob(["field-assembly/**/*.rs"]),
+    deps = [
+        "//algebra",
+        "//r1cs-core:r1cs_core",
+        "//r1cs-std:r1cs_std",
+        "//crypto-primitives:crypto_primitives",
+        "//gm17",
+        "//bench-utils:bench_utils",
+
+        "//cargo:digest",
+        "//cargo:blake2",
+        "//cargo:rand",
+        "//cargo:derivative",
+        "//cargo:rayon"
+        # [dev-dependencies]
+        # "//cargo:rand_xorshift"
+    ],
+    crate_features = [ "bench-utils/print-trace" ]
+)
