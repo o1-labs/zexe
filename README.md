@@ -11,6 +11,19 @@ $ bazel build dpc
 Cargo builds should continue to work; adding Bazel support requires no
 changes to existing code, only the addition of some files.
 
+If you run into trouble, or you just want more verbose output, copy
+`.bazelrc` to user.bazelrc and uncomment the relevent lines.
+
+WARNING: you'll probably see some error messages along the lines of
+
+```
+INFO: From Executing genrule @raze__crossbeam_epoch__0_8_2//:crossbeam_epoch_build_script_executor:
+error[E0463]: can't find crate for `std`
+```
+
+This is due to a known problem that does not seem to affect the Zexe
+build, so we can ignore these messages for now.
+
 Dependencies can be built independently.  Examples:
 
 ```
