@@ -32,11 +32,13 @@ bazel_version(name = "bazel_version")
 
 load("@io_bazel_rules_rust//rust:repositories.bzl",
      "rust_repositories", "rust_repository_set")
-rust_repository_set(name = "foo",
+# rust_repositories(version = "1.43.1")
+# to set default edition to 2018:
+rust_repository_set(name = "coda_rust_toolchain",
                     exec_triple = "x86_64-apple-darwin",
                     # "x86_64-unknown-linux-gnu"
-                    edition = "2018", version = "1.41.1")
-# rust_repositories(version = "1.43.1")
+                    edition = "2018",
+                    version = "1.43.1")
 
 
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
