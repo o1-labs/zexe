@@ -1,0 +1,65 @@
+"""
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = [
+  # Public for visibility by "@raze__crate__version//" targets.
+  #
+  # Prefer access through "//cargo", which limits external
+  # visibility to explicit Cargo.toml dependencies.
+  "//visibility:public",
+])
+
+licenses([
+  "notice", # "MIT"
+])
+
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+    "rust_binary",
+    "rust_test",
+)
+
+
+# Unsupported target "animation" with type "example" omitted
+# Unsupported target "area-chart" with type "example" omitted
+# Unsupported target "benchmark" with type "bench" omitted
+# Unsupported target "blit-bitmap" with type "example" omitted
+# Unsupported target "boxplot" with type "example" omitted
+# Unsupported target "chart" with type "example" omitted
+# Unsupported target "console" with type "example" omitted
+# Unsupported target "errorbar" with type "example" omitted
+# Unsupported target "histogram" with type "example" omitted
+# Unsupported target "mandelbrot" with type "example" omitted
+# Unsupported target "matshow" with type "example" omitted
+# Unsupported target "normal-dist" with type "example" omitted
+# Unsupported target "normal-dist2" with type "example" omitted
+
+rust_library(
+    name = "plotters",
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2018",
+    srcs = glob(["**/*.rs"]),
+    deps = [
+        "@raze__num_traits__0_2_11//:num_traits",
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    version = "0.2.14",
+    crate_features = [
+        "area_series",
+        "line_series",
+        "svg",
+    ],
+)
+
+# Unsupported target "relative_size" with type "example" omitted
+# Unsupported target "sierpinski" with type "example" omitted
+# Unsupported target "slc-temp" with type "example" omitted
+# Unsupported target "snowflake" with type "example" omitted
+# Unsupported target "stock" with type "example" omitted
+# Unsupported target "two-scales" with type "example" omitted

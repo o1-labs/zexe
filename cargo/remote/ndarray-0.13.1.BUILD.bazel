@@ -1,0 +1,125 @@
+"""
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = [
+  # Public for visibility by "@raze__crate__version//" targets.
+  #
+  # Prefer access through "//cargo", which limits external
+  # visibility to explicit Cargo.toml dependencies.
+  "//visibility:public",
+])
+
+licenses([
+  "notice", # "MIT,Apache-2.0"
+])
+
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+    "rust_binary",
+    "rust_test",
+)
+
+rust_binary(
+    name = "ndarray_build_script",
+    srcs = glob(["**/*.rs"]),
+    crate_root = "build.rs",
+    edition = "2018",
+    deps = [
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    crate_features = [
+    ],
+    data = glob(["*"]),
+    version = "0.13.1",
+    visibility = ["//visibility:private"],
+)
+
+genrule(
+    name = "ndarray_build_script_executor",
+    srcs = glob(["*", "**/*.rs"]),
+    outs = ["ndarray_out_dir_outputs.tar.gz"],
+    tools = [
+      ":ndarray_build_script",
+    ],
+    tags = ["no-sandbox"],
+    cmd = "mkdir -p $$(dirname $@)/ndarray_out_dir_outputs/;"
+        + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
+        # TODO(acmcarther): This needs to be revisited as part of the cross compilation story.
+        #                   See also: https://github.com/google/cargo-raze/pull/54
+        + " export TARGET='x86_64-unknown-linux-gnu';"
+        + " export RUST_BACKTRACE=1;"
+        + " export OUT_DIR=$$PWD/$$(dirname $@)/ndarray_out_dir_outputs;"
+        + " export BINARY_PATH=\"$$PWD/$(location :ndarray_build_script)\";"
+        + " export OUT_TAR=$$PWD/$@;"
+        + " cd $$(dirname $(location :Cargo.toml)) && $$BINARY_PATH && tar -czf $$OUT_TAR -C $$OUT_DIR .)"
+)
+
+# Unsupported target "array" with type "test" omitted
+# Unsupported target "array-construct" with type "test" omitted
+# Unsupported target "axis_ops" with type "example" omitted
+# Unsupported target "azip" with type "test" omitted
+# Unsupported target "bench1" with type "bench" omitted
+# Unsupported target "bounds_check_elim" with type "example" omitted
+# Unsupported target "broadcast" with type "test" omitted
+# Unsupported target "chunks" with type "bench" omitted
+# Unsupported target "clone" with type "test" omitted
+# Unsupported target "column_standardize" with type "example" omitted
+# Unsupported target "complex" with type "test" omitted
+# Unsupported target "construct" with type "bench" omitted
+# Unsupported target "convo" with type "example" omitted
+# Unsupported target "dimension" with type "test" omitted
+# Unsupported target "format" with type "test" omitted
+# Unsupported target "gemv" with type "bench" omitted
+# Unsupported target "higher-order" with type "bench" omitted
+# Unsupported target "higher_order_f" with type "test" omitted
+# Unsupported target "indices" with type "test" omitted
+# Unsupported target "into-ixdyn" with type "test" omitted
+# Unsupported target "iter" with type "bench" omitted
+# Unsupported target "iterator_chunks" with type "test" omitted
+# Unsupported target "iterators" with type "test" omitted
+# Unsupported target "ix0" with type "test" omitted
+# Unsupported target "ixdyn" with type "test" omitted
+# Unsupported target "life" with type "example" omitted
+
+rust_library(
+    name = "ndarray",
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2018",
+    srcs = glob(["**/*.rs"]),
+    deps = [
+        "@raze__matrixmultiply__0_2_3//:matrixmultiply",
+        "@raze__num_complex__0_2_4//:num_complex",
+        "@raze__num_integer__0_1_42//:num_integer",
+        "@raze__num_traits__0_2_11//:num_traits",
+        "@raze__rawpointer__0_2_1//:rawpointer",
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    out_dir_tar = ":ndarray_build_script_executor",
+    version = "0.13.1",
+    crate_features = [
+    ],
+)
+
+# Unsupported target "numeric" with type "bench" omitted
+# Unsupported target "numeric" with type "test" omitted
+# Unsupported target "oper" with type "test" omitted
+# Unsupported target "par_azip" with type "test" omitted
+# Unsupported target "par_rayon" with type "bench" omitted
+# Unsupported target "par_rayon" with type "test" omitted
+# Unsupported target "par_zip" with type "test" omitted
+# Unsupported target "raw_views" with type "test" omitted
+# Unsupported target "rollaxis" with type "example" omitted
+# Unsupported target "s" with type "test" omitted
+# Unsupported target "sort-axis" with type "example" omitted
+# Unsupported target "stacking" with type "test" omitted
+# Unsupported target "windows" with type "test" omitted
+# Unsupported target "zip_many" with type "example" omitted
+# Unsupported target "zst" with type "test" omitted

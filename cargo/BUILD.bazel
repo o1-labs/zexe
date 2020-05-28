@@ -1,0 +1,142 @@
+"""
+cargo-raze workspace build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = ["//visibility:public"])
+
+licenses([
+  "notice" # See individual crates for specific licenses
+])
+alias(
+    name = "algebra",
+    actual = "@raze__algebra__0_1_0//:algebra",
+)
+alias(
+    name = "blake2",
+    actual = "@raze__blake2__0_8_1//:blake2",
+)
+alias(
+    name = "circuits_dlog",
+    actual = "@raze__circuits_dlog__0_1_0//:circuits_dlog",
+)
+alias(
+    name = "circuits_pairing",
+    actual = "@raze__circuits_pairing__0_1_0//:circuits_pairing",
+)
+alias(
+    name = "colored",
+    actual = "@raze__colored__1_9_3//:colored",
+)
+alias(
+    name = "commitment_dlog",
+    actual = "@raze__commitment_dlog__0_1_0//:commitment_dlog",
+)
+alias(
+    name = "commitment_pairing",
+    actual = "@raze__commitment_pairing__0_1_0//:commitment_pairing",
+)
+alias(
+    name = "criterion",
+    actual = "@raze__criterion__0_3_2//:criterion",
+)
+alias(
+    name = "csv",
+    actual = "@raze__csv__1_1_3//:csv",
+)
+alias(
+    name = "derivative",
+    actual = "@raze__derivative__2_1_1//:derivative",
+)
+alias(
+    name = "digest",
+    actual = "@raze__digest__0_8_1//:digest",
+)
+alias(
+    name = "evaluation_domains",
+    actual = "@raze__evaluation_domains__0_1_0//:evaluation_domains",
+)
+alias(
+    name = "ff_fft",
+    actual = "@raze__ff_fft__0_1_0//:ff_fft",
+)
+alias(
+    name = "libc",
+    actual = "@raze__libc__0_2_70//:libc",
+)
+alias(
+    name = "num_bigint",
+    actual = "@raze__num_bigint__0_2_6//:num_bigint",
+)
+alias(
+    name = "num_traits",
+    actual = "@raze__num_traits__0_2_11//:num_traits",
+)
+alias(
+    name = "oracle",
+    actual = "@raze__oracle__0_1_0//:oracle",
+)
+alias(
+    name = "paste",
+    actual = "@raze__paste__0_1_12//:paste",
+)
+alias(
+    name = "proc_macro2",
+    actual = "@raze__proc_macro2__1_0_17//:proc_macro2",
+)
+alias(
+    name = "protocol_dlog",
+    actual = "@raze__protocol_dlog__0_1_0//:protocol_dlog",
+)
+alias(
+    name = "protocol_pairing",
+    actual = "@raze__protocol_pairing__0_1_0//:protocol_pairing",
+)
+alias(
+    name = "quote",
+    actual = "@raze__quote__1_0_6//:quote",
+)
+alias(
+    name = "radix_trie",
+    actual = "@raze__radix_trie__0_1_6//:radix_trie",
+)
+alias(
+    name = "rand",
+    actual = "@raze__rand__0_7_3//:rand",
+)
+alias(
+    name = "rand_core",
+    actual = "@raze__rand_core__0_5_1//:rand_core",
+)
+alias(
+    name = "rand_xorshift",
+    actual = "@raze__rand_xorshift__0_2_0//:rand_xorshift",
+)
+alias(
+    name = "rayon",
+    actual = "@raze__rayon__1_3_0//:rayon",
+)
+alias(
+    name = "rustc_version",
+    actual = "@raze__rustc_version__0_2_3//:rustc_version",
+)
+alias(
+    name = "smallvec",
+    actual = "@raze__smallvec__1_4_0//:smallvec",
+)
+alias(
+    name = "sprs",
+    actual = "@raze__sprs__0_7_1//:sprs",
+)
+alias(
+    name = "syn",
+    actual = "@raze__syn__1_0_23//:syn",
+)
+alias(
+    name = "typenum",
+    actual = "@raze__typenum__1_12_0//:typenum",
+)
+alias(
+    name = "unroll",
+    actual = "@raze__unroll__0_1_4//:unroll",
+)

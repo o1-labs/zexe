@@ -1,0 +1,62 @@
+"""
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = [
+  # Public for visibility by "@raze__crate__version//" targets.
+  #
+  # Prefer access through "//cargo", which limits external
+  # visibility to explicit Cargo.toml dependencies.
+  "//visibility:public",
+])
+
+licenses([
+  "notice", # "Apache-2.0,MIT"
+])
+
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+    "rust_binary",
+    "rust_test",
+)
+
+
+# Unsupported target "bench_main" with type "bench" omitted
+
+rust_library(
+    name = "criterion",
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2018",
+    srcs = glob(["**/*.rs"]),
+    deps = [
+        "@raze__atty__0_2_14//:atty",
+        "@raze__cast__0_2_3//:cast",
+        "@raze__clap__2_33_1//:clap",
+        "@raze__criterion_plot__0_4_2//:criterion_plot",
+        "@raze__csv__1_1_3//:csv",
+        "@raze__itertools__0_9_0//:itertools",
+        "@raze__lazy_static__1_4_0//:lazy_static",
+        "@raze__num_traits__0_2_11//:num_traits",
+        "@raze__oorandom__11_1_1//:oorandom",
+        "@raze__plotters__0_2_14//:plotters",
+        "@raze__rayon__1_3_0//:rayon",
+        "@raze__regex__1_3_7//:regex",
+        "@raze__serde__1_0_110//:serde",
+        "@raze__serde_derive__1_0_110//:serde_derive",
+        "@raze__serde_json__1_0_53//:serde_json",
+        "@raze__tinytemplate__1_0_4//:tinytemplate",
+        "@raze__walkdir__2_3_1//:walkdir",
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    version = "0.3.2",
+    crate_features = [
+        "default",
+    ],
+)
+
+# Unsupported target "criterion_tests" with type "test" omitted
