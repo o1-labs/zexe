@@ -2,6 +2,8 @@ This is a fork, for adding Bazel support to Zexe.  See the master branch for the
 
 ## Building
 
+Tested on MacOS Catalina, with Bazel 3.1.0.
+
 To build:
 
 ```
