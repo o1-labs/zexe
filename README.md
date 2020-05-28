@@ -46,6 +46,10 @@ translated to underscores '-'.
 
 Bazel includes a powerful [query facility](https://docs.bazel.build/versions/master/query-how-to.html).  Examples:
 
+List all visible targets (targets with `visibility = ["//visibility:public"],`):
+
+`$ bazel query 'attr(visibility, "//visibility:public", //...:all)' | sort`
+
 List all deps of `dpc`:
 
 `$ bazel query "deps(//dpc)" --notool_deps --output package | sort`
