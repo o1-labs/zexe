@@ -1,8 +1,8 @@
 load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
 
 rust_library(
-    edition = "2018",
     name = "r1cs_core",
+    edition = "2018",
     visibility = ["//visibility:public"],
     # crate_type = "lib",
     srcs = glob(["src/**/*.rs"]),
