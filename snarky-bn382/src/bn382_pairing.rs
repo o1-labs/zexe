@@ -1211,6 +1211,11 @@ pub extern "C" fn zexe_bn382_fp_urs_create(depth: usize) -> *const URS<Bn_382> {
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_bn382_fp_urs_delete(t : *mut URS<Bn_382>) {
+    let _box = unsafe { Box::from_raw(t) };
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_bn382_fp_urs_write(urs: *mut URS<Bn_382>, path: *mut c_char) {
     let path = (unsafe { CStr::from_ptr(path) })
         .to_string_lossy()
@@ -1776,6 +1781,11 @@ pub extern "C" fn zexe_bn382_g1_affine_pair_make(
 ) -> *const (G1Affine, G1Affine) {
     let res = ((unsafe { *x0 }), (unsafe { *x1 }));
     return Box::into_raw(Box::new(res));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_g1_affine_pair_delete(t : *mut (G1Affine, G1Affine)) {
+    let _box = unsafe { Box::from_raw(t) };
 }
 
 #[no_mangle]

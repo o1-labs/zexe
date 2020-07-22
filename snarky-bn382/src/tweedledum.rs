@@ -47,6 +47,11 @@ pub extern "C" fn zexe_tweedle_fq_urs_create(depth: usize) -> *const SRS<GAffine
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_urs_delete(t : *mut SRS<GAffine>) {
+    let _box = unsafe { Box::from_raw(t) };
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_tweedle_fq_urs_write(urs: *mut SRS<GAffine>, path: *mut c_char) {
     let path = (unsafe { CStr::from_ptr(path) })
         .to_string_lossy()
@@ -1054,6 +1059,11 @@ pub extern "C" fn zexe_tweedle_dum_affine_pair_make(
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_tweedle_dum_affine_pair_delete(t : *mut (GAffine, GAffine)) {
+    let _box = unsafe { Box::from_raw(t) };
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_tweedle_dum_affine_pair_vector_create() -> *mut Vec<(GAffine, GAffine)> {
     return Box::into_raw(Box::new(Vec::new()));
 }
@@ -1730,6 +1740,11 @@ pub extern "C" fn zexe_tweedle_fq_proof_evaluations_triple_2(
 ) -> *const DlogProofEvaluations<Fq> {
     let x = (unsafe { &(*e)[2] }).clone();
     return Box::into_raw(Box::new(x));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_proof_evaluations_delete(t : *mut DlogProofEvaluations<Fq>) {
+    let _box = unsafe { Box::from_raw(t) };
 }
 
 #[no_mangle]
