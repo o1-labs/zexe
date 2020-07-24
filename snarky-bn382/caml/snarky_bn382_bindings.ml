@@ -33,7 +33,7 @@ module Pair (P : Prefix) (Elt : Type) (F : Ctypes.FOREIGN) = struct
 
   let f i = foreign (prefix i) (typ @-> returning Elt.typ)
 
-  let make_without_finaliser = foreign (prefix "make") (Elt.typ @-> Elt.typ @-> returning typ)
+  let make = foreign (prefix "make") (Elt.typ @-> Elt.typ @-> returning typ)
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
@@ -112,11 +112,11 @@ struct
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
-  let create_without_finaliser = foreign (prefix "create") (Index.typ @-> returning typ)
+  let create = foreign (prefix "create") (Index.typ @-> returning typ)
 
   let urs = foreign (prefix "urs") (typ @-> returning Urs.typ)
 
-  let make_without_finaliser =
+  let make =
     foreign (prefix "make")
       ( size_t @-> size_t @-> size_t @-> size_t @-> size_t @-> Urs.typ
       @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
@@ -155,7 +155,7 @@ struct
   open P
   open F
 
-  let create_without_finaliser = foreign (prefix "create") (size_t @-> returning typ)
+  let create = foreign (prefix "create") (size_t @-> returning typ)
 
   let read = foreign (prefix "read") (string @-> returning typ)
 
@@ -208,7 +208,7 @@ struct
   let domain_k_size =
     foreign (prefix "domain_k_size") (typ @-> returning size_t)
 
-  let create_without_finaliser =
+  let create =
     foreign (prefix "create")
       ( M.typ @-> M.typ @-> M.typ @-> size_t @-> size_t @-> URS.typ
       @-> returning typ )
@@ -239,14 +239,14 @@ module Vector (P : Prefix) (E : Type) (F : Ctypes.FOREIGN) = struct
       end :
       Type )
 
-  let create_without_finaliser = foreign (prefix "create") (void @-> returning typ)
+  let create = foreign (prefix "create") (void @-> returning typ)
 
   let length = foreign (prefix "length") (typ @-> returning int)
 
   let emplace_back =
     foreign (prefix "emplace_back") (typ @-> E.typ @-> returning void)
 
-  let get_without_finaliser = foreign (prefix "get") (typ @-> int @-> returning E.typ)
+  let get = foreign (prefix "get") (typ @-> int @-> returning E.typ)
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 end
@@ -306,7 +306,7 @@ struct
 
     let y = foreign (prefix "y") (typ @-> returning BaseField.typ)
 
-    let create_without_finaliser =
+    let create =
       foreign (prefix "create")
         (BaseField.typ @-> BaseField.typ @-> returning typ)
 
@@ -390,7 +390,7 @@ struct
 
   let prefix = P.prefix
 
-  let create_without_finaliser =
+  let create =
     foreign (prefix "create")
       ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
       @-> returning typ )
@@ -402,7 +402,7 @@ struct
     foreign (prefix "batch_verify")
       (VerifierIndex.typ @-> Vector.typ @-> returning bool)
 
-  let make_without_finaliser =
+  let make =
     foreign (prefix "make")
       ( ScalarFieldVector.typ @-> AffineCurve.typ @-> AffineCurve.typ
       @-> AffineCurve.typ @-> AffineCurve.typ @-> AffineCurve.typ
@@ -547,7 +547,7 @@ struct
     foreign (prefix "shifted")
       (typ @-> returning (ptr_opt AffineCurve.Underlying.typ))
 
-  let make_without_finaliser : (AffineCurve.Vector.t -> AffineCurve.t option -> t return) result
+  let make : (AffineCurve.Vector.t -> AffineCurve.t option -> t return) result
       =
     foreign (prefix "make")
       ( AffineCurve.Vector.typ
@@ -674,7 +674,7 @@ struct
     let delete =
       foreign (prefix "delete") (typ @-> returning void)
 
-    let make_without_finaliser =
+    let make =
       foreign (prefix "make")
         ( ScalarFieldVector.typ @-> ScalarFieldVector.typ
         @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
@@ -691,7 +691,7 @@ struct
 
   let prefix = P.prefix
 
-  let make_without_finaliser =
+  let make =
     foreign (prefix "make")
       ( ScalarFieldVector.typ @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
       @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
@@ -701,7 +701,7 @@ struct
       @-> Evaluations.typ @-> Evaluations.typ @-> ScalarFieldVector.typ
       @-> AffineCurve.Vector.typ @-> returning typ )
 
-  let create_without_finaliser =
+  let create =
     foreign (prefix "create")
       ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
       @-> ScalarFieldVector.typ @-> AffineCurve.Vector.typ @-> returning typ )
@@ -765,7 +765,7 @@ struct
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
-  let create_without_finaliser =
+  let create =
     foreign (prefix "create")
       (VerifierIndex.typ @-> Proof.typ @-> returning typ)
 
@@ -821,7 +821,7 @@ struct
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
-  let create_without_finaliser =
+  let create =
     foreign (prefix "create")
       (VerifierIndex.typ @-> Proof.typ @-> returning typ)
 
@@ -958,7 +958,7 @@ struct
 
     let prefix = with_prefix (prefix "constraint_matrix")
 
-    let create_without_finaliser = foreign (prefix "create") (void @-> returning typ)
+    let create = foreign (prefix "create") (void @-> returning typ)
 
     let delete = foreign (prefix "delete") (typ @-> returning void)
 
@@ -1054,7 +1054,7 @@ module Full (F : Ctypes.FOREIGN) = struct
 
       open F
 
-      let create_without_finaliser = foreign (prefix "create") (size_t @-> returning typ)
+      let create = foreign (prefix "create") (size_t @-> returning typ)
 
       let read = foreign (prefix "read") (string @-> returning typ)
 
@@ -1331,7 +1331,7 @@ module Full (F : Ctypes.FOREIGN) = struct
 
       open F
 
-      let create_without_finaliser = foreign (prefix "create") (size_t @-> returning typ)
+      let create = foreign (prefix "create") (size_t @-> returning typ)
 
       let read = foreign (prefix "read") (string @-> returning typ)
 
