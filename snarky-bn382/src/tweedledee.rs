@@ -11,15 +11,16 @@ use algebra::{
     FromBytes, One, ToBytes, UniformRand, Zero,
 };
 
-use evaluation_domains::EvaluationDomains;
+use marlin_circuits::domains::EvaluationDomains;
 
 use ff_fft::{DensePolynomial, EvaluationDomain, Evaluations, Radix2EvaluationDomain as Domain};
 
 use oracle::{
     self,
-    marlin_sponge::{DefaultFqSponge, DefaultFrSponge, ScalarChallenge},
+    sponge::{DefaultFqSponge, DefaultFrSponge, ScalarChallenge},
 };
 
+use colored::Colorize;
 use rand::rngs::StdRng;
 use rand_core;
 
@@ -31,19 +32,19 @@ use std::{
     os::raw::c_char,
 };
 
-use circuits_dlog::index::{
+use marlin_protocol_dlog::index::{
     Index as DlogIndex, SRSSpec, SRSValue, VerifierIndex as DlogVerifierIndex,
 };
 use commitment_dlog::{
     commitment::{b_poly_coefficients, product, CommitmentCurve, OpeningProof, PolyComm},
     srs::SRS,
 };
-use protocol_dlog::prover::{ProofEvaluations as DlogProofEvaluations, ProverProof as DlogProof};
+use marlin_protocol_dlog::prover::{ProofEvaluations as DlogProofEvaluations, ProverProof as DlogProof};
 
 // Fp URS stubs
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_fp_urs_create(depth: usize) -> *const SRS<GAffine> {
-    Box::into_raw(Box::new(SRS::create(depth)))
+    Box::into_raw(Box::new(SRS::create(depth, 0 ,0)))
 }
 
 #[no_mangle]
@@ -236,7 +237,7 @@ pub extern "C" fn zexe_tweedle_fp_index_write<'a>(
     path: *const c_char,
 ) {
     fn write_compiled<W: Write>(
-        c: &circuits_dlog::compiled::Compiled<GAffine>,
+        c: &marlin_protocol_dlog::compiled::Compiled<GAffine>,
         mut w: W,
     ) -> IoResult<()> {
         write_poly_comm(&c.col_comm, &mut w)?;
@@ -291,7 +292,7 @@ pub extern "C" fn zexe_tweedle_fp_index_read<'a>(
         ds: EvaluationDomains<Fp>,
         m: *const Vec<(Vec<usize>, Vec<Fp>)>,
         mut r: R,
-    ) -> IoResult<circuits_dlog::compiled::Compiled<GAffine>> {
+    ) -> IoResult<marlin_protocol_dlog::compiled::Compiled<GAffine>> {
         let constraints = rows_to_csmat(
             public_inputs,
             ds.h.size(),
@@ -315,7 +316,7 @@ pub extern "C" fn zexe_tweedle_fp_index_read<'a>(
         let val_eval_b = read_evaluations(&mut r)?;
         let rc_eval_b = read_evaluations(&mut r)?;
 
-        Ok(circuits_dlog::compiled::Compiled {
+        Ok(marlin_protocol_dlog::compiled::Compiled {
             constraints,
             col_comm,
             row_comm,
@@ -410,19 +411,19 @@ pub extern "C" fn zexe_tweedle_fp_verifier_index_make<'a>(
         domains: EvaluationDomains::create(variables, constraints, public_inputs, nonzero_entries)
             .unwrap(),
         matrix_commitments: [
-            circuits_dlog::index::MatrixValues {
+            marlin_protocol_dlog::index::MatrixValues {
                 row: (unsafe { &*row_a }).clone(),
                 col: (unsafe { &*col_a }).clone(),
                 val: (unsafe { &*val_a }).clone(),
                 rc: (unsafe { &*rc_a }).clone(),
             },
-            circuits_dlog::index::MatrixValues {
+            marlin_protocol_dlog::index::MatrixValues {
                 row: (unsafe { &*row_b }).clone(),
                 col: (unsafe { &*col_b }).clone(),
                 val: (unsafe { &*val_b }).clone(),
                 rc: (unsafe { &*rc_b }).clone(),
             },
-            circuits_dlog::index::MatrixValues {
+            marlin_protocol_dlog::index::MatrixValues {
                 row: (unsafe { &*row_c }).clone(),
                 col: (unsafe { &*col_c }).clone(),
                 val: (unsafe { &*val_c }).clone(),
@@ -1129,7 +1130,7 @@ pub extern "C" fn zexe_tweedle_dee_affine_vector_delete(v: *mut Vec<GAffine>) {
 
 // Fp oracles
 pub struct FpOracles {
-    o: protocol_dlog::prover::RandomOracles<Fp>,
+    o: marlin_protocol_dlog::prover::RandomOracles<Fp>,
     opening_prechallenges: Vec<ScalarChallenge<Fp>>,
 }
 
@@ -1285,6 +1286,9 @@ pub extern "C" fn zexe_tweedle_fp_proof_create(
     )
     .unwrap();
 
+    println!("{} {:?}", "public_inputs: ".magenta(), index.public_inputs);
+    println!("{} {:?}", "max_poly_size: ".magenta(), index.max_poly_size);
+    println!("{} {:?} {:?} {:?}", "Constrainrs shape: ".green(), index.compiled[0].constraints.rows(), index.compiled[0].constraints.cols(), index.compiled[0].constraints.nnz());
     return Box::into_raw(Box::new(proof));
 }
 
@@ -1297,12 +1301,15 @@ pub extern "C" fn zexe_tweedle_fp_proof_verify(
     let proof = unsafe { (*proof).clone() };
     let group_map = <GAffine as CommitmentCurve>::Map::setup();
 
-    DlogProof::verify::<DefaultFqSponge<TweedledeeParameters>, DefaultFrSponge<Fp>>(
+    let retval = DlogProof::verify::<DefaultFqSponge<TweedledeeParameters>, DefaultFrSponge<Fp>>(
         &group_map,
         &[proof].to_vec(),
         &index,
         &mut rand_core::OsRng,
-    )
+    );
+
+    println!("{} {:?}", "Proof verification: ".yellow(), retval);
+    retval
 }
 
 // TODO: Batch verify across different indexes
@@ -1315,12 +1322,15 @@ pub extern "C" fn zexe_tweedle_fp_proof_batch_verify(
     let proofs = unsafe { &(*proofs) };
     let group_map = <GAffine as CommitmentCurve>::Map::setup();
 
-    DlogProof::<GAffine>::verify::<DefaultFqSponge<TweedledeeParameters>, DefaultFrSponge<Fp>>(
+    let retval = DlogProof::<GAffine>::verify::<DefaultFqSponge<TweedledeeParameters>, DefaultFrSponge<Fp>>(
         &group_map,
         proofs,
         index,
         &mut rand_core::OsRng,
-    )
+    );
+
+    println!("{} {:?}", "Proof verification: ".yellow(), retval);
+    retval
 }
 
 #[no_mangle]
