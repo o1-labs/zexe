@@ -62,7 +62,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
     let srs = unsafe { &*srs };
 
     let n = Domain::<Fq>::compute_size_of_domain(gates.len()).unwrap();
-    let wire = |w: Wire| -> usize {match w.col {L => w.row, R => w.row + n, O => w.row + 2*n}};
+    let wire = |w: Wire| -> usize {match w.col {Col::L => w.row, Col::R => w.row + n, Col::O => w.row + 2*n}};
 
     let gates = gates.iter().map
     (
