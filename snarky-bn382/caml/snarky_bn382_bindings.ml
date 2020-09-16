@@ -193,6 +193,8 @@ struct
 
   let qm_comm = foreign (prefix "qm_comm") (typ @-> returning PolyComm.typ)
 
+  let qc_comm = foreign (prefix "qc_comm") (typ @-> returning PolyComm.typ)
+
   let rcm_comm_0 =
     foreign (prefix "rcm_comm_0") (typ @-> returning PolyComm.typ)
 
@@ -201,6 +203,9 @@ struct
 
   let rcm_comm_2 =
     foreign (prefix "rcm_comm_2") (typ @-> returning PolyComm.typ)
+
+  let psm_comm =
+    foreign (prefix "psm_comm") (typ @-> returning PolyComm.typ)
 
   let add_comm = foreign (prefix "add_comm") (typ @-> returning PolyComm.typ)
 
@@ -217,9 +222,9 @@ struct
   let emul3_comm =
     foreign (prefix "emul3_comm") (typ @-> returning PolyComm.typ)
 
-  let r = foreign (prefix "r") (typ @-> returning PolyComm.typ)
+  let r = foreign (prefix "r") (typ @-> returning ScalarField.typ)
 
-  let o = foreign (prefix "o") (typ @-> returning PolyComm.typ)
+  let o = foreign (prefix "o") (typ @-> returning ScalarField.typ)
 end
 
 module URS
@@ -310,7 +315,7 @@ end
 
 module Plonk_index
     (P : Prefix)
-    (Constraint_system : Type)
+    (Plonk_gate_vector : Type)
     (PlolyComm : Type)
     (URS : Type)
     (F : Ctypes.FOREIGN) =
@@ -340,7 +345,7 @@ struct
 
   let create =
     foreign (prefix "create")
-      (Constraint_system.typ @-> size_t @-> URS.typ @-> returning typ)
+      (Plonk_gate_vector.typ @-> size_t @-> URS.typ @-> returning typ)
 
   let metadata s = foreign (prefix s) (typ @-> returning size_t)
 
@@ -641,6 +646,26 @@ module Triple (P : Prefix) (Elt : Type) (F : Ctypes.FOREIGN) = struct
   let f2 = f "2"
 end
 
+module Double (P : Prefix) (Elt : Type) (F : Ctypes.FOREIGN) = struct
+  include (
+    struct
+        type t = unit ptr
+
+        let typ = ptr void
+      end :
+      Type )
+
+  open F
+
+  let prefix = with_prefix (P.prefix "double")
+
+  let f i = foreign (prefix i) (typ @-> returning Elt.typ)
+
+  let f0 = f "0"
+
+  let f1 = f "1"
+end
+
 module Dlog_poly_comm
     (P : Prefix) (AffineCurve : sig
         module Underlying : Type
@@ -882,7 +907,7 @@ module Dlog_plonk_proof
     (Index : Type)
     (VerifierIndex : Type)
     (ScalarFieldVector : Type)
-    (FieldVectorPair : Type)
+    (FieldVectorDouble : Type)
     (OpeningProof : Type)
     (PolyComm : Type)
     (F : Ctypes.FOREIGN) =
@@ -909,26 +934,26 @@ struct
 
     let prefix = with_prefix (P.prefix "evaluations")
 
-    let f s = foreign (prefix s) (typ @-> returning ScalarField.typ)
+    let f s = foreign (prefix s) (typ @-> returning ScalarFieldVector.typ)
 
-    let w = f "l"
+    let l_eval = f "l"
 
-    let za = f "r"
+    let r_eval = f "r"
 
-    let zb = f "o"
+    let o_eval = f "o"
 
-    let h1 = f "z"
+    let z_eval = f "z"
 
-    let g1 = f "t"
+    let t_eval = f "t"
 
-    let h2 = f "f"
+    let f_eval = f "f"
 
-    let g2 = f "sigma1"
+    let sigma1_eval = f "sigma1"
 
-    let h3 = f "sigma2"
+    let sigma2_eval = f "sigma2"
 
-    module Pair =
-      Pair (struct
+    module Double =
+      Double (struct
           let prefix = prefix
         end)
         (T)
@@ -936,9 +961,9 @@ struct
 
     let make =
       foreign (prefix "make")
-        ( ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-        @-> ScalarField.typ @-> ScalarField.typ @-> returning typ )
+        ( ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> returning typ )
   end
 
   let prefix = P.prefix
@@ -947,13 +972,14 @@ struct
     foreign (prefix "make")
       ( ScalarFieldVector.typ @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
       @-> PolyComm.typ @-> PolyComm.typ @-> AffineCurve.Pair.Vector.typ
-      @-> PolyComm.typ @-> PolyComm.typ @-> AffineCurve.typ @-> AffineCurve.typ
-      @-> Evaluations.typ @-> Evaluations.typ @-> returning typ )
+      @-> ScalarField.typ @-> ScalarField.typ @-> AffineCurve.typ @-> AffineCurve.typ
+      @-> Evaluations.typ @-> Evaluations.typ @-> ScalarFieldVector.typ
+      @-> AffineCurve.Vector.typ @-> returning typ )
 
   let create =
     foreign (prefix "create")
-      ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
-      @-> returning typ )
+      ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+      @-> AffineCurve.Vector.typ @-> returning typ )
 
   let verify =
     foreign (prefix "verify") (VerifierIndex.typ @-> typ @-> returning bool)
@@ -976,7 +1002,9 @@ struct
 
   let t_comm = f "t_comm" PolyComm.typ
 
-  let proof_comm = f "proof" OpeningProof.typ
+  let proof = f "proof" OpeningProof.typ
+
+  let evals_nocopy = f "evals_nocopy" Evaluations.Double.typ
 end
 
 module Pairing_oracles
@@ -1099,7 +1127,7 @@ module Dlog_plonk_oracles
     end)
     (VerifierIndex : Type)
     (Proof : Type)
-    (FieldVectorTriple : Type)
+    (FieldVectorDouble : Type)
     (F : Ctypes.FOREIGN) =
 struct
   include (
@@ -1122,6 +1150,8 @@ struct
 
   let element name = foreign (prefix name) (typ @-> returning Field.typ)
 
+  let digest_before_evaluations = element "digest_before_evaluations"
+
   let opening_prechallenges =
     foreign
       (prefix "opening_prechallenges")
@@ -1139,12 +1169,11 @@ struct
 
   let u = element "u"
 
-  let p_eval_1 = element "p_eval1"
-
-  let p_eval_2 = element "p_eval2"
+  let p_nocopy =
+    foreign (prefix "p") (typ @-> returning FieldVectorDouble.typ)
 end
 
-module Field
+module PrimeField
     (P : Prefix)
     (Bigint : Type)
     (Usize_vector : Type)
@@ -1220,7 +1249,16 @@ struct
 
   let of_bigint_raw =
     foreign (prefix "of_bigint_raw") (Bigint.typ @-> returning typ)
+end
 
+module Field
+    (P : Prefix)
+    (Bigint : Type)
+    (Usize_vector : Type)
+    (F : Ctypes.FOREIGN) =
+struct
+  include PrimeField (P) (Bigint) (Usize_vector) (F)
+  
   module Vector = struct
     module T =
       Vector (struct
@@ -1256,6 +1294,27 @@ struct
   end
 end
 
+module Field_plonk
+    (P : Prefix)
+    (Bigint : Type)
+    (Usize_vector : Type)
+    (F : Ctypes.FOREIGN) =
+struct
+  include PrimeField (P) (Bigint) (Usize_vector) (F)
+
+  module Vector = struct
+    module T =
+      Vector (struct
+          let prefix = prefix
+        end)
+        (T)
+        (F)
+
+    include T
+    module Double = Double (T) (T) (F)
+  end
+end
+
 module Plonk_gate_vector
     (P : Prefix)
     (Field_vector : Type)
@@ -1271,7 +1330,7 @@ struct
       end :
       Type )
 
-  let prefix = with_prefix (P.prefix "circuit_gate_vector")
+  let prefix = with_prefix (P.prefix "gate_vector")
 
   let create = foreign (prefix "create") (void @-> returning typ)
 
@@ -1279,61 +1338,22 @@ struct
 
   let length = foreign (prefix "length") (typ @-> returning int)
 
-  let push_gate gate_name =
+  let add_gate =
     foreign
-      (prefix (Printf.sprintf "push_%s" gate_name))
-      ( typ @-> size_t (* l_index *) @-> size_t (* l_permutation *)
-      @-> size_t (* r_index *) @-> size_t (* r_permutation *)
-      @-> size_t (* o_index *) @-> size_t (* o_permutation *)
-      @-> Field_vector.typ (* constraints vector *) @-> returning void )
-
-  let push_zero = push_gate "zero"
-
-  let push_generic = push_gate "generic"
-
-  let push_poseidon = push_gate "poseidon"
-
-  let push_add1 = push_gate "add1"
-
-  let push_add2 = push_gate "add2"
-
-  let push_vbmul1 = push_gate "vbmul1"
-
-  let push_vbmul2 = push_gate "vbmul2"
-
-  let push_vbmul3 = push_gate "vbmul3"
-
-  let push_endomul1 = push_gate "endomul1"
-
-  let push_endomul2 = push_gate "endomul2"
-
-  let push_endomul3 = push_gate "endomul3"
-
-  let push_endomul4 = push_gate "endomul4"
-end
-
-module Plonk_constraint_system
-    (P : Prefix)
-    (Plonk_gate_vector : Type)
-    (F : Ctypes.FOREIGN) =
-struct
-  open F
-
-  include (
-    struct
-        type t = unit ptr
-
-        let typ = ptr void
-      end :
-      Type )
-
-  let prefix = with_prefix (P.prefix "constraint_system")
-
-  let create =
-    foreign (prefix "create")
-      (Plonk_gate_vector.typ @-> size_t @-> returning typ)
-
-  let delete = foreign (prefix "delete") (typ @-> returning void)
+      (prefix "add")
+      (
+        typ @->
+        int @->
+        size_t @->
+        size_t @->
+        int @->
+        size_t @->
+        int @->
+        size_t @->
+        int @->
+        Field_vector.typ @->
+        returning void
+      )
 end
 
 module Full (F : Ctypes.FOREIGN) = struct
@@ -1511,7 +1531,7 @@ module Full (F : Ctypes.FOREIGN) = struct
           module Vector : sig
             include Prefix_type
 
-            module Triple : Type
+          module Double : Type
           end
       end) (Curve : sig
         include Prefix_type
@@ -1532,8 +1552,6 @@ module Full (F : Ctypes.FOREIGN) = struct
       end) =
   struct
     let prefix = Field.prefix
-
-    module Field_triple = Triple (Field) (Field) (F)
 
     module Field_opening_proof =
       Dlog_opening_proof (struct
@@ -1597,13 +1615,12 @@ module Full (F : Ctypes.FOREIGN) = struct
     end
 
     module Gate_vector = Plonk_gate_vector (P) (Field.Vector) (F)
-    module Constraint_system = Plonk_constraint_system (P) (Gate_vector) (F)
 
     module Field_index =
       Plonk_index (struct
           let prefix = with_prefix (P.prefix "index")
         end)
-        (Constraint_system)
+        (Gate_vector)
         (Field_poly_comm)
         (Field_urs)
         (F)
@@ -1627,24 +1644,40 @@ module Full (F : Ctypes.FOREIGN) = struct
         (Field_index)
         (Field_verifier_index)
         (Field.Vector)
-        (Field.Vector.Triple)
+        (Field.Vector.Double)
         (Field_opening_proof)
         (Field_poly_comm)
         (F)
 
     module Field_oracles =
-      Dlog_oracles (struct
-          let prefix = with_prefix (prefix "oracles")
+      Dlog_plonk_oracles (struct
+          let prefix = with_prefix (P.prefix "oracles")
         end)
         (Field)
         (Field_verifier_index)
         (Field_proof)
-        (Field.Vector.Triple)
+        (Field.Vector.Double)
         (F)
   end
 
   module Tweedle = struct
     let prefix = with_prefix (zexe "tweedle")
+
+    module Fp_plonk =
+      Field_plonk (struct
+          let prefix = with_prefix (prefix "fp")
+        end)
+        (Bigint256)
+        (Usize_vector)
+        (F)
+
+    module Fq_plonk =
+      Field_plonk (struct
+          let prefix = with_prefix (prefix "fq")
+        end)
+        (Bigint256)
+        (Usize_vector)
+        (F)
 
     module Fp =
       Field (struct
@@ -1673,14 +1706,26 @@ module Full (F : Ctypes.FOREIGN) = struct
           (Fq)
           (F)
 
+      module Marlin = Dlog_proof_system (Field) (Curve)
+    end
+
+    module Dum_plonk = struct
+      module Field = Fq_plonk
+
+      module Curve =
+        Curve (struct
+            let prefix = with_prefix (prefix "dum")
+          end)
+          (Fp_plonk)
+          (Fq_plonk)
+          (F)
+
       module Plonk =
         Plonk_dlog_proof_system (struct
             let prefix = with_prefix (prefix "plonk_fq")
           end)
           (Field)
           (Curve)
-
-      include Dlog_proof_system (Field) (Curve)
     end
 
     module Dee = struct
@@ -1694,14 +1739,26 @@ module Full (F : Ctypes.FOREIGN) = struct
           (Fp)
           (F)
 
+      module Marlin = Dlog_proof_system (Field) (Curve)
+    end
+
+    module Dee_plonk = struct
+      module Field = Fp_plonk
+
+      module Curve =
+        Curve (struct
+            let prefix = with_prefix (prefix "dee")
+          end)
+          (Fq_plonk)
+          (Fp_plonk)
+          (F)
+
       module Plonk =
         Plonk_dlog_proof_system (struct
             let prefix = with_prefix (prefix "plonk_fp")
           end)
           (Field)
           (Curve)
-
-      include Dlog_proof_system (Field) (Curve)
     end
 
     module Endo = struct
@@ -1719,6 +1776,24 @@ module Full (F : Ctypes.FOREIGN) = struct
         let base = endo Fp.typ "fq_endo_base"
 
         let scalar = endo Fq.typ "fq_endo_scalar"
+      end
+    end
+
+    module Endo_plonk = struct
+      let endo typ which =
+        let open F in
+        F.foreign (prefix which) (void @-> returning typ)
+
+      module Dee = struct
+        let base = endo Fq_plonk.typ "fp_endo_base"
+
+        let scalar = endo Fp_plonk.typ "fp_endo_scalar"
+      end
+
+      module Dum = struct
+        let base = endo Fp_plonk.typ "fq_endo_base"
+
+        let scalar = endo Fq_plonk.typ "fq_endo_scalar"
       end
     end
   end
