@@ -31,11 +31,16 @@ module Pair (P : Prefix) (Elt : Type) (F : Ctypes.FOREIGN) = struct
 
   let f i = foreign (prefix i) (typ @-> returning Elt.typ)
 
-  let make = foreign (prefix "make") (Elt.typ @-> Elt.typ @-> returning typ)
-
   let f0 = f "0"
 
   let f1 = f "1"
+end
+
+module Pair_with_make (P : Prefix) (Elt : Type) (F : Ctypes.FOREIGN) = struct
+  open F
+  include Pair (P) (Elt) (F)
+
+  let make = foreign (prefix "make") (Elt.typ @-> Elt.typ @-> returning typ)
 end
 
 module Bigint (P : Prefix) (F : Ctypes.FOREIGN) = struct
@@ -337,8 +342,6 @@ struct
 
   let metadata s = foreign (prefix s) (typ @-> returning size_t)
 
-  let num_variables = metadata "num_variables"
-
   let public_inputs = metadata "public_inputs"
 end
 
@@ -406,7 +409,7 @@ struct
     end
 
     module Pair = struct
-      module T = Pair (Prefix) (T) (F)
+      module T = Pair_with_make (Prefix) (T) (F)
       include T
 
       module Vector =
@@ -899,21 +902,21 @@ struct
 
     let f s = foreign (prefix s) (typ @-> returning ScalarField.typ)
 
-    let w = f "l"
+    let l = f "l"
 
-    let za = f "r"
+    let r = f "r"
 
-    let zb = f "o"
+    let o = f "o"
 
-    let h1 = f "z"
+    let z = f "z"
 
-    let g1 = f "t"
+    let t = f "t"
 
-    let h2 = f "f"
+    let f = f "f"
 
-    let g2 = f "sigma1"
+    let sigma1 = f "sigma1"
 
-    let h3 = f "sigma2"
+    let sigma2 = f "sigma2"
 
     module Pair =
       Pair (struct
@@ -1239,6 +1242,86 @@ struct
   end
 end
 
+module Plonk_gate_vector
+    (P : Prefix)
+    (Field_vector : Type)
+    (F : Ctypes.FOREIGN) =
+struct
+  open F
+
+  include (
+    struct
+        type t = unit ptr
+
+        let typ = ptr void
+      end :
+      Type )
+
+  let prefix = with_prefix (P.prefix "circuit_gate_vector")
+
+  let create = foreign (prefix "create") (void @-> returning typ)
+
+  let delete = foreign (prefix "delete") (typ @-> returning void)
+
+  let length = foreign (prefix "length") (typ @-> returning int)
+
+  let push_gate gate_name =
+    foreign
+      (prefix (Printf.sprintf "push_%s" gate_name))
+      ( typ @-> size_t (* l_index *) @-> size_t (* l_permutation *)
+      @-> size_t (* r_index *) @-> size_t (* r_permutation *)
+      @-> size_t (* o_index *) @-> size_t (* o_permutation *)
+      @-> Field_vector.typ (* constraints vector *) @-> returning void )
+
+  let push_zero = push_gate "zero"
+
+  let push_generic = push_gate "generic"
+
+  let push_poseidon = push_gate "poseidon"
+
+  let push_add1 = push_gate "add1"
+
+  let push_add2 = push_gate "add2"
+
+  let push_vbmul1 = push_gate "vbmul1"
+
+  let push_vbmul2 = push_gate "vbmul2"
+
+  let push_vbmul3 = push_gate "vbmul3"
+
+  let push_endomul1 = push_gate "endomul1"
+
+  let push_endomul2 = push_gate "endomul2"
+
+  let push_endomul3 = push_gate "endomul3"
+
+  let push_endomul4 = push_gate "endomul4"
+end
+
+module Plonk_constraint_system
+    (P : Prefix)
+    (Plonk_gate_vector : Type)
+    (F : Ctypes.FOREIGN) =
+struct
+  open F
+
+  include (
+    struct
+        type t = unit ptr
+
+        let typ = ptr void
+      end :
+      Type )
+
+  let prefix = with_prefix (P.prefix "constraint_system")
+
+  let create =
+    foreign (prefix "create")
+      (Plonk_gate_vector.typ @-> size_t @-> returning typ)
+
+  let delete = foreign (prefix "delete") (typ @-> returning void)
+end
+
 module Full (F : Ctypes.FOREIGN) = struct
   let zexe = with_prefix "zexe"
 
@@ -1485,11 +1568,8 @@ module Full (F : Ctypes.FOREIGN) = struct
           (typ @-> Field.Vector.typ @-> returning Field_poly_comm.typ)
     end
 
-    module Constraint_system : Type = struct
-      type t = unit ptr
-
-      let typ = ptr void
-    end
+    module Gate_vector = Plonk_gate_vector (P) (Field.Vector) (F)
+    module Constraint_system = Plonk_constraint_system (P) (Gate_vector) (F)
 
     module Field_index =
       Plonk_index (struct
@@ -1500,21 +1580,15 @@ module Full (F : Ctypes.FOREIGN) = struct
         (Field_urs)
         (F)
 
-    module Field_verifier_index = struct
-      include PlonkVerifierIndex (struct
-                  let prefix = with_prefix (P.prefix "verifier_index")
-                end)
-                (Field_index)
-                (Field_urs)
-                (Field_poly_comm)
-                (Field)
-                (F)
-
-      open F
-
-      let read =
-        foreign (prefix "read") (Field_urs.typ @-> string @-> returning typ)
-    end
+    module Field_verifier_index =
+      PlonkVerifierIndex (struct
+          let prefix = with_prefix (P.prefix "verifier_index")
+        end)
+        (Field_index)
+        (Field_urs)
+        (Field_poly_comm)
+        (Field)
+        (F)
 
     module Field_proof =
       Dlog_plonk_proof (struct
@@ -1570,14 +1644,14 @@ module Full (F : Ctypes.FOREIGN) = struct
         (Fq)
         (F)
 
-      include Dlog_proof_system (Field) (Curve)
-
       module Plonk =
         Plonk_dlog_proof_system (struct
             let prefix = with_prefix (prefix "plonk_fq")
           end)
           (Field)
           (Curve)
+
+      include Dlog_proof_system (Field) (Curve)
     end
 
     module Dee = struct
@@ -1591,14 +1665,14 @@ module Full (F : Ctypes.FOREIGN) = struct
           (Fp)
           (F)
 
-      include Dlog_proof_system (Field) (Curve)
-
       module Plonk =
         Plonk_dlog_proof_system (struct
             let prefix = with_prefix (prefix "plonk_fp")
           end)
           (Field)
           (Curve)
+
+      include Dlog_proof_system (Field) (Curve)
     end
 
     module Endo = struct
