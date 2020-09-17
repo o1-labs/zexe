@@ -8,7 +8,7 @@ use algebra::{
 
 use plonk_circuits::scalars::{ProofEvaluations as DlogProofEvaluations};
 use plonk_circuits::constraints::ConstraintSystem;
-use plonk_circuits::gate::{CircuitGate, Gate, GateType};
+use plonk_circuits::gate::{CircuitGate, Gate, GateType, GateType::{*}};
 use plonk_circuits::wires::{GateWires, Wire, Wires, Col};
 
 use ff_fft::{EvaluationDomain, Radix2EvaluationDomain as Domain};
@@ -62,19 +62,17 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_create<'a>(
     let srs = unsafe { &*srs };
 
     let n = Domain::<Fp>::compute_size_of_domain(gates.len()).unwrap();
-    let wire = |w: Wire| -> usize {match w.col {L => w.row, R => w.row + n, O => w.row + 2*n}};
-
     let gates = gates.iter().map
     (
         |gate|
-        CircuitGate::<Fp>
+        CircuitGate
         {
-            typ: gate.typ,
+            typ: gate.typ.clone(),
             wires: GateWires
             {
-                l: (gate.wires.row, wire(gate.wires.l)),
-                r: (gate.wires.row + n, wire(gate.wires.r)),
-                o: (gate.wires.row + 2*n, wire(gate.wires.o)),
+                l: (gate.wires.row, gate.wires.row),
+                r: (gate.wires.row + n, gate.wires.row),
+                o: (gate.wires.row + 2*n, gate.wires.row),
             },
             c: gate.c.clone()
         }

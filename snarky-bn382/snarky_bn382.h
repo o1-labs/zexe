@@ -1363,7 +1363,7 @@ void *zexe_tweedle_plonk_fp_oracles_u(void *);
 void* zexe_tweedle_plonk_fp_oracles_digest_before_evaluations(void*);
 void zexe_tweedle_plonk_fp_oracles_delete(void *);
 
-// Fp circuit gate vector
+// Fp gate vector
 void *zexe_tweedle_plonk_fp_gate_vector_create(void);
 int zexe_tweedle_plonk_fp_gate_vector_length(void *);
 void zexe_tweedle_plonk_fp_gate_vector_delete(void *);
@@ -1379,51 +1379,51 @@ void zexe_tweedle_plonk_fp_gate_vector_add(
     int ocol,
     void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_zero(
+void zexe_tweedle_plonk_fp_gate_vector_add_zero(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_generic(
+void zexe_tweedle_plonk_fp_gate_vector_add_generic(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_poseidon(
+void zexe_tweedle_plonk_fp_gate_vector_add_poseidon(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_add1(
+void zexe_tweedle_plonk_fp_gate_vector_add_add1(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_add2(
+void zexe_tweedle_plonk_fp_gate_vector_add_add2(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_vbmul1(
+void zexe_tweedle_plonk_fp_gate_vector_add_vbmul1(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_vbmul2(
+void zexe_tweedle_plonk_fp_gate_vector_add_vbmul2(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_vbmul3(
+void zexe_tweedle_plonk_fp_gate_vector_add_vbmul3(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_endomul1(
+void zexe_tweedle_plonk_fp_gate_vector_add_endomul1(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_endomul2(
+void zexe_tweedle_plonk_fp_gate_vector_add_endomul2(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_endomul3(
+void zexe_tweedle_plonk_fp_gate_vector_add_endomul3(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fp_circuit_gate_vector_add_endomul4(
+void zexe_tweedle_plonk_fp_gate_vector_add_endomul4(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
@@ -1595,7 +1595,7 @@ void *zexe_tweedle_plonk_fq_oracles_u(void *);
 void* zexe_tweedle_plonk_fq_oracles_digest_before_evaluations(void*);
 void zexe_tweedle_plonk_fq_oracles_delete(void *);
 
-// Fq circuit gate vector
+// Fq gate vector
 void *zexe_tweedle_plonk_fq_gate_vector_create(void);
 int zexe_tweedle_plonk_fq_gate_vector_length(void *);
 void zexe_tweedle_plonk_fq_gate_vector_delete(void *);
@@ -1611,51 +1611,51 @@ void zexe_tweedle_plonk_fq_gate_vector_add(
     int ocol,
     void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_zero(
+void zexe_tweedle_plonk_fq_gate_vector_add_zero(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_generic(
+void zexe_tweedle_plonk_fq_gate_vector_add_generic(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_poseidon(
+void zexe_tweedle_plonk_fq_gate_vector_add_poseidon(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_add1(
+void zexe_tweedle_plonk_fq_gate_vector_add_add1(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_add2(
+void zexe_tweedle_plonk_fq_gate_vector_add_add2(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_vbmul1(
+void zexe_tweedle_plonk_fq_gate_vector_add_vbmul1(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_vbmul2(
+void zexe_tweedle_plonk_fq_gate_vector_add_vbmul2(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_vbmul3(
+void zexe_tweedle_plonk_fq_gate_vector_add_vbmul3(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_endomul1(
+void zexe_tweedle_plonk_fq_gate_vector_add_endomul1(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_endomul2(
+void zexe_tweedle_plonk_fq_gate_vector_add_endomul2(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_endomul3(
+void zexe_tweedle_plonk_fq_gate_vector_add_endomul3(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
-void zexe_tweedle_plonk_fq_circuit_gate_vector_add_endomul4(
+void zexe_tweedle_plonk_fq_gate_vector_add_endomul4(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 

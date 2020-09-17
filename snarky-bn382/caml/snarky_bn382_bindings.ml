@@ -1504,7 +1504,8 @@ struct
         @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
         @-> AffineCurve.Pair.Vector.typ @-> ScalarField.typ @-> ScalarField.typ
         @-> AffineCurve.typ @-> AffineCurve.typ @-> Evaluations.typ
-        @-> Evaluations.typ @-> ScalarFieldVector.typ @-> AffineCurve.Vector.typ @-> returning typ )
+        @-> Evaluations.typ @-> ScalarFieldVector.typ
+        @-> AffineCurve.Vector.typ @-> returning typ )
     and add_finalizer = add_finalizer in
     fun ~primary_input ~l_comm ~r_comm ~o_comm ~z_comm ~t_comm ~lr ~z1 ~z2
         ~delta ~sg ~evals0 ~evals1 ~prev_challenges ~prev_sgs ->
@@ -1516,10 +1517,12 @@ struct
     let%map create =
       foreign (prefix "create")
         ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
-         @-> ScalarFieldVector.typ @-> AffineCurve.Vector.typ @-> returning typ )
+        @-> ScalarFieldVector.typ @-> AffineCurve.Vector.typ @-> returning typ
+        )
     and add_finalizer = add_finalizer in
     fun index primary_input auxiliary_input prev_challenges prev_sgs ->
-      add_finalizer (create index primary_input auxiliary_input prev_challenges prev_sgs)
+      add_finalizer
+        (create index primary_input auxiliary_input prev_challenges prev_sgs)
 
   let verify =
     foreign (prefix "verify") (VerifierIndex.typ @-> typ @-> returning bool)
@@ -2029,8 +2032,8 @@ struct
     let%map add_gate =
       foreign
         (prefix (Printf.sprintf "add_%s" gate_name))
-        ( typ @-> size_t @-> size_t @-> int @-> size_t @-> int @-> size_t @-> int
-        @-> Field_vector.typ @-> returning void )
+        ( typ @-> size_t @-> size_t @-> int @-> size_t @-> int @-> size_t
+        @-> int @-> Field_vector.typ @-> returning void )
     in
     fun t ~row ~lrow ~lcol ~rrow ~rcol ~orow ~ocol v ->
       add_gate t row lrow lcol rrow rcol orow ocol v
@@ -2062,8 +2065,8 @@ struct
   let add_raw =
     let%map add_gate =
       foreign (prefix "add")
-        ( typ @-> size_t @-> size_t @-> int @-> size_t @-> int @-> size_t @-> int
-        @-> Field_vector.typ @-> returning void )
+        ( typ @-> int @-> size_t @-> size_t @-> int @-> size_t @-> int @-> size_t
+        @-> int @-> Field_vector.typ @-> returning void )
     in
     fun t ~gate_enum ~row ~lrow ~lcol ~rrow ~rcol ~orow ~ocol v ->
       add_gate t gate_enum row lrow lcol rrow rcol orow ocol v
@@ -2866,4 +2869,4 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
   end
 
   include Bn382
-end
+  end
