@@ -223,11 +223,17 @@ end
 module Vector (P : Prefix) (E : Type) (F : Ctypes.FOREIGN) = struct
   open F
 
+  type elt = E.t
+
   let prefix = with_prefix (P.prefix "vector")
 
-  type t = unit ptr
+  include (
+    struct
+        type t = unit ptr
 
-  let typ = ptr void
+        let typ = ptr void
+      end :
+      Type )
 
   let create = foreign (prefix "create") (void @-> returning typ)
 
