@@ -1374,7 +1374,9 @@ module Dlog_plonk_proof
                     and type 'a return := 'a F.return)
     (Index : Type)
     (VerifierIndex : Type)
-    (ScalarFieldVector : Type)
+    (ScalarFieldVector : Type_with_finalizer
+                         with type 'a result := 'a F.result
+                          and type 'a return := 'a F.return)
     (FieldVectorPair : Type)
     (OpeningProof : Type_with_finalizer
                     with type 'a result := 'a F.result
@@ -1433,8 +1435,8 @@ struct
     include T
 
     let f s =
-      let%map f = foreign (prefix s) (typ @-> returning ScalarField.typ)
-      and add_finalizer = ScalarField.add_finalizer in
+      let%map f = foreign (prefix s) (typ @-> returning ScalarFieldVector.typ)
+      and add_finalizer = ScalarFieldVector.add_finalizer in
       fun t -> add_finalizer (f t)
 
     let sigma1 = f "sigma1"
@@ -1464,9 +1466,11 @@ struct
     let make =
       let%map make =
         foreign (prefix "make")
-          ( ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-          @-> ScalarField.typ @-> ScalarField.typ @-> ScalarField.typ
-          @-> ScalarField.typ @-> ScalarField.typ @-> returning typ )
+          ( ScalarFieldVector.typ @-> ScalarFieldVector.typ
+          @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+          @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+          @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ @-> returning typ
+          )
       and add_finalizer = add_finalizer in
       fun ~l ~r ~o ~z ~t ~f ~sigma1 ~sigma2 ->
         add_finalizer (make l r o z t f sigma1 sigma2)
@@ -1477,7 +1481,7 @@ struct
       foreign (prefix "make")
         ( ScalarFieldVector.typ @-> PolyComm.typ @-> PolyComm.typ
         @-> PolyComm.typ @-> PolyComm.typ @-> PolyComm.typ
-        @-> AffineCurve.Pair.Vector.typ @-> PolyComm.typ @-> PolyComm.typ
+        @-> AffineCurve.Pair.Vector.typ @-> ScalarField.typ @-> ScalarField.typ
         @-> AffineCurve.typ @-> AffineCurve.typ @-> Evaluations.typ
         @-> Evaluations.typ @-> returning typ )
     and add_finalizer = add_finalizer in
@@ -1518,7 +1522,10 @@ struct
 
   let t_comm = f "t_comm" PolyComm.typ PolyComm.add_finalizer
 
-  let proof_comm = f "proof" OpeningProof.typ OpeningProof.add_finalizer
+  let proof = f "proof" OpeningProof.typ OpeningProof.add_finalizer
+
+  let evals_nocopy =
+    f "evals_nocopy" Evaluations.Pair.typ Evaluations.Pair.add_finalizer
 end
 
 module Pairing_oracles
@@ -2100,7 +2107,7 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         let add_finalizer = F.return Fn.id
       end)
 
-  module Dlog_proof_system (Field : sig
+  module Proof_system_common (Field : sig
     include
       Prefix_type_with_finalizer
       with type 'a result := 'a F.result
@@ -2117,8 +2124,6 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         with type 'a result := 'a F.result
          and type 'a return := 'a F.return
     end
-
-    module Constraint_matrix : Type
   end) (Curve : sig
     include
       Prefix_type_with_finalizer
@@ -2153,17 +2158,6 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
     let prefix = Field.prefix
 
     module Field_triple = Triple (F) (Field) (Field)
-
-    module Field_vector_triple = Triple (Field.Vector) (Field.Vector) (F)
-
-    module Field_opening_proof =
-      Dlog_opening_proof
-        (F)
-        (struct
-          let prefix = with_prefix (prefix "opening_proof")
-        end)
-        (Field)
-        (Curve.Affine)
 
     module Field_poly_comm =
       Dlog_poly_comm
@@ -2234,7 +2228,7 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
       let h =
         let%map h = foreign (prefix "h") (typ @-> returning Curve.Affine.typ)
         and add_finalizer = Curve.Affine.add_finalizer in
-        fun t -> add_finalizer (h t)
+        fun urs -> add_finalizer (h urs)
 
       let b_poly_commitment =
         let%map b_poly_commitment =
@@ -2244,6 +2238,74 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         and add_finalizer = Field_poly_comm.add_finalizer in
         fun urs chals -> add_finalizer (b_poly_commitment urs chals)
     end
+  end
+
+  module Dlog_proof_system (Field : sig
+    include
+      Prefix_type_with_finalizer
+      with type 'a result := 'a F.result
+       and type 'a return := 'a F.return
+
+    module Vector : sig
+      include
+        Prefix_type_with_finalizer
+        with type 'a result := 'a F.result
+         and type 'a return := 'a F.return
+
+      module Triple :
+        Type_with_finalizer
+        with type 'a result := 'a F.result
+         and type 'a return := 'a F.return
+    end
+
+    module Constraint_matrix : Type
+  end) (Curve : sig
+    include
+      Prefix_type_with_finalizer
+      with type 'a result := 'a F.result
+       and type 'a return := 'a F.return
+
+    module Affine : sig
+      module Underlying : Type
+
+      include
+        Type_with_finalizer
+        with type 'a result := 'a F.result
+         and type 'a return := 'a F.return
+         and type t = Underlying.t ptr
+
+      module Vector :
+        Type_with_finalizer
+        with type 'a result := 'a F.result
+         and type 'a return := 'a F.return
+
+      module Pair : sig
+        include Type
+
+        module Vector :
+          Type_with_finalizer
+          with type 'a result := 'a F.result
+           and type 'a return := 'a F.return
+      end
+    end
+  end)
+  (Common : module type of Proof_system_common (Field) (Curve)) =
+  struct
+    let prefix = Field.prefix
+
+    module Field_triple = Common.Field_triple
+
+    module Field_opening_proof =
+      Dlog_opening_proof
+        (F)
+        (struct
+          let prefix = with_prefix (prefix "opening_proof")
+        end)
+        (Field)
+        (Curve.Affine)
+
+    module Field_poly_comm = Common.Field_poly_comm
+    module Field_urs = Common.Field_urs
 
     module Field_index =
       Index
@@ -2321,7 +2383,10 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
                and type 'a return := 'a F.return
           end
       end) (Curve : sig
-        include Prefix_type
+        include
+          Prefix_type_with_finalizer
+          with type 'a result := 'a F.result
+           and type 'a return := 'a F.return
 
         module Affine : sig
           module Underlying : Type
@@ -2349,11 +2414,10 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
                and type 'a return := 'a F.return
           end
         end
-      end) =
-  struct
-    let prefix = Field.prefix
-
-    module Field_triple = Triple (F) (Field) (Field)
+      end)
+      (Common : module type of Proof_system_common (Field) (Curve)) =
+      struct
+    module Field_triple = Common.Field_triple
 
     module Field_opening_proof =
       Dlog_opening_proof
@@ -2364,91 +2428,8 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         (Field)
         (Curve.Affine)
 
-    module Field_poly_comm =
-      Dlog_poly_comm
-        (F)
-        (struct
-          let prefix = with_prefix (prefix "poly_comm")
-        end)
-        (Curve.Affine)
-
-    module Field_urs = struct
-      let prefix = with_prefix (prefix "urs")
-
-      include (
-        struct
-            type t = unit ptr
-
-            let typ = ptr void
-          end :
-          Type )
-
-      open F
-      open F.Let_syntax
-
-      let delete = foreign (prefix "delete") (typ @-> returning void)
-
-      let add_finalizer =
-        F.map delete ~f:(fun delete x ->
-            Caml.Gc.finalise (bind_return ~f:delete) x ;
-            x )
-
-      (* Stub out delete to make sure we don't attempt to double-free. *)
-      let delete : t -> unit = ignore
-
-      let create =
-        let%map create =
-          foreign (prefix "create")
-            (size_t @-> size_t @-> size_t @-> returning typ)
-        and add_finalizer = add_finalizer in
-        fun depth public size -> add_finalizer (create depth public size)
-
-      let read =
-        let%map read = foreign (prefix "read") (string @-> returning typ)
-        and add_finalizer = add_finalizer in
-        fun path -> add_finalizer (read path)
-
-      let write = foreign (prefix "write") (typ @-> string @-> returning void)
-
-      let lagrange_commitment =
-        let%map lagrange_commitment =
-          foreign
-            (prefix "lagrange_commitment")
-            (typ @-> size_t @-> size_t @-> returning Field_poly_comm.typ)
-        and add_finalizer = Field_poly_comm.add_finalizer in
-        fun urs domain_size i ->
-          add_finalizer (lagrange_commitment urs domain_size i)
-
-      let commit_evaluations =
-        let%map commit_evaluations =
-          foreign
-            (prefix "commit_evaluations")
-            ( typ @-> size_t @-> Field.Vector.typ
-            @-> returning Field_poly_comm.typ )
-        and add_finalizer = Field_poly_comm.add_finalizer in
-        fun urs domain_size evals ->
-          add_finalizer (commit_evaluations urs domain_size evals)
-
-      let h =
-        let%map h = foreign (prefix "h") (typ @-> returning Curve.Affine.typ)
-        and add_finalizer = Curve.Affine.add_finalizer in
-        fun urs -> add_finalizer (h urs)
-
-      let batch_accumulator_check =
-        foreign
-          (prefix "batch_accumulator_check")
-          ( typ @-> Curve.Affine.Vector.typ @-> Field.Vector.typ
-          @-> returning bool )
-
-      let b_poly_commitment =
-        let%map b_poly_commitment =
-          foreign
-            (prefix "b_poly_commitment")
-            (typ @-> Field.Vector.typ @-> returning Field_poly_comm.typ)
-        and add_finalizer = Field_poly_comm.add_finalizer in
-        fun urs chals -> add_finalizer (b_poly_commitment urs chals)
-    end
-
+    module Field_poly_comm = Common.Field_poly_comm
+    module Field_urs = Common.Field_urs
     module Gate_vector = Plonk_gate_vector (F) (P) (Field.Vector)
     module Constraint_system = Plonk_constraint_system (F) (P) (Gate_vector)
 
@@ -2489,10 +2470,10 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         (Field_poly_comm)
 
     module Field_oracles =
-      Dlog_oracles
+      Dlog_plonk_oracles
         (F)
         (struct
-          let prefix = with_prefix (prefix "oracles")
+          let prefix = with_prefix (P.prefix "oracles")
         end)
         (Field)
         (Field_verifier_index)
@@ -2533,14 +2514,17 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
           (Fp)
           (Fq)
 
+      module Common = Proof_system_common (Field) (Curve)
+
       module Plonk =
         Plonk_dlog_proof_system (struct
             let prefix = with_prefix (prefix "plonk_fq")
           end)
           (Field)
           (Curve)
+          (Common)
 
-      include Dlog_proof_system (Field) (Curve)
+      include Dlog_proof_system (Field) (Curve) (Common)
     end
 
     module Dee = struct
@@ -2555,14 +2539,17 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
           (Fq)
           (Fp)
 
+      module Common = Proof_system_common (Field) (Curve)
+
       module Plonk =
         Plonk_dlog_proof_system (struct
             let prefix = with_prefix (prefix "plonk_fp")
           end)
           (Field)
           (Curve)
+          (Common)
 
-      include Dlog_proof_system (Field) (Curve)
+      include Dlog_proof_system (Field) (Curve) (Common)
     end
 
     module Endo = struct
