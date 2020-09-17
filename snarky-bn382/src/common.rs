@@ -8,9 +8,17 @@ use algebra::{
     },
 };
 
-use evaluation_domains::EvaluationDomains;
-use circuits_pairing::index::{MatrixValues,};
-use ff_fft::{Evaluations, DensePolynomial, EvaluationDomain, Radix2EvaluationDomain as Domain, GeneralEvaluationDomain};
+use marlin_protocol_pairing::index::MatrixValues;
+use commitment_dlog::{
+    commitment::{b_poly_coefficients, CommitmentCurve, PolyComm},
+    srs::SRS,
+};
+use marlin_circuits::domains::EvaluationDomains;
+use ff_fft::{
+    DensePolynomial, EvaluationDomain, Evaluations, GeneralEvaluationDomain,
+    Radix2EvaluationDomain as Domain,
+};
+use rayon::prelude::*;
 use sprs::{CsMat, CsVecView, CSR};
 use std::io::{Read, Result as IoResult, Write};
 use commitment_dlog::{commitment::{PolyComm,}};
@@ -123,7 +131,10 @@ pub fn read_poly_comm<A : FromBytes + AffineCurve, R: Read>(mut r : R) -> IoResu
     Ok(PolyComm { unshifted, shifted })
 }
 
-pub fn write_dlog_matrix_values<A: ToBytes + AffineCurve, W: Write>(m : &circuits_dlog::index::MatrixValues<A>, mut w: W) -> IoResult<()> {
+pub fn write_dlog_matrix_values<A: ToBytes + AffineCurve, W: Write>(
+    m: &marlin_protocol_dlog::index::MatrixValues<A>,
+    mut w: W,
+) -> IoResult<()> {
     write_poly_comm(&m.row, &mut w)?;
     write_poly_comm(&m.col, &mut w)?;
     write_poly_comm(&m.val, &mut w)?;
@@ -131,12 +142,14 @@ pub fn write_dlog_matrix_values<A: ToBytes + AffineCurve, W: Write>(m : &circuit
     Ok(())
 }
 
-pub fn read_dlog_matrix_values<A: FromBytes + AffineCurve, R: Read>(mut r: R) -> IoResult<circuits_dlog::index::MatrixValues<A>> {
+pub fn read_dlog_matrix_values<A: FromBytes + AffineCurve, R: Read>(
+    mut r: R,
+) -> IoResult<marlin_protocol_dlog::index::MatrixValues<A>> {
     let row = read_poly_comm(&mut r)?;
     let col = read_poly_comm(&mut r)?;
     let val = read_poly_comm(&mut r)?;
-    let rc =  read_poly_comm(&mut r)?;
-    Ok(circuits_dlog::index::MatrixValues {row, col, val, rc})
+    let rc = read_poly_comm(&mut r)?;
+    Ok(marlin_protocol_dlog::index::MatrixValues { row, col, val, rc })
 }
 
 pub fn write_dense_polynomial<A: ToBytes + Field, W: Write>(p : &DensePolynomial<A>, w: W) -> IoResult<()> {

@@ -17,13 +17,18 @@ use algebra::{
     },
     UniformRand,
 };
-use commitment_pairing::urs::{URS};
-use evaluation_domains::EvaluationDomains;
-use circuits_pairing::index::{Index, VerifierIndex, MatrixValues, URSSpec};
-use ff_fft::{Evaluations, DensePolynomial, EvaluationDomain, Radix2EvaluationDomain as Domain};
+use marlin_protocol_pairing::index::{Index, MatrixValues, URSSpec, VerifierIndex};
+use commitment_pairing::urs::URS;
+use marlin_circuits::domains::EvaluationDomains;
+use ff_fft::{DensePolynomial, EvaluationDomain, Evaluations, Radix2EvaluationDomain as Domain};
 
-use oracle::{self, marlin_sponge::{DefaultFqSponge, DefaultFrSponge}, poseidon, poseidon::Sponge};
-use protocol_pairing::{prover::{ ProverProof, ProofEvaluations, RandomOracles}};
+use oracle::{
+    self,
+    sponge::{DefaultFqSponge, DefaultFrSponge},
+    poseidon,
+    poseidon::{Sponge, MarlinSpongeConstants as SC},
+};
+use marlin_protocol_pairing::prover::{ProofEvaluations, ProverProof, RandomOracles};
 use rand::rngs::StdRng;
 use rand_core;
 
@@ -36,13 +41,13 @@ use std::io::{Read, Result as IoResult, Write, BufReader, BufWriter};
 
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fp_endo_base() -> *const Fq {
-    let (endo_q, _endo_r) = circuits_pairing::index::endos::<Bn_382>();
+    let (endo_q, _endo_r) = marlin_protocol_pairing::index::endos::<Bn_382>();
     return Box::into_raw(Box::new(endo_q));
 }
 
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fp_endo_scalar() -> *const Fp {
-    let (_endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
+    let (_endo_q, endo_r) = marlin_protocol_pairing::index::endos::<Bn_382>();
     return Box::into_raw(Box::new(endo_r));
 }
 
@@ -407,7 +412,10 @@ pub extern "C" fn zexe_bn382_fp_proof_create(
 
     let witness = prepare_witness(index.domains, primary_input, auxiliary_input);
 
-    let proof = ProverProof::create::<DefaultFqSponge<Bn_382G1Parameters>, DefaultFrSponge<Fp> > (&witness, &index).unwrap();
+    let proof = ProverProof::create::<DefaultFqSponge<Bn_382G1Parameters, SC>, DefaultFrSponge<Fp, SC>>(
+        &witness, &index,
+    )
+    .unwrap();
 
     return Box::into_raw(Box::new(proof));
 }
@@ -421,8 +429,11 @@ pub extern "C" fn zexe_bn382_fp_proof_batch_verify(
     let index = unsafe { &(*index) };
     let proofs = unsafe { &(*proofs) };
 
-    match ProverProof::<Bn_382>::verify::<DefaultFqSponge<Bn_382G1Parameters>, DefaultFrSponge<Fp> >(
-        proofs, index, &mut rand_core::OsRng) {
+    match ProverProof::<Bn_382>::verify::<DefaultFqSponge<Bn_382G1Parameters, SC>, DefaultFrSponge<Fp, SC>>(
+        proofs,
+        index,
+        &mut rand_core::OsRng,
+    ) {
         Ok(_) => true,
         Err(_) => false
     }
@@ -437,8 +448,7 @@ pub extern "C" fn zexe_bn382_fp_proof_verify(
     let index = unsafe { &(*index) };
     let proof = unsafe { (*proof).clone() };
 
-    match ProverProof::verify::<DefaultFqSponge<Bn_382G1Parameters>, DefaultFrSponge<Fp>>
-    (
+    match ProverProof::verify::<DefaultFqSponge<Bn_382G1Parameters, SC>, DefaultFrSponge<Fp, SC>>(
         &[proof].to_vec(),
         &index,
         &mut rand_core::OsRng
@@ -801,7 +811,11 @@ pub extern "C" fn zexe_bn382_fp_oracles_create(
     let x_hat = evals_from_coeffs(proof.public.clone(), index.domains.x).interpolate();
     let x_hat_comm = index.urs.commit(&x_hat).unwrap();
 
-    let oracles = proof.oracles::<DefaultFqSponge<Bn_382G1Parameters>, DefaultFrSponge<Fp> >(index, x_hat_comm, &x_hat).unwrap();
+    let oracles = proof
+        .oracles::<DefaultFqSponge<Bn_382G1Parameters, SC>, DefaultFrSponge<Fp, SC>>(
+            index, x_hat_comm, &x_hat,
+        )
+        .unwrap();
     return Box::into_raw(Box::new(oracles));
 }
 
@@ -935,8 +949,8 @@ pub extern "C" fn zexe_bn382_fp_verifier_index_make(
     val_c: *const G1Affine,
     rc_c: *const G1Affine,
 ) -> *const VerifierIndex<Bn_382> {
-    let urs : URS<Bn_382> = (unsafe { &*urs }).clone();
-    let (endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
+    let urs: URS<Bn_382> = (unsafe { &*urs }).clone();
+    let (endo_q, endo_r) = marlin_protocol_pairing::index::endos::<Bn_382>();
     let index = VerifierIndex {
         domains: EvaluationDomains::create(variables, constraints, public_inputs, nonzero_entries).unwrap(),
         matrix_commitments: [
@@ -997,7 +1011,7 @@ pub extern "C" fn zexe_bn382_fp_verifier_index_read<'a>(
         let public_inputs = u64::read(&mut r)? as usize;
         let max_degree = u64::read(&mut r)? as usize;
         let urs = URS::<Bn_382>::read(&mut r)?;
-        let (endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
+        let (endo_q, endo_r) = marlin_protocol_pairing::index::endos::<Bn_382>();
         Ok(VerifierIndex {
             matrix_commitments: [m0, m1, m2],
             domains,
@@ -1301,10 +1315,13 @@ pub extern "C" fn zexe_bn382_fp_index_public_inputs(
 
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fp_index_write<'a>(
-    index : *const Index<'a, Bn_382>,
-    path: *const c_char) {
-
-    fn write_compiled<W:Write>(c: &circuits_pairing::compiled::Compiled<Bn_382>, mut w:W) -> IoResult<()> {
+    index: *const Index<'a, Bn_382>,
+    path: *const c_char,
+) {
+    fn write_compiled<W: Write>(
+        c: &marlin_protocol_pairing::compiled::Compiled<Bn_382>,
+        mut w: W,
+    ) -> IoResult<()> {
         c.col_comm.write(&mut w)?;
         c.row_comm.write(&mut w)?;
         c.val_comm.write(&mut w)?;
@@ -1347,11 +1364,21 @@ pub extern "C" fn zexe_bn382_fp_index_read<'a>(
     a: *const Vec<(Vec<usize>, Vec<Fp>)>,
     b: *const Vec<(Vec<usize>, Vec<Fp>)>,
     c: *const Vec<(Vec<usize>, Vec<Fp>)>,
-    public_inputs : usize,
-    path: *const c_char) -> *const Index<'a, Bn_382> {
-
-    fn read_compiled<R:Read>(public_inputs: usize, ds: EvaluationDomains<Fp>, m: *const Vec<(Vec<usize>, Vec<Fp>)>, mut r: R) -> IoResult<circuits_pairing::compiled::Compiled<Bn_382>> {
-        let constraints = rows_to_csmat(public_inputs, ds.h.size(), ds.h.size() / ds.x.size(), unsafe { &*m });
+    public_inputs: usize,
+    path: *const c_char,
+) -> *const Index<'a, Bn_382> {
+    fn read_compiled<R: Read>(
+        public_inputs: usize,
+        ds: EvaluationDomains<Fp>,
+        m: *const Vec<(Vec<usize>, Vec<Fp>)>,
+        mut r: R,
+    ) -> IoResult<marlin_protocol_pairing::compiled::Compiled<Bn_382>> {
+        let constraints = rows_to_csmat(
+            public_inputs,
+            ds.h.size(),
+            ds.h.size() / ds.x.size(),
+            unsafe { &*m },
+        );
 
         let col_comm = G1Affine::read(&mut r)?;
         let row_comm = G1Affine::read(&mut r)?;
@@ -1369,7 +1396,7 @@ pub extern "C" fn zexe_bn382_fp_index_read<'a>(
         let val_eval_b = read_evaluations(&mut r)?;
         let rc_eval_b  = read_evaluations(&mut r)?;
 
-        Ok(circuits_pairing::compiled::Compiled {
+        Ok(marlin_protocol_pairing::compiled::Compiled {
             constraints,
             col_comm   ,
             row_comm   ,
@@ -1401,12 +1428,12 @@ pub extern "C" fn zexe_bn382_fp_index_read<'a>(
         let c2 = read_compiled(public_inputs, domains, c, &mut r)?;
 
         let public_inputs = u64::read(&mut r)? as usize;
-        let (endo_q, endo_r) = circuits_pairing::index::endos::<Bn_382>();
-        Ok( Index::<Bn_382> {
+        let (endo_q, endo_r) = marlin_protocol_pairing::index::endos::<Bn_382>();
+        Ok(Index::<Bn_382> {
             compiled: [c0, c1, c2],
             domains,
             public_inputs,
-            urs: circuits_pairing::index::URSValue::Ref(srs),
+            urs: marlin_protocol_pairing::index::URSValue::Ref(srs),
             fr_sponge_params: oracle::bn_382::fp::params(),
             fq_sponge_params: oracle::bn_382::fq::params(),
             endo_q,
@@ -1590,19 +1617,19 @@ pub extern "C" fn zexe_bn382_fq_sponge_params_delete(
 }
 
 #[no_mangle]
-pub extern "C" fn zexe_bn382_fq_sponge_create() -> *mut poseidon::ArithmeticSponge<Fq> {
-    let ret = oracle::poseidon::ArithmeticSponge::<Fq>::new();
+pub extern "C" fn zexe_bn382_fq_sponge_create() -> *mut poseidon::ArithmeticSponge<Fq, SC> {
+    let ret = oracle::poseidon::ArithmeticSponge::<Fq, SC>::new();
     return Box::into_raw(Box::new(ret));
 }
 
 #[no_mangle]
-pub extern "C" fn zexe_bn382_fq_sponge_delete(x: *mut poseidon::ArithmeticSponge<Fp>) {
+pub extern "C" fn zexe_bn382_fq_sponge_delete(x: *mut poseidon::ArithmeticSponge<Fp, SC>) {
     let _box = unsafe { Box::from_raw(x) };
 }
 
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fq_sponge_absorb(
-    sponge: *mut poseidon::ArithmeticSponge<Fq>,
+    sponge: *mut poseidon::ArithmeticSponge<Fq, SC>,
     params: *const poseidon::ArithmeticSpongeParams<Fq>,
     x: *const Fq,
 ) {
@@ -1615,7 +1642,7 @@ pub extern "C" fn zexe_bn382_fq_sponge_absorb(
 
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fq_sponge_squeeze(
-    sponge: *mut poseidon::ArithmeticSponge<Fq>,
+    sponge: *mut poseidon::ArithmeticSponge<Fq, SC>,
     params: *const poseidon::ArithmeticSpongeParams<Fq>,
 ) -> *mut Fq {
     let sponge = unsafe { &mut (*sponge) };

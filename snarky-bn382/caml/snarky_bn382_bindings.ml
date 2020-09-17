@@ -929,7 +929,7 @@ struct
   module Constraint_matrix = struct
     open F
 
-    module T = struct
+    module T : Type = struct
       type t = unit ptr
 
       let typ = ptr void
@@ -940,6 +940,8 @@ struct
     let prefix = with_prefix (prefix "constraint_matrix")
 
     let create = foreign (prefix "create") (void @-> returning typ)
+
+    let delete = foreign (prefix "delete") (typ @-> returning void)
 
     let append_row =
       foreign (prefix "append_row")
@@ -1027,7 +1029,9 @@ module Full (F : Ctypes.FOREIGN) = struct
 
       open F
 
-      let create = foreign (prefix "create") (size_t @-> returning typ)
+      let create =
+        foreign (prefix "create")
+          (size_t @-> size_t @-> size_t @-> returning typ)
 
       let read = foreign (prefix "read") (string @-> returning typ)
 
@@ -1293,7 +1297,9 @@ module Full (F : Ctypes.FOREIGN) = struct
 
       open F
 
-      let create = foreign (prefix "create") (size_t @-> returning typ)
+      let create =
+        foreign (prefix "create")
+          (size_t @-> size_t @-> size_t @-> returning typ)
 
       let read = foreign (prefix "read") (string @-> returning typ)
 

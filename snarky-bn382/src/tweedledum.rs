@@ -17,11 +17,15 @@ use algebra::{
     UniformRand,
 };
 
-use evaluation_domains::EvaluationDomains;
+use marlin_circuits::domains::EvaluationDomains;
 
 use ff_fft::{Evaluations, DensePolynomial, EvaluationDomain, Radix2EvaluationDomain as Domain};
 
-use oracle::{self, marlin_sponge::{ScalarChallenge, DefaultFqSponge, DefaultFrSponge}};
+use oracle::{
+    self,
+    sponge::{DefaultFqSponge, DefaultFrSponge, ScalarChallenge},
+    poseidon::{MarlinSpongeConstants},
+};
 
 use rand::rngs::StdRng;
 use rand_core;
@@ -32,14 +36,19 @@ use std::fs::File;
 use std::io::{Read, Result as IoResult, Write, BufReader, BufWriter};
 use groupmap::GroupMap;
 
-use commitment_dlog::{commitment::{CommitmentCurve, PolyComm, product, b_poly_coefficients, OpeningProof}, srs::{SRS}};
-use circuits_dlog::index::{Index as DlogIndex, VerifierIndex as DlogVerifierIndex, SRSSpec, SRSValue};
-use protocol_dlog::prover::{ProverProof as DlogProof, ProofEvaluations as DlogProofEvaluations};
+use marlin_protocol_dlog::index::{
+    Index as DlogIndex, SRSSpec, SRSValue, VerifierIndex as DlogVerifierIndex,
+};
+use commitment_dlog::{
+    commitment::{b_poly_coefficients, product, CommitmentCurve, OpeningProof, PolyComm},
+    srs::SRS,
+};
+use marlin_protocol_dlog::prover::{ProofEvaluations as DlogProofEvaluations, ProverProof as DlogProof};
 
 // Fq URS stubs
 #[no_mangle]
-pub extern "C" fn zexe_tweedle_fq_urs_create(depth : usize) -> *const SRS<GAffine> {
-    Box::into_raw(Box::new(SRS::create(depth)))
+pub extern "C" fn zexe_tweedle_fq_urs_create(depth: usize, public: usize, size: usize) -> *const SRS<GAffine> {
+    Box::into_raw(Box::new(SRS::create(depth, public, size)))
 }
 
 #[no_mangle]
@@ -207,10 +216,13 @@ pub extern "C" fn zexe_tweedle_fq_index_public_inputs(
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_fq_index_write<'a>(
-    index : *const DlogIndex<'a, GAffine>,
-    path: *const c_char) {
-
-    fn write_compiled<W:Write>(c: &circuits_dlog::compiled::Compiled<GAffine>, mut w:W) -> IoResult<()> {
+    index: *const DlogIndex<'a, GAffine>,
+    path: *const c_char,
+) {
+    fn write_compiled<W: Write>(
+        c: &marlin_protocol_dlog::compiled::Compiled<GAffine>,
+        mut w: W,
+    ) -> IoResult<()> {
         write_poly_comm(&c.col_comm, &mut w)?;
         write_poly_comm(&c.row_comm, &mut w)?;
         write_poly_comm(&c.val_comm, &mut w)?;
@@ -253,11 +265,21 @@ pub extern "C" fn zexe_tweedle_fq_index_read<'a>(
     a: *const Vec<(Vec<usize>, Vec<Fq>)>,
     b: *const Vec<(Vec<usize>, Vec<Fq>)>,
     c: *const Vec<(Vec<usize>, Vec<Fq>)>,
-    public_inputs : usize,
-    path: *const c_char) -> *const DlogIndex<'a, GAffine> {
-
-    fn read_compiled<R:Read>(public_inputs: usize, ds: EvaluationDomains<Fq>, m: *const Vec<(Vec<usize>, Vec<Fq>)>, mut r: R) -> IoResult<circuits_dlog::compiled::Compiled<GAffine>> {
-        let constraints = rows_to_csmat(public_inputs, ds.h.size(), ds.h.size() / ds.x.size(), unsafe { &*m });
+    public_inputs: usize,
+    path: *const c_char,
+) -> *const DlogIndex<'a, GAffine> {
+    fn read_compiled<R: Read>(
+        public_inputs: usize,
+        ds: EvaluationDomains<Fq>,
+        m: *const Vec<(Vec<usize>, Vec<Fq>)>,
+        mut r: R,
+    ) -> IoResult<marlin_protocol_dlog::compiled::Compiled<GAffine>> {
+        let constraints = rows_to_csmat(
+            public_inputs,
+            ds.h.size(),
+            ds.h.size() / ds.x.size(),
+            unsafe { &*m },
+        );
 
         let col_comm = read_poly_comm(&mut r)?;
         let row_comm = read_poly_comm(&mut r)?;
@@ -275,7 +297,7 @@ pub extern "C" fn zexe_tweedle_fq_index_read<'a>(
         let val_eval_b = read_evaluations(&mut r)?;
         let rc_eval_b  = read_evaluations(&mut r)?;
 
-        Ok(circuits_dlog::compiled::Compiled {
+        Ok(marlin_protocol_dlog::compiled::Compiled {
             constraints,
             col_comm   ,
             row_comm   ,
@@ -366,9 +388,24 @@ pub extern "C" fn zexe_tweedle_fq_verifier_index_make<'a>(
     let index = DlogVerifierIndex::<GAffine> {
         domains: EvaluationDomains::create(variables, constraints, public_inputs, nonzero_entries).unwrap(),
         matrix_commitments: [
-            circuits_dlog::index::MatrixValues { row: (unsafe {&*row_a}).clone(), col: (unsafe {&*col_a}).clone(), val: (unsafe {&*val_a}).clone(), rc: (unsafe {&*rc_a}).clone() },
-            circuits_dlog::index::MatrixValues { row: (unsafe {&*row_b}).clone(), col: (unsafe {&*col_b}).clone(), val: (unsafe {&*val_b}).clone(), rc: (unsafe {&*rc_b}).clone() },
-            circuits_dlog::index::MatrixValues { row: (unsafe {&*row_c}).clone(), col: (unsafe {&*col_c}).clone(), val: (unsafe {&*val_c}).clone(), rc: (unsafe {&*rc_c}).clone() },
+            marlin_protocol_dlog::index::MatrixValues {
+                row: (unsafe { &*row_a }).clone(),
+                col: (unsafe { &*col_a }).clone(),
+                val: (unsafe { &*val_a }).clone(),
+                rc: (unsafe { &*rc_a }).clone(),
+            },
+            marlin_protocol_dlog::index::MatrixValues {
+                row: (unsafe { &*row_b }).clone(),
+                col: (unsafe { &*col_b }).clone(),
+                val: (unsafe { &*val_b }).clone(),
+                rc: (unsafe { &*rc_b }).clone(),
+            },
+            marlin_protocol_dlog::index::MatrixValues {
+                row: (unsafe { &*row_c }).clone(),
+                col: (unsafe { &*col_c }).clone(),
+                val: (unsafe { &*val_c }).clone(),
+                rc: (unsafe { &*rc_c }).clone(),
+            },
         ],
         fq_sponge_params: oracle::tweedle::fp::params(),
         fr_sponge_params: oracle::tweedle::fq::params(),
@@ -1036,7 +1073,7 @@ pub extern "C" fn zexe_tweedle_dum_affine_vector_delete(v: *mut Vec<GAffine>) {
 
 // Fq oracles
 pub struct FqOracles {
-    o: protocol_dlog::prover::RandomOracles<Fq>,
+    o: marlin_protocol_dlog::prover::RandomOracles<Fq>,
     opening_prechallenges: Vec<ScalarChallenge<Fq>>,
 }
 
@@ -1053,10 +1090,10 @@ pub extern "C" fn zexe_tweedle_fq_oracles_create(
         // TODO: Should have no degree bound when we add the correct degree bound method
     let x_hat_comm = index.srs.get_ref().commit(&x_hat, None);
 
-    let (mut sponge, o) = proof.oracles::<
-        DefaultFqSponge<TweedledumParameters>,
-        DefaultFrSponge<Fq>,
-        >(index, x_hat_comm, &x_hat);
+    let (mut sponge, o) = proof
+        .oracles::<DefaultFqSponge<TweedledumParameters, MarlinSpongeConstants>, DefaultFrSponge<Fq, MarlinSpongeConstants>>(
+            index, x_hat_comm, &x_hat,
+        );
     let opening_prechallenges = proof.proof.prechallenges(&mut sponge);
 
     return Box::into_raw(Box::new(FqOracles { o, opening_prechallenges }));
@@ -1186,8 +1223,10 @@ pub extern "C" fn zexe_tweedle_fq_proof_create(
     let rng = &mut rand_core::OsRng;
 
     let map = <GAffine as CommitmentCurve>::Map::setup();
-    let proof = DlogProof::create::<DefaultFqSponge<TweedledumParameters>, DefaultFrSponge<Fq> >
-        (&map, &witness, &index, prev, rng).unwrap();
+    let proof = DlogProof::create::<DefaultFqSponge<TweedledumParameters, MarlinSpongeConstants>, DefaultFrSponge<Fq, MarlinSpongeConstants>>(
+        &map, &witness, &index, prev, rng,
+    )
+    .unwrap();
 
     return Box::into_raw(Box::new(proof));
 }
@@ -1202,8 +1241,7 @@ pub extern "C" fn zexe_tweedle_fq_proof_verify(
     let proof = unsafe { (*proof).clone() };
     let group_map = <GAffine as CommitmentCurve>::Map::setup();
 
-    DlogProof::verify::<DefaultFqSponge<TweedledumParameters>, DefaultFrSponge<Fq>>
-    (
+    DlogProof::verify::<DefaultFqSponge<TweedledumParameters, MarlinSpongeConstants>, DefaultFrSponge<Fq, MarlinSpongeConstants>>(
         &group_map,
         &[proof].to_vec(),
         &index,
@@ -1221,8 +1259,12 @@ pub extern "C" fn zexe_tweedle_fq_proof_batch_verify(
     let proofs = unsafe { &(*proofs) };
     let group_map = <GAffine as CommitmentCurve>::Map::setup();
 
-    DlogProof::<GAffine>::verify::<DefaultFqSponge<TweedledumParameters>, DefaultFrSponge<Fq> >(
-        &group_map, proofs, index, &mut rand_core::OsRng)
+    DlogProof::<GAffine>::verify::<DefaultFqSponge<TweedledumParameters, MarlinSpongeConstants>, DefaultFrSponge<Fq, MarlinSpongeConstants>>(
+        &group_map,
+        proofs,
+        index,
+        &mut rand_core::OsRng,
+    )
 }
 
 #[no_mangle]
