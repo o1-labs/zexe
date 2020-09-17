@@ -54,8 +54,15 @@ pub extern "C" fn zexe_bn382_fq_urs_create(depth: usize, public: usize, size: us
 }
 
 #[no_mangle]
-pub extern "C" fn zexe_bn382_fq_urs_write(urs : *mut SRS<GAffine>, path: *mut c_char) {
-    let path = (unsafe { CStr::from_ptr(path) }).to_string_lossy().into_owned();
+pub extern "C" fn zexe_bn382_fq_urs_delete(x: *mut SRS<GAffine>) {
+    let _box = unsafe { Box::from_raw(x) };
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_urs_write(urs: *mut SRS<GAffine>, path: *mut c_char) {
+    let path = (unsafe { CStr::from_ptr(path) })
+        .to_string_lossy()
+        .into_owned();
     let file = BufWriter::new(File::create(path).unwrap());
     let urs = unsafe { &*urs };
     let _ = urs.write(file);
@@ -847,6 +854,11 @@ pub extern "C" fn zexe_bn382_fq_triple_2(evals: *const [Fq; 3]) -> *const Fq {
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_bn382_fq_triple_delete(x: *mut [Fq; 3]) {
+    let _box = unsafe { Box::from_raw(x) };
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_bn382_fq_vector_triple_0(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
     let x = (unsafe { &(*evals) })[0].clone();
     return Box::into_raw(Box::new(x));
@@ -862,6 +874,11 @@ pub extern "C" fn zexe_bn382_fq_vector_triple_1(evals: *const [Vec<Fq>; 3]) -> *
 pub extern "C" fn zexe_bn382_fq_vector_triple_2(evals: *const [Vec<Fq>; 3]) -> *const Vec<Fq> {
     let x = (unsafe { &(*evals) })[2].clone();
     return Box::into_raw(Box::new(x));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_vector_triple_delete(x: *mut [Fq; 3]) {
+    let _box = unsafe { Box::from_raw(x) };
 }
 
 // G / Fp stubs
@@ -1008,6 +1025,11 @@ pub extern "C" fn zexe_bn382_g_affine_pair_make(x0 : *const GAffine, x1 : *const
 -> *const (GAffine, GAffine) {
     let res = ((unsafe { *x0 }), (unsafe { *x1 }));
     return Box::into_raw(Box::new(res));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_g_affine_pair_delete(x: *mut (GAffine, GAffine)) {
+    let _box = unsafe { Box::from_raw(x) };
 }
 
 #[no_mangle]
@@ -1599,6 +1621,11 @@ pub extern "C" fn zexe_bn382_fq_proof_evaluations_triple_2(e: *const [DlogProofE
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_bn382_fq_proof_evaluations_triple_delete(x: *mut [DlogProofEvaluations<Fq>; 3]) {
+    let _box = unsafe { Box::from_raw(x) };
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_bn382_fq_proof_evaluations_make(
     w: *const Vec<Fq>,
     za: *const Vec<Fq>,
@@ -1654,6 +1681,11 @@ pub extern "C" fn zexe_bn382_fq_proof_evaluations_make(
     };
 
     return Box::into_raw(Box::new(res));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_proof_evaluations_delete(x: *mut DlogProofEvaluations<Fq>) {
+    let _box = unsafe { Box::from_raw(x) };
 }
 
 // fq poly comm
