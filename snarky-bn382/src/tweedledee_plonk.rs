@@ -976,7 +976,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_zero(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Zero, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Zero, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -991,7 +991,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_generic(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Generic, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Generic, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1006,7 +1006,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_poseidon(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Poseidon, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Poseidon, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1021,7 +1021,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_add1(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Add1, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Add1, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1036,7 +1036,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_add2(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Add2, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Add2, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1051,7 +1051,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_vbmul1(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Vbmul1, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Vbmul1, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1066,7 +1066,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_vbmul2(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Vbmul2, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Vbmul2, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1081,7 +1081,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_vbmul3(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Vbmul3, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Vbmul3, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1096,7 +1096,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_endomul1(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul1, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul1, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1111,7 +1111,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_endomul2(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul2, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul2, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1126,7 +1126,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_endomul3(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul3, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul3, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
@@ -1141,7 +1141,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_endomul4(
     ocol: Col,
     c: *const Vec<Fp>,
 ) {
-    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul4, l_index, l_permutation, r_index, r_permutation, o_index, o_permutation, c);
+    zexe_tweedle_plonk_fp_gate_vector_add(v, Endomul4, row, lrow, lcol, rrow, rcol, orow, ocol, c);
 }
 
 #[no_mangle]
