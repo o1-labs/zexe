@@ -407,7 +407,7 @@ pub extern "C" fn zexe_bn382_batch_pairing_check(
     // Optimization: Parallelize
     // Optimization:
     //   Experiment with scalar multiplying the affine point by b^i before adding
-    //   into the accumulator.
+    // into the   accumulator.
     for ((p_i, (s_i, t_i)), u_i) in p.iter().zip(s.iter().zip(t)).zip(u) {
         acc_beta_h *= b;
         acc_beta_h.add_assign_mixed(p_i);
