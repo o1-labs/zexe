@@ -1,14 +1,19 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-# use this until cfg_flags support is upstreamed:
-git_repository(
+local_repository(
     name = "io_bazel_rules_rust",
-    remote = "https://github.com/mobileink/rules_rust.git",
-    # branch = "cfg_flags",
-    commit = "7fda95cff7ea44b97417e2abd344768fed6c0daa",
-    shallow_since = "1590675478 -0500",
+    path = "/Users/gar/bazel/rules_rust"
 )
+
+# use this until cfg_flags support is upstreamed:
+# git_repository(
+#     name = "io_bazel_rules_rust",
+#     remote = "https://github.com/mobileink/rules_rust.git",
+#     # branch = "cfg_flags",
+#     commit = "7fda95cff7ea44b97417e2abd344768fed6c0daa",
+#     shallow_since = "1590675478 -0500",
+# )
 
 # http_archive(
 #     name = "io_bazel_rules_rust",
@@ -47,3 +52,23 @@ bazel_version(name = "bazel_version")
 load("//cargo:crates.bzl", "raze_fetch_remote_crates")
 
 raze_fetch_remote_crates()
+
+################################################################
+#### OCAML BAZEL RULES ####
+git_repository(
+    name = "obazl_rules_ocaml",
+    remote = "https://github.com/obazl/rules_ocaml",
+    branch = "master",
+    # commit = "feef897197b36b14b65ffdf00b9badcbdb8f42f4",
+    # shallow_since = "1593623637 -0500"
+)
+
+load("@obazl_rules_ocaml//ocaml:deps.bzl",
+     "ocaml_configure_tooling",
+     # "ocaml_repositories",
+     # "ocaml_home_sdk",
+     "ocaml_register_toolchains")
+
+ocaml_configure_tooling()
+
+ocaml_register_toolchains(installation="host")
