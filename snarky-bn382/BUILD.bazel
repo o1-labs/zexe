@@ -1,0 +1,191 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+load(
+    "@obazl_rules_ocaml//ocaml:build.bzl",
+    "ocaml_archive",
+    "ocaml_interface",
+    "ocaml_module",
+    "ocaml_ns_module",
+    "ppx_archive",
+    "ppx_module",
+    "ppx_ns_module",
+)
+
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+INTF_OPTS = [
+    # "-verbose"
+]
+
+IMPL_OPTS = [
+    # "-verbose"
+]
+
+SNARKY_BN382_NS = "Snarky_bn382"
+
+SNARKY_BN382_PPX = "//src/ppx:"
+
+ocaml_archive(
+    name = "snarky_bn382",
+    opts = INTF_OPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        # do not sort (buildifier)
+        ":snarky_bn382_ns_module",
+        ":snarky_bn382.cm_",
+    ],
+    cc_deps = {
+        ":snarky_bn382_stubs_stubs": "default"
+    }
+)
+
+ocaml_ns_module(
+    name = "snarky_bn382_ns_module",
+    ns = SNARKY_BN382_NS,
+    submodules = [
+        # do not sort (buildifier)
+        "snarky_bn382.ml",
+    ],
+)
+
+ocaml_module(
+    name = "snarky_bn382.cm_",
+    impl = "snarky_bn382.ml",
+    # ns_module = ":snarky_bn382_ns_module",
+    opts = IMPL_OPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        # do not sort (buildifier)
+        "@opam//pkg:ctypes",
+        ":snarky_bn382_stubs",
+        "//snarky-bn382/bindings_gen:snarky_bn382_generated_stubs",
+        "//snarky-bn382/caml:snarky_bn382_bindings",
+    ],
+)
+
+## emitting data_only_dirs
+
+## genrule()
+
+## genrule()
+
+## library: snarky_bn382_stubs
+
+SNARKY_BN382_STUBS_NS = "Snarky_bn382_stubs"
+
+SNARKY_BN382_STUBS_PPX = "//src/ppx:"
+
+## (self_build_stubs_archive (snarky_bn382_stubs))
+## means we expect snarky_bn382_stubs.a
+## but we don't have snarky_bn382_stubs.c, only snarky_bn382.c
+
+## apparently, since lib snarky_bn382 depends on lib
+## snarky_bn382_stubs, and it provides a c_name (snarky_bn382.c) and c
+## flags, the latter will use this c file to produce its output. what
+## does c_names mean? we don't know, since the manual only notes that
+## it is "now deleted." evidently, refers to c files to be compiled by dune
+## and "packaged together with" the lib.
+ocaml_module(
+    name = "snarky_bn382_stubs",
+    # name = "snarky_bn382_stubs.cm_",
+    impl = "snarky_bn382_stubs.ml",
+    # ns_module = ":snarky_bn382_stubs_ns_module",
+    opts = IMPL_OPTS,
+    cc_deps = {
+        # do not sort (buildifier)
+        ":snarky_bn382_a": "default"
+    },
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "snarky_bn382_a",
+    srcs = [
+        "//snarky-bn382/bindings_gen:snarky_bn382_c",
+        ":snarky_bn382.h"
+    ],
+    copts = [
+        "-std=c11",
+        "-Isnarky-bn382",
+        ## overlook implicit decl error for
+        ## 'zexe_tweedle_plonk_fq_verifier_index_write'
+        "-Wno-implicit-function-declaration",
+    ],
+    include_prefix = "snarky_bn382",
+    deps = [
+        "@ocaml//csdk/ctypes"
+    ],
+    visibility = ["//visibility:private"],
+)
+
+# ocaml_ns_module(
+#     name = "snarky_bn382_stubs_ns_module",
+#     ns = SNARKY_BN382_STUBS_NS,
+#     submodules = [
+#         # do not sort (buildifier)
+#         "snarky_bn382_stubs.ml",
+#     ],
+# )
+
+# ocaml_archive(
+#     name = "snarky_bn382_stubs",
+#     opts = INTF_OPTS,
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         # do not sort (buildifier)
+#         ":snarky_bn382_stubs_ns_module",
+#         ":snarky_bn382_stubs.cm_",
+#     ],
+# )
+## library: snarky_bn382
+
+rust_library(
+    edition = "2018",
+    # output will be libsnarky_bn382_stubs_stubs.a
+    name = "snarky_bn382_stubs_stubs",
+    visibility = ["//visibility:public"],
+    crate_type = "staticlib",
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        ## Using @zexe prevents clash with @marlin packages.
+        ## Without this (and the corresponding local_repository rule in WORKSPACE)
+        ## we get duplicate copies of these packages. This is because we import @marlin,
+        ## which imports @zexe, so marlin's targets depend on @zexe// labels.
+        "@zexe//algebra",
+        "@zexe//bench-utils:bench_utils",
+        "@zexe//crypto-primitives:crypto_primitives",
+        "@zexe//dpc",
+        "@zexe//ff-fft:ff_fft",
+        "@zexe//gm17",
+        "@zexe//groth16",
+        "@zexe//groupmap",
+        "@zexe//r1cs-core:r1cs_core",
+        "@zexe//r1cs-std:r1cs_std",
+
+        "@marlin//oracle",
+        "@marlin//dlog_solver",
+        "@marlin//circuits/marlin:marlin_circuits",
+        "@marlin//circuits/plonk:plonk_circuits",
+
+        "@marlin//pairing/commitment:commitment_pairing",
+        "@marlin//pairing/marlin:marlin_protocol_pairing",
+
+        "@marlin//dlog/commitment:commitment_dlog",
+        "@marlin//dlog/marlin:marlin_protocol_dlog",
+        "@marlin//dlog/plonk:plonk_protocol_dlog",
+
+        "//cargo:libc",
+        "//cargo:rand",
+        "//cargo:rand_core",
+        "//cargo:num_bigint",
+        "//cargo:sprs",
+        "//cargo:rayon"
+    ],
+    crate_features = [
+        "bn_382",
+        "std",
+        "use_core",
+        "i128"
+    ]
+)
+

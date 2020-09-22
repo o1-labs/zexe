@@ -1,32 +1,44 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-package(default_visibility = [
-  # Public for visibility by "@raze__crate__version//" targets.
-  #
-  # Prefer access through "//cargo", which limits external
-  # visibility to explicit Cargo.toml dependencies.
-  "//visibility:public",
-])
 
-licenses([
-  "notice", # "MIT,Apache-2.0"
-])
-
+# buildifier: disable=load
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
-    "rust_library",
     "rust_binary",
+    "rust_library",
     "rust_test",
 )
 
-rust_binary(
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
+])
+
+# Generated targets
+# buildifier: disable=load-on-top
+load(
+    "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    "cargo_build_script",
+)
+
+# buildifier: leave-alone
+cargo_build_script(
     name = "crossbeam_utils_build_script",
     srcs = glob(["**/*.rs"]),
     crate_root = "build.rs",
     edition = "2015",
+    # buildifier: leave-alone
     deps = [
         "@raze__autocfg__1_0_0//:autocfg",
     ],
@@ -38,60 +50,47 @@ rust_binary(
       "lazy_static",
       "std",
     ],
-    data = glob(["*"]),
+    build_script_env = {
+    },
+    data = glob(["**"]),
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     version = "0.7.2",
     visibility = ["//visibility:private"],
-)
-
-genrule(
-    name = "crossbeam_utils_build_script_executor",
-    srcs = glob(["*", "**/*.rs"]),
-    outs = ["crossbeam_utils_out_dir_outputs.tar.gz"],
-    tools = [
-      ":crossbeam_utils_build_script",
-    ],
-    tags = ["no-sandbox"],
-    cmd = "mkdir -p $$(dirname $@)/crossbeam_utils_out_dir_outputs/;"
-        + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
-        # TODO(acmcarther): This needs to be revisited as part of the cross compilation story.
-        #                   See also: https://github.com/google/cargo-raze/pull/54
-        + " export TARGET='x86_64-unknown-linux-gnu';"
-        + " export RUST_BACKTRACE=1;"
-        + " export CARGO_FEATURE_DEFAULT=1;"
-        + " export CARGO_FEATURE_LAZY_STATIC=1;"
-        + " export CARGO_FEATURE_STD=1;"
-        + " export OUT_DIR=$$PWD/$$(dirname $@)/crossbeam_utils_out_dir_outputs;"
-        + " export BINARY_PATH=\"$$PWD/$(location :crossbeam_utils_build_script)\";"
-        + " export OUT_TAR=$$PWD/$@;"
-        + " cd $$(dirname $(location :Cargo.toml)) && $$BINARY_PATH && tar -czf $$OUT_TAR -C $$OUT_DIR .)"
 )
 
 # Unsupported target "atomic_cell" with type "bench" omitted
 # Unsupported target "atomic_cell" with type "test" omitted
 # Unsupported target "cache_padded" with type "test" omitted
 
+# buildifier: leave-alone
 rust_library(
     name = "crossbeam_utils",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
+        ":crossbeam_utils_build_script",
         "@raze__cfg_if__0_1_10//:cfg_if",
         "@raze__lazy_static__1_4_0//:lazy_static",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    out_dir_tar = ":crossbeam_utils_build_script_executor",
     version = "0.7.2",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "default",
         "lazy_static",
         "std",
     ],
 )
-
 # Unsupported target "parker" with type "test" omitted
 # Unsupported target "sharded_lock" with type "test" omitted
 # Unsupported target "thread" with type "test" omitted

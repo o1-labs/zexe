@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "restricted", # "Unlicense OR MIT"
 ])
 
 load(
@@ -20,15 +20,16 @@ load(
     "rust_library",
     "rust_binary",
     "rust_test",
+    "cargo_config"
 )
 
-rust_binary(
-    name = "num_bigint_build_script",
+# rust_binary(
+cargo_config(
+    name = "byteorder_build_script",
     srcs = glob(["**/*.rs"]),
     crate_root = "build.rs",
     edition = "2015",
     deps = [
-        "@raze__autocfg__1_0_0//:autocfg",
     ],
     rustc_flags = [
         "--cap-lints=allow",
@@ -38,19 +39,19 @@ rust_binary(
       "std",
     ],
     data = glob(["*"]),
-    version = "0.2.6",
+    version = "1.3.4",
     visibility = ["//visibility:private"],
 )
 
 genrule(
-    name = "num_bigint_build_script_executor",
+    name = "byteorder_build_script_executor",
     srcs = glob(["*", "**/*.rs"]),
-    outs = ["num_bigint_out_dir_outputs.tar.gz"],
+    outs = ["byteorder_out_dir_outputs.tar.gz"],
     tools = [
-      ":num_bigint_build_script",
+      ":byteorder_build_script",
     ],
     tags = ["no-sandbox"],
-    cmd = "mkdir -p $$(dirname $@)/num_bigint_out_dir_outputs/;"
+    cmd = "mkdir -p $$(dirname $@)/byteorder_out_dir_outputs/;"
         + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
         # TODO(acmcarther): This needs to be revisited as part of the cross compilation story.
         #                   See also: https://github.com/google/cargo-raze/pull/54
@@ -58,47 +59,30 @@ genrule(
         + " export RUST_BACKTRACE=1;"
         + " export CARGO_FEATURE_DEFAULT=1;"
         + " export CARGO_FEATURE_STD=1;"
-        + " export OUT_DIR=$$PWD/$$(dirname $@)/num_bigint_out_dir_outputs;"
-        + " export BINARY_PATH=\"$$PWD/$(location :num_bigint_build_script)\";"
+        + " export OUT_DIR=$$PWD/$$(dirname $@)/byteorder_out_dir_outputs;"
+        + " export BINARY_PATH=\"$$PWD/$(location :byteorder_build_script)\";"
         + " export OUT_TAR=$$PWD/$@;"
         + " cd $$(dirname $(location :Cargo.toml)) && $$BINARY_PATH && tar -czf $$OUT_TAR -C $$OUT_DIR .)"
 )
 
-# Unsupported target "bigint" with type "bench" omitted
-# Unsupported target "bigint" with type "test" omitted
-# Unsupported target "bigint_bitwise" with type "test" omitted
-# Unsupported target "bigint_scalar" with type "test" omitted
-# Unsupported target "biguint" with type "test" omitted
-# Unsupported target "biguint_scalar" with type "test" omitted
-# Unsupported target "factorial" with type "bench" omitted
-# Unsupported target "gcd" with type "bench" omitted
-# Unsupported target "modpow" with type "test" omitted
+# Unsupported target "bench" with type "bench" omitted
 
 rust_library(
-    name = "num_bigint",
+    name = "byteorder",
     crate_root = "src/lib.rs",
     crate_type = "lib",
     edition = "2015",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "@raze__num_integer__0_1_42//:num_integer",
-        "@raze__num_traits__0_2_11//:num_traits",
     ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    out_dir_tar = ":num_bigint_build_script_executor",
-    version = "0.2.6",
+    out_dir_tar = ":byteorder_build_script_executor",
+    version = "1.3.4",
     crate_features = [
         "default",
         "std",
     ],
 )
 
-# Unsupported target "quickcheck" with type "test" omitted
-# Unsupported target "rand" with type "test" omitted
-# Unsupported target "roots" with type "bench" omitted
-# Unsupported target "roots" with type "test" omitted
-# Unsupported target "serde" with type "test" omitted
-# Unsupported target "shootout-pidigits" with type "bench" omitted
-# Unsupported target "torture" with type "test" omitted

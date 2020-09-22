@@ -6,7 +6,7 @@ rust_library(
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     deps = [
-        "//algebra",
+        "//algebra-core:algebra_core",
         "//cargo:rand", #default-features = false
         "//cargo:rayon", # optional
     ],

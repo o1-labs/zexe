@@ -1,10 +1,27 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-local_repository(
-    name = "io_bazel_rules_rust",
-    path = "/Users/gar/bazel/rules_rust"
+# local_repository(
+#     name = "io_bazel_rules_rust",
+#     path = "/Users/gar/bazel/rules_rust"
+# )
+
+http_archive(
+    name = "bazel_skylib",
+    urls = [
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+    ],
+    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
 )
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()
+
+################################################################
+################  RUST  ################
+
+# Minimum rust version: 1.46.0 (?)
 
 # use this until cfg_flags support is upstreamed:
 # git_repository(
@@ -15,39 +32,68 @@ local_repository(
 #     shallow_since = "1590675478 -0500",
 # )
 
-# http_archive(
-#     name = "io_bazel_rules_rust",
-#     sha256 = "b6da34e057a31b8a85e343c732de4af92a762f804fc36b0baa6c001423a70ebc",
-#     strip_prefix = "rules_rust-55f77017a7f5b08e525ebeab6e11d8896a4499d2",
-#     urls = [
-#         # Master branch as of 2019-10-07
-#         "https://github.com/bazelbuild/rules_rust/archive/55f77017a7f5b08e525ebeab6e11d8896a4499d2.tar.gz",
-#     ],
-# )
-
 http_archive(
-    name = "bazel_skylib",
-    sha256 = "9a737999532daca978a158f94e77e9af6a6a169709c0cee274f0a4c3359519bd",
-    strip_prefix = "bazel-skylib-1.0.0",
-    url = "https://github.com/bazelbuild/bazel-skylib/archive/1.0.0.tar.gz",
+    name = "io_bazel_rules_rust",
+    # sha256 = "b6da34e057a31b8a85e343c732de4af92a762f804fc36b0baa6c001423a70ebc",
+    strip_prefix = "rules_rust-50f45841dc68f7355113ada4d61fecabb528b38f",
+    urls = [
+        "https://github.com/bazelbuild/rules_rust/archive/50f45841dc68f7355113ada4d61fecabb528b38f.tar.gz",
+        # Master branch as of 2019-10-07
+        # strip_prefix = "rules_rust-55f77017a7f5b08e525ebeab6e11d8896a4499d2",
+        # "https://github.com/bazelbuild/rules_rust/archive/55f77017a7f5b08e525ebeab6e11d8896a4499d2.tar.gz",
+    ],
 )
-
-load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
-bazel_version(name = "bazel_version")
 
 load("@io_bazel_rules_rust//rust:repositories.bzl",
      "rust_repositories", "rust_repository_set")
-# rust_repositories(version = "1.43.1")
-# to set default edition to 2018:
-rust_repository_set(name = "coda_rust_toolchain",
-                    exec_triple = "x86_64-apple-darwin",
-                    # "x86_64-unknown-linux-gnu"
-                    edition = "2018",
-                    version = "1.43.1")
-
+#rust_repositories()
+rust_repositories(version = "1.43.1", edition="2018")
 
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 bazel_version(name = "bazel_version")
+
+
+####
+
+# load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+# bazel_version(name = "bazel_version")
+
+# load("@io_bazel_rules_rust//rust:repositories.bzl",
+#      "rust_repositories", "rust_repository_set")
+# rust_repositories(version = "1.43.1")
+# to set default edition to 2018:
+
+# rust_repository_set(name = "coda_rust_toolchain",
+#                     exec_triple = "x86_64-apple-darwin",
+#                     # "x86_64-unknown-linux-gnu"
+#                     edition = "2018",
+#                     version = "1.43.1")
+
+
+# load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+# bazel_version(name = "bazel_version")
+
+# This local repo allows us to import marlin, which imports zexe. Some
+# of marlin's targets depend on @zexe// packages; this repo allows
+# Bazel to resolve them here. In addition, zexe targets the depend on
+# both zexe and marlin packages must use @zexe// labels for the
+# former; otherwise we get duplicate copies of the packages.
+# See //snarky-bn382:libsnarky_bn382_stubs_stubs.
+local_repository(
+    name = "zexe",
+    path = "."
+)
+
+http_archive(
+    name = "marlin",
+    urls = [
+        "https://github.com/o1-labs/marlin/archive/master.zip"
+        # "https://github.com/o1-labs/marlin/archive/43a351fe47f2d481d2254ce88b4c338127bcc6f3.zip",
+        # "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+        # "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+    ],
+    # sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+)
 
 load("//cargo:crates.bzl", "raze_fetch_remote_crates")
 

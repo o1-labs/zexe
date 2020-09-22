@@ -1,32 +1,44 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-package(default_visibility = [
-  # Public for visibility by "@raze__crate__version//" targets.
-  #
-  # Prefer access through "//cargo", which limits external
-  # visibility to explicit Cargo.toml dependencies.
-  "//visibility:public",
-])
 
-licenses([
-  "notice", # "MIT,Apache-2.0"
-])
-
+# buildifier: disable=load
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
-    "rust_library",
     "rust_binary",
+    "rust_library",
     "rust_test",
 )
 
-rust_binary(
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # MIT from expression "MIT OR Apache-2.0"
+])
+
+# Generated targets
+# buildifier: disable=load-on-top
+load(
+    "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    "cargo_build_script",
+)
+
+# buildifier: leave-alone
+cargo_build_script(
     name = "ndarray_build_script",
     srcs = glob(["**/*.rs"]),
     crate_root = "build.rs",
     edition = "2018",
+    # buildifier: leave-alone
     deps = [
     ],
     rustc_flags = [
@@ -34,29 +46,15 @@ rust_binary(
     ],
     crate_features = [
     ],
-    data = glob(["*"]),
+    build_script_env = {
+    },
+    data = glob(["**"]),
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     version = "0.13.1",
     visibility = ["//visibility:private"],
-)
-
-genrule(
-    name = "ndarray_build_script_executor",
-    srcs = glob(["*", "**/*.rs"]),
-    outs = ["ndarray_out_dir_outputs.tar.gz"],
-    tools = [
-      ":ndarray_build_script",
-    ],
-    tags = ["no-sandbox"],
-    cmd = "mkdir -p $$(dirname $@)/ndarray_out_dir_outputs/;"
-        + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
-        # TODO(acmcarther): This needs to be revisited as part of the cross compilation story.
-        #                   See also: https://github.com/google/cargo-raze/pull/54
-        + " export TARGET='x86_64-unknown-linux-gnu';"
-        + " export RUST_BACKTRACE=1;"
-        + " export OUT_DIR=$$PWD/$$(dirname $@)/ndarray_out_dir_outputs;"
-        + " export BINARY_PATH=\"$$PWD/$(location :ndarray_build_script)\";"
-        + " export OUT_TAR=$$PWD/$@;"
-        + " cd $$(dirname $(location :Cargo.toml)) && $$BINARY_PATH && tar -czf $$OUT_TAR -C $$OUT_DIR .)"
 )
 
 # Unsupported target "array" with type "test" omitted
@@ -86,28 +84,32 @@ genrule(
 # Unsupported target "ixdyn" with type "test" omitted
 # Unsupported target "life" with type "example" omitted
 
+# buildifier: leave-alone
 rust_library(
     name = "ndarray",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2018",
-    srcs = glob(["**/*.rs"]),
     deps = [
+        ":ndarray_build_script",
         "@raze__matrixmultiply__0_2_3//:matrixmultiply",
         "@raze__num_complex__0_2_4//:num_complex",
-        "@raze__num_integer__0_1_42//:num_integer",
+        "@raze__num_integer__0_1_43//:num_integer",
         "@raze__num_traits__0_2_11//:num_traits",
         "@raze__rawpointer__0_2_1//:rawpointer",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    out_dir_tar = ":ndarray_build_script_executor",
     version = "0.13.1",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
     ],
 )
-
 # Unsupported target "numeric" with type "bench" omitted
 # Unsupported target "numeric" with type "test" omitted
 # Unsupported target "oper" with type "test" omitted

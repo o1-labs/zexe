@@ -1,0 +1,65 @@
+load(
+    "@obazl_rules_ocaml//ocaml:build.bzl",
+    "ocaml_module",
+    "ppx_executable"
+)
+
+IMPL_OPTS = [
+    # "-verbose"
+]
+
+ocaml_module(
+    name = "snarky_bn382_bindings",
+    impl = "snarky_bn382_bindings.ml",
+    opts = IMPL_OPTS,
+    ppx_bin = ":ppx",
+    ppx_bin_opts = [
+        # do not sort (buildifier)
+        "-cookie",
+        "library-name=\"bitstring_lib\"",
+        "-corrected-suffix",
+        ".ppx-corrected",
+    ],
+    deps = [
+        # do not sort (buildifier)
+        "@opam//pkg:core_kernel",
+        "@opam//pkg:ctypes",
+        "@opam//pkg:ctypes.foreign",
+        ":cstubs_applicative.cm_"
+    ],
+    visibility = ["//visibility:public"],
+)
+
+ocaml_module(
+    name = "cstubs_applicative.cm_",
+    impl = "cstubs_applicative.ml",
+    opts = IMPL_OPTS,
+    deps = [
+        # do not sort (buildifier)
+        "@opam//pkg:base",
+        "@opam//pkg:ctypes",
+        "@opam//pkg:ctypes.stubs",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+ppx_executable(
+    name = "ppx",
+    srcs = [
+        # do not sort (buildifier)
+        "@obazl//ppxlib:driver_standalone_shim",
+    ],
+    build_deps = [
+        # do not sort (buildifier)
+        "@opam//pkg:ppx_let",
+    ],
+    opts = select({
+        "//bzl/config:enable_verbose": ["-verbose"],
+        "//conditions:default": ["-thread"],
+    }) + [
+        "-linkall",
+        "-predicates",
+        "ppx_driver",
+    ],
+    visibility = ["//visibility:private"],
+)

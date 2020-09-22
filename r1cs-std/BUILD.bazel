@@ -5,11 +5,14 @@ rust_library(
     name = "r1cs_std",
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = [
+        "//cargo:derivative",
+    ],
     deps = [
         "//algebra",
         "//r1cs-core:r1cs_core",
-        "//cargo:derivative",
-        "//cargo:radix_trie"
     ],
-    crate_features = ["std", "use_core"]
+    crate_features = [
+        "bls12_377", "edwards_bls12", "edwards_sw6"
+    ]
 )

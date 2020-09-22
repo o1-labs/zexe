@@ -3,3 +3,10 @@
  (libraries ctypes ctypes.foreign cstubs_applicative)
  (public_name snarky_bn382.bindings)
  (preprocess (pps ppx_let)))
+
+;; from coda/src/lib/cstubs_applicative:
+(library
+ (name cstubs_applicative)
+ (public_name cstubs_applicative)
+ (libraries base ctypes ctypes.stubs)
+ (preprocess (pps ppx_version)))

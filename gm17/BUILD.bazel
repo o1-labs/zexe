@@ -6,13 +6,18 @@ rust_library(
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     deps = [
-        "//algebra",
+        "//algebra-core:algebra_core",
         "//bench-utils:bench_utils",
         "//ff-fft:ff_fft",  # default-features = false
         "//r1cs-core:r1cs_core", # default-features = false
+
         "//cargo:rand", #default-features = false
         "//cargo:rayon", # optional
         "//cargo:smallvec",
     ],
-    crate_features = ["parallel", "std", "algebra-core/std", "proc-macro"]
+    crate_features = [
+        "parallel",
+        "std",
+        # "algebra-core/std",
+    ]
 )

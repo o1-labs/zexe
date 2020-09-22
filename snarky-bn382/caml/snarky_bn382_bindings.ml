@@ -785,7 +785,6 @@ struct
 
   include T
   module Vector = Vector (F) (P) (T)
->>>>>>> master
 
   module Evals = struct
     include (

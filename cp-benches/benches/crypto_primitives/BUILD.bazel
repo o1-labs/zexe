@@ -1,0 +1,22 @@
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+)
+
+rust_library(
+    name = "algebra",
+    visibility = ["//visibility:public"],
+    srcs = glob(["**/*.rs"]),
+    proc_macro_deps = [
+        "//cargo:derivative",
+    ],
+    deps = [
+        "//algebra-core:algebra_core",
+    ],
+    # crate_features = [
+    #     "parallel",
+    #     # "rayon",
+    #     "full"
+    # ],
+)
+

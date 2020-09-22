@@ -7,8 +7,10 @@ rust_library(
     # crate_type = "lib",
     srcs = glob(["src/**/*.rs"]),
     deps = [
-        "//algebra",
+        "//algebra-core:algebra_core",
         "//cargo:smallvec",
     ],
-    # crate_features = ["std", "algebra-core/std", "proc-macro"]
+    crate_features = ["std",
+                      "algebra-core/std",
+                      ]
 )

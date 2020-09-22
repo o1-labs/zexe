@@ -1,0 +1,28 @@
+## BUILD.bazel for /Users/gar/coda/gitfork/src/lib/zexe/snarky-bn382/test/dune
+load(
+    "@obazl_rules_ocaml//ocaml:build.bzl",
+    "ocaml_executable",
+    "ocaml_module",
+)
+
+INTF_OPTS = ["-verbose"]
+
+IMPL_OPTS = ["-verbose"]
+
+ocaml_executable(
+    name = "test",
+    deps = [
+        # do not sort (buildifier)
+        ":test.cm_",
+    ],
+)
+
+ocaml_module(
+    name = "test.cm_",
+    impl = "test.ml",
+    deps = [
+        "//snarky-bn382:snarky_bn382"
+    ],
+    visibility = ["//visibility:public"],
+)
+

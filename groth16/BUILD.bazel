@@ -6,14 +6,19 @@ rust_library(
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     deps = [
-        "//algebra",
+        "//algebra-core:algebra_core",
+        "//bench-utils:bench_utils",
         "//ff-fft:ff_fft",
         "//r1cs-core:r1cs_core",
-        "//bench-utils:bench_utils",
 
         "//cargo:rand",
         "//cargo:rayon",
-        "//cargo:smallvec"
+        # "//cargo:smallvec"
     ],
-    # crate_features = ["std", "algebra-core/std", "proc-macro"]
+    crate_features = [
+        "derive",
+        "parallel",
+        "std",
+        "algebra-core/std",
+    ]
 )

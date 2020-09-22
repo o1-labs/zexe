@@ -1,22 +1,18 @@
 """
+@generated
 cargo-raze crate workspace functions
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")
 
-def _new_http_archive(name, **kwargs):
-    if not native.existing_rule(name):
-        http_archive(name=name, **kwargs)
-
-def _new_git_repository(name, **kwargs):
-    if not native.existing_rule(name):
-        new_git_repository(name=name, **kwargs)
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "new_git_repository")  # buildifier: disable=load
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
 def raze_fetch_remote_crates():
-
-    _new_http_archive(
+    """This function defines a collection of repos and should be called in a WORKSPACE file"""
+    maybe(
+        http_archive,
         name = "raze__alga__0_9_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/alga/alga-0.9.3.crate",
         type = "tar.gz",
@@ -25,23 +21,35 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:alga-0.9.3.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__algebra__0_1_0",
         remote = "https://github.com/o1-labs/zexe/",
-        commit = "c2ae6020f1bbac6bb0df1261a0532dab842e6f66",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
         build_file = Label("//cargo/remote:algebra-0.1.0.BUILD.bazel"),
         init_submodules = True,
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
+        name = "raze__algebra_benches__0_1_0",
+        remote = "https://github.com/o1-labs/zexe/",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
+        build_file = Label("//cargo/remote:algebra-benches-0.1.0.BUILD.bazel"),
+        init_submodules = True,
+    )
+
+    maybe(
+        new_git_repository,
         name = "raze__algebra_core__0_1_0",
         remote = "https://github.com/o1-labs/zexe/",
-        commit = "c2ae6020f1bbac6bb0df1261a0532dab842e6f66",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
         build_file = Label("//cargo/remote:algebra-core-0.1.0.BUILD.bazel"),
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__approx__0_3_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/approx/approx-0.3.2.crate",
         type = "tar.gz",
@@ -50,7 +58,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:approx-0.3.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
+        name = "raze__array_init__0_1_1",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/array-init/array-init-0.1.1.crate",
+        type = "tar.gz",
+        strip_prefix = "array-init-0.1.1",
+        build_file = Label("//cargo/remote:array-init-0.1.1.BUILD.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "raze__atty__0_2_14",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/atty/atty-0.2.14.crate",
         type = "tar.gz",
@@ -59,7 +77,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:atty-0.2.14.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
+        name = "raze__autocfg__0_1_7",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/autocfg/autocfg-0.1.7.crate",
+        type = "tar.gz",
+        strip_prefix = "autocfg-0.1.7",
+        build_file = Label("//cargo/remote:autocfg-0.1.7.BUILD.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "raze__autocfg__1_0_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/autocfg/autocfg-1.0.0.crate",
         type = "tar.gz",
@@ -68,7 +96,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:autocfg-1.0.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__bitflags__1_2_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/bitflags/bitflags-1.2.1.crate",
         type = "tar.gz",
@@ -77,7 +106,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:bitflags-1.2.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__blake2__0_7_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/blake2/blake2-0.7.1.crate",
         type = "tar.gz",
@@ -86,7 +116,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:blake2-0.7.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__blake2__0_8_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/blake2/blake2-0.8.1.crate",
         type = "tar.gz",
@@ -95,7 +126,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:blake2-0.8.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__bstr__0_2_13",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/bstr/bstr-0.2.13.crate",
         type = "tar.gz",
@@ -104,7 +136,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:bstr-0.2.13.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__bumpalo__3_3_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/bumpalo/bumpalo-3.3.0.crate",
         type = "tar.gz",
@@ -113,7 +146,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:bumpalo-3.3.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__byte_tools__0_2_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/byte-tools/byte-tools-0.2.0.crate",
         type = "tar.gz",
@@ -122,7 +156,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:byte-tools-0.2.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__byte_tools__0_3_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/byte-tools/byte-tools-0.3.1.crate",
         type = "tar.gz",
@@ -131,7 +166,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:byte-tools-0.3.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__byteorder__1_3_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/byteorder/byteorder-1.3.4.crate",
         type = "tar.gz",
@@ -140,7 +176,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:byteorder-1.3.4.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__cast__0_2_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/cast/cast-0.2.3.crate",
         type = "tar.gz",
@@ -149,7 +186,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:cast-0.2.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__cfg_if__0_1_10",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/cfg-if/cfg-if-0.1.10.crate",
         type = "tar.gz",
@@ -158,7 +196,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:cfg-if-0.1.10.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__circuits_dlog__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -166,7 +205,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__circuits_pairing__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -174,7 +214,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__clap__2_33_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/clap/clap-2.33.1.crate",
         type = "tar.gz",
@@ -183,7 +224,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:clap-2.33.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__colored__1_9_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/colored/colored-1.9.3.crate",
         type = "tar.gz",
@@ -192,7 +234,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:colored-1.9.3.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__commitment_dlog__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -200,7 +243,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__commitment_pairing__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -208,7 +252,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__constant_time_eq__0_1_5",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/constant_time_eq/constant_time_eq-0.1.5.crate",
         type = "tar.gz",
@@ -217,7 +262,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:constant_time_eq-0.1.5.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__criterion__0_3_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/criterion/criterion-0.3.2.crate",
         type = "tar.gz",
@@ -226,7 +272,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:criterion-0.3.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__criterion_plot__0_4_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/criterion-plot/criterion-plot-0.4.2.crate",
         type = "tar.gz",
@@ -235,7 +282,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:criterion-plot-0.4.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
+        name = "raze__crossbeam_channel__0_4_4",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crossbeam-channel/crossbeam-channel-0.4.4.crate",
+        type = "tar.gz",
+        strip_prefix = "crossbeam-channel-0.4.4",
+        build_file = Label("//cargo/remote:crossbeam-channel-0.4.4.BUILD.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "raze__crossbeam_deque__0_7_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crossbeam-deque/crossbeam-deque-0.7.3.crate",
         type = "tar.gz",
@@ -244,7 +301,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:crossbeam-deque-0.7.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__crossbeam_epoch__0_8_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crossbeam-epoch/crossbeam-epoch-0.8.2.crate",
         type = "tar.gz",
@@ -253,16 +311,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:crossbeam-epoch-0.8.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
-        name = "raze__crossbeam_queue__0_2_1",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crossbeam-queue/crossbeam-queue-0.2.1.crate",
-        type = "tar.gz",
-        sha256 = "c695eeca1e7173472a32221542ae469b3e9aac3a4fc81f7696bcad82029493db",
-        strip_prefix = "crossbeam-queue-0.2.1",
-        build_file = Label("//cargo/remote:crossbeam-queue-0.2.1.BUILD.bazel"),
-    )
-
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__crossbeam_utils__0_7_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crossbeam-utils/crossbeam-utils-0.7.2.crate",
         type = "tar.gz",
@@ -271,7 +321,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:crossbeam-utils-0.7.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__crypto_mac__0_5_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crypto-mac/crypto-mac-0.5.2.crate",
         type = "tar.gz",
@@ -280,7 +331,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:crypto-mac-0.5.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__crypto_mac__0_7_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/crypto-mac/crypto-mac-0.7.0.crate",
         type = "tar.gz",
@@ -289,7 +341,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:crypto-mac-0.7.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__csv__1_1_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/csv/csv-1.1.3.crate",
         type = "tar.gz",
@@ -298,7 +351,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:csv-1.1.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__csv_core__0_1_10",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/csv-core/csv-core-0.1.10.crate",
         type = "tar.gz",
@@ -307,7 +361,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:csv-core-0.1.10.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__derivative__2_1_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/derivative/derivative-2.1.1.crate",
         type = "tar.gz",
@@ -316,7 +371,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:derivative-2.1.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__digest__0_7_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/digest/digest-0.7.6.crate",
         type = "tar.gz",
@@ -325,7 +381,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:digest-0.7.6.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__digest__0_8_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/digest/digest-0.8.1.crate",
         type = "tar.gz",
@@ -334,7 +391,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:digest-0.8.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__either__1_5_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/either/either-1.5.3.crate",
         type = "tar.gz",
@@ -343,7 +401,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:either-1.5.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__endian_type__0_1_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/endian-type/endian-type-0.1.2.crate",
         type = "tar.gz",
@@ -351,7 +410,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:endian-type-0.1.2.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__evaluation_domains__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -359,23 +419,26 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__ff_fft__0_1_0",
         remote = "https://github.com/o1-labs/zexe/",
-        commit = "c2ae6020f1bbac6bb0df1261a0532dab842e6f66",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
         build_file = Label("//cargo/remote:ff-fft-0.1.0.BUILD.bazel"),
         init_submodules = True,
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__field_assembly__0_1_0",
         remote = "https://github.com/o1-labs/zexe/",
-        commit = "c2ae6020f1bbac6bb0df1261a0532dab842e6f66",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
         build_file = Label("//cargo/remote:field-assembly-0.1.0.BUILD.bazel"),
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__generic_array__0_12_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/generic-array/generic-array-0.12.3.crate",
         type = "tar.gz",
@@ -384,7 +447,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:generic-array-0.12.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__generic_array__0_9_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/generic-array/generic-array-0.9.0.crate",
         type = "tar.gz",
@@ -393,7 +457,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:generic-array-0.9.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__getrandom__0_1_14",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/getrandom/getrandom-0.1.14.crate",
         type = "tar.gz",
@@ -402,15 +467,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:getrandom-0.1.14.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__groupmap__0_1_0",
         remote = "https://github.com/o1-labs/zexe/",
-        commit = "c2ae6020f1bbac6bb0df1261a0532dab842e6f66",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
         build_file = Label("//cargo/remote:groupmap-0.1.0.BUILD.bazel"),
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__hermit_abi__0_1_13",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/hermit-abi/hermit-abi-0.1.13.crate",
         type = "tar.gz",
@@ -419,7 +486,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:hermit-abi-0.1.13.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__itertools__0_8_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/itertools/itertools-0.8.2.crate",
         type = "tar.gz",
@@ -428,7 +496,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:itertools-0.8.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__itertools__0_9_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/itertools/itertools-0.9.0.crate",
         type = "tar.gz",
@@ -437,7 +506,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:itertools-0.9.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__itoa__0_4_5",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/itoa/itoa-0.4.5.crate",
         type = "tar.gz",
@@ -446,7 +516,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:itoa-0.4.5.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__js_sys__0_3_39",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/js-sys/js-sys-0.3.39.crate",
         type = "tar.gz",
@@ -455,7 +526,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:js-sys-0.3.39.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__lazy_static__1_4_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/lazy_static/lazy_static-1.4.0.crate",
         type = "tar.gz",
@@ -464,7 +536,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:lazy_static-1.4.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__libc__0_2_70",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/libc/libc-0.2.70.crate",
         type = "tar.gz",
@@ -473,7 +546,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:libc-0.2.70.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__libm__0_2_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/libm/libm-0.2.1.crate",
         type = "tar.gz",
@@ -482,7 +556,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:libm-0.2.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__log__0_4_8",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/log/log-0.4.8.crate",
         type = "tar.gz",
@@ -491,7 +566,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:log-0.4.8.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__matrixmultiply__0_2_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/matrixmultiply/matrixmultiply-0.2.3.crate",
         type = "tar.gz",
@@ -500,7 +576,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:matrixmultiply-0.2.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__maybe_uninit__2_0_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/maybe-uninit/maybe-uninit-2.0.0.crate",
         type = "tar.gz",
@@ -509,7 +586,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:maybe-uninit-2.0.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__memchr__2_3_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/memchr/memchr-2.3.3.crate",
         type = "tar.gz",
@@ -518,7 +596,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:memchr-2.3.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__memoffset__0_5_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/memoffset/memoffset-0.5.4.crate",
         type = "tar.gz",
@@ -527,15 +606,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:memoffset-0.5.4.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__mince__0_1_0",
         remote = "https://github.com/o1-labs/zexe/",
-        commit = "c2ae6020f1bbac6bb0df1261a0532dab842e6f66",
+        commit = "610535945f76ceaf5343454d0cc9baeb7295b19a",
         build_file = Label("//cargo/remote:mince-0.1.0.BUILD.bazel"),
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__ndarray__0_13_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/ndarray/ndarray-0.13.1.crate",
         type = "tar.gz",
@@ -544,25 +625,26 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:ndarray-0.13.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__nibble_vec__0_0_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/nibble_vec/nibble_vec-0.0.4.crate",
-        sha256 = "c8d77f3db4bce033f4d04db08079b2ef1c3d02b44e86f25d08886fafa7756ffa",
         type = "tar.gz",
         strip_prefix = "nibble_vec-0.0.4",
         build_file = Label("//cargo/remote:nibble_vec-0.0.4.BUILD.bazel"),
     )
 
-    _new_http_archive(
-        name = "raze__num_bigint__0_2_6",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-bigint/num-bigint-0.2.6.crate",
+    maybe(
+        http_archive,
+        name = "raze__num_bigint__0_2_3",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-bigint/num-bigint-0.2.3.crate",
         type = "tar.gz",
-        sha256 = "090c7f9998ee0ff65aa5b723e4009f7b217707f1fb5ea551329cc4d6231fb304",
-        strip_prefix = "num-bigint-0.2.6",
-        build_file = Label("//cargo/remote:num-bigint-0.2.6.BUILD.bazel"),
+        strip_prefix = "num-bigint-0.2.3",
+        build_file = Label("//cargo/remote:num-bigint-0.2.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__num_complex__0_2_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-complex/num-complex-0.2.4.crate",
         type = "tar.gz",
@@ -571,16 +653,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:num-complex-0.2.4.BUILD.bazel"),
     )
 
-    _new_http_archive(
-        name = "raze__num_integer__0_1_42",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-integer/num-integer-0.1.42.crate",
+    maybe(
+        http_archive,
+        name = "raze__num_integer__0_1_43",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-integer/num-integer-0.1.43.crate",
         type = "tar.gz",
-        sha256 = "3f6ea62e9d81a77cd3ee9a2a5b9b609447857f3d358704331e4ef39eb247fcba",
-        strip_prefix = "num-integer-0.1.42",
-        build_file = Label("//cargo/remote:num-integer-0.1.42.BUILD.bazel"),
+        strip_prefix = "num-integer-0.1.43",
+        build_file = Label("//cargo/remote:num-integer-0.1.43.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__num_traits__0_1_43",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-traits/num-traits-0.1.43.crate",
         type = "tar.gz",
@@ -589,7 +672,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:num-traits-0.1.43.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__num_traits__0_2_11",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num-traits/num-traits-0.2.11.crate",
         type = "tar.gz",
@@ -598,7 +682,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:num-traits-0.2.11.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__num_cpus__1_13_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/num_cpus/num_cpus-1.13.0.crate",
         type = "tar.gz",
@@ -607,7 +692,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:num_cpus-1.13.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__oorandom__11_1_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/oorandom/oorandom-11.1.1.crate",
         type = "tar.gz",
@@ -616,7 +702,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:oorandom-11.1.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__opaque_debug__0_2_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/opaque-debug/opaque-debug-0.2.3.crate",
         type = "tar.gz",
@@ -625,7 +712,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:opaque-debug-0.2.3.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__oracle__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -633,7 +721,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__paste__0_1_12",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/paste/paste-0.1.12.crate",
         type = "tar.gz",
@@ -642,7 +731,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:paste-0.1.12.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__paste_impl__0_1_12",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/paste-impl/paste-impl-0.1.12.crate",
         type = "tar.gz",
@@ -651,7 +741,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:paste-impl-0.1.12.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__plotters__0_2_14",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/plotters/plotters-0.2.14.crate",
         type = "tar.gz",
@@ -660,7 +751,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:plotters-0.2.14.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__ppv_lite86__0_2_8",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/ppv-lite86/ppv-lite86-0.2.8.crate",
         type = "tar.gz",
@@ -669,7 +761,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:ppv-lite86-0.2.8.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__proc_macro_hack__0_5_15",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/proc-macro-hack/proc-macro-hack-0.5.15.crate",
         type = "tar.gz",
@@ -678,7 +771,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:proc-macro-hack-0.5.15.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__proc_macro2__0_4_30",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/proc-macro2/proc-macro2-0.4.30.crate",
         type = "tar.gz",
@@ -687,7 +781,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:proc-macro2-0.4.30.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__proc_macro2__1_0_17",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/proc-macro2/proc-macro2-1.0.17.crate",
         type = "tar.gz",
@@ -696,7 +791,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:proc-macro2-1.0.17.BUILD.bazel"),
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__protocol_dlog__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -704,7 +800,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_git_repository(
+    maybe(
+        new_git_repository,
         name = "raze__protocol_pairing__0_1_0",
         remote = "https://github.com/o1-labs/marlin/",
         commit = "7b222a75e918b5113a81ac2dd3dddf657e93ae9e",
@@ -712,7 +809,8 @@ def raze_fetch_remote_crates():
         init_submodules = True,
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__quote__0_6_13",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/quote/quote-0.6.13.crate",
         type = "tar.gz",
@@ -721,7 +819,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:quote-0.6.13.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__quote__1_0_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/quote/quote-1.0.6.crate",
         type = "tar.gz",
@@ -730,7 +829,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:quote-1.0.6.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__radix_trie__0_1_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/radix_trie/radix_trie-0.1.6.crate",
         type = "tar.gz",
@@ -738,7 +838,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:radix_trie-0.1.6.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rand__0_7_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rand/rand-0.7.3.crate",
         type = "tar.gz",
@@ -747,7 +848,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rand-0.7.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rand_chacha__0_2_2",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rand_chacha/rand_chacha-0.2.2.crate",
         type = "tar.gz",
@@ -756,7 +858,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rand_chacha-0.2.2.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rand_core__0_5_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rand_core/rand_core-0.5.1.crate",
         type = "tar.gz",
@@ -765,7 +868,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rand_core-0.5.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rand_hc__0_2_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rand_hc/rand_hc-0.2.0.crate",
         type = "tar.gz",
@@ -774,7 +878,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rand_hc-0.2.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rand_xorshift__0_2_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rand_xorshift/rand_xorshift-0.2.0.crate",
         type = "tar.gz",
@@ -783,7 +888,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rand_xorshift-0.2.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rawpointer__0_2_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rawpointer/rawpointer-0.2.1.crate",
         type = "tar.gz",
@@ -792,25 +898,26 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rawpointer-0.2.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
-        name = "raze__rayon__1_3_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rayon/rayon-1.3.0.crate",
+    maybe(
+        http_archive,
+        name = "raze__rayon__1_3_1",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rayon/rayon-1.3.1.crate",
         type = "tar.gz",
-        sha256 = "db6ce3297f9c85e16621bb8cca38a06779ffc31bb8184e1be4bed2be4678a098",
-        strip_prefix = "rayon-1.3.0",
-        build_file = Label("//cargo/remote:rayon-1.3.0.BUILD.bazel"),
+        strip_prefix = "rayon-1.3.1",
+        build_file = Label("//cargo/remote:rayon-1.3.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
-        name = "raze__rayon_core__1_7_0",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rayon-core/rayon-core-1.7.0.crate",
+    maybe(
+        http_archive,
+        name = "raze__rayon_core__1_8_1",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rayon-core/rayon-core-1.8.1.crate",
         type = "tar.gz",
-        sha256 = "08a89b46efaf957e52b18062fb2f4660f8b8a4dde1807ca002690868ef2c85a9",
-        strip_prefix = "rayon-core-1.7.0",
-        build_file = Label("//cargo/remote:rayon-core-1.7.0.BUILD.bazel"),
+        strip_prefix = "rayon-core-1.8.1",
+        build_file = Label("//cargo/remote:rayon-core-1.8.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__regex__1_3_7",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/regex/regex-1.3.7.crate",
         type = "tar.gz",
@@ -819,7 +926,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:regex-1.3.7.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__regex_automata__0_1_9",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/regex-automata/regex-automata-0.1.9.crate",
         type = "tar.gz",
@@ -828,7 +936,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:regex-automata-0.1.9.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__regex_syntax__0_6_17",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/regex-syntax/regex-syntax-0.6.17.crate",
         type = "tar.gz",
@@ -837,7 +946,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:regex-syntax-0.6.17.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__rustc_version__0_2_3",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/rustc_version/rustc_version-0.2.3.crate",
         type = "tar.gz",
@@ -846,7 +956,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:rustc_version-0.2.3.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__ryu__1_0_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/ryu/ryu-1.0.4.crate",
         type = "tar.gz",
@@ -855,7 +966,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:ryu-1.0.4.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__same_file__1_0_6",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/same-file/same-file-1.0.6.crate",
         type = "tar.gz",
@@ -864,7 +976,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:same-file-1.0.6.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__scopeguard__1_1_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/scopeguard/scopeguard-1.1.0.crate",
         type = "tar.gz",
@@ -873,7 +986,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:scopeguard-1.1.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__semver__0_9_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/semver/semver-0.9.0.crate",
         type = "tar.gz",
@@ -882,7 +996,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:semver-0.9.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__semver_parser__0_7_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/semver-parser/semver-parser-0.7.0.crate",
         type = "tar.gz",
@@ -891,7 +1006,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:semver-parser-0.7.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__serde__1_0_110",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/serde/serde-1.0.110.crate",
         type = "tar.gz",
@@ -900,7 +1016,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:serde-1.0.110.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__serde_derive__1_0_110",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/serde_derive/serde_derive-1.0.110.crate",
         type = "tar.gz",
@@ -909,7 +1026,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:serde_derive-1.0.110.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__serde_json__1_0_53",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/serde_json/serde_json-1.0.53.crate",
         type = "tar.gz",
@@ -918,7 +1036,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:serde_json-1.0.53.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__smallvec__1_4_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/smallvec/smallvec-1.4.0.crate",
         type = "tar.gz",
@@ -927,7 +1046,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:smallvec-1.4.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__sprs__0_7_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/sprs/sprs-0.7.1.crate",
         type = "tar.gz",
@@ -936,7 +1056,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:sprs-0.7.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__subtle__1_0_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/subtle/subtle-1.0.0.crate",
         type = "tar.gz",
@@ -945,7 +1066,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:subtle-1.0.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__syn__0_15_44",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/syn/syn-0.15.44.crate",
         type = "tar.gz",
@@ -954,16 +1076,17 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:syn-0.15.44.BUILD.bazel"),
     )
 
-    _new_http_archive(
-        name = "raze__syn__1_0_23",
-        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/syn/syn-1.0.23.crate",
+    maybe(
+        http_archive,
+        name = "raze__syn__1_0_17",
+        url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/syn/syn-1.0.17.crate",
         type = "tar.gz",
-        sha256 = "95b5f192649e48a5302a13f2feb224df883b98933222369e4b3b0fe2a5447269",
-        strip_prefix = "syn-1.0.23",
-        build_file = Label("//cargo/remote:syn-1.0.23.BUILD.bazel"),
+        strip_prefix = "syn-1.0.17",
+        build_file = Label("//cargo/remote:syn-1.0.17.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__textwrap__0_11_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/textwrap/textwrap-0.11.0.crate",
         type = "tar.gz",
@@ -972,7 +1095,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:textwrap-0.11.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__tinytemplate__1_0_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/tinytemplate/tinytemplate-1.0.4.crate",
         type = "tar.gz",
@@ -981,7 +1105,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:tinytemplate-1.0.4.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__typenum__1_12_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/typenum/typenum-1.12.0.crate",
         type = "tar.gz",
@@ -990,7 +1115,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:typenum-1.12.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__unicode_width__0_1_7",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/unicode-width/unicode-width-0.1.7.crate",
         type = "tar.gz",
@@ -999,7 +1125,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:unicode-width-0.1.7.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__unicode_xid__0_1_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/unicode-xid/unicode-xid-0.1.0.crate",
         type = "tar.gz",
@@ -1008,7 +1135,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:unicode-xid-0.1.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__unicode_xid__0_2_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/unicode-xid/unicode-xid-0.2.0.crate",
         type = "tar.gz",
@@ -1017,7 +1145,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:unicode-xid-0.2.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__unroll__0_1_4",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/unroll/unroll-0.1.4.crate",
         type = "tar.gz",
@@ -1026,7 +1155,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:unroll-0.1.4.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__walkdir__2_3_1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/walkdir/walkdir-2.3.1.crate",
         type = "tar.gz",
@@ -1035,7 +1165,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:walkdir-2.3.1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__wasi__0_9_0_wasi_snapshot_preview1",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wasi/wasi-0.9.0+wasi-snapshot-preview1.crate",
         type = "tar.gz",
@@ -1044,7 +1175,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:wasi-0.9.0+wasi-snapshot-preview1.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__wasm_bindgen__0_2_62",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wasm-bindgen/wasm-bindgen-0.2.62.crate",
         type = "tar.gz",
@@ -1053,7 +1185,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:wasm-bindgen-0.2.62.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__wasm_bindgen_backend__0_2_62",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wasm-bindgen-backend/wasm-bindgen-backend-0.2.62.crate",
         type = "tar.gz",
@@ -1062,7 +1195,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:wasm-bindgen-backend-0.2.62.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__wasm_bindgen_macro__0_2_62",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wasm-bindgen-macro/wasm-bindgen-macro-0.2.62.crate",
         type = "tar.gz",
@@ -1071,7 +1205,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:wasm-bindgen-macro-0.2.62.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__wasm_bindgen_macro_support__0_2_62",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wasm-bindgen-macro-support/wasm-bindgen-macro-support-0.2.62.crate",
         type = "tar.gz",
@@ -1080,7 +1215,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:wasm-bindgen-macro-support-0.2.62.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__wasm_bindgen_shared__0_2_62",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/wasm-bindgen-shared/wasm-bindgen-shared-0.2.62.crate",
         type = "tar.gz",
@@ -1089,7 +1225,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:wasm-bindgen-shared-0.2.62.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__web_sys__0_3_39",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/web-sys/web-sys-0.3.39.crate",
         type = "tar.gz",
@@ -1098,7 +1235,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:web-sys-0.3.39.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__winapi__0_3_8",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi/winapi-0.3.8.crate",
         type = "tar.gz",
@@ -1107,7 +1245,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:winapi-0.3.8.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__winapi_i686_pc_windows_gnu__0_4_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi-i686-pc-windows-gnu/winapi-i686-pc-windows-gnu-0.4.0.crate",
         type = "tar.gz",
@@ -1116,7 +1255,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:winapi-i686-pc-windows-gnu-0.4.0.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__winapi_util__0_1_5",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi-util/winapi-util-0.1.5.crate",
         type = "tar.gz",
@@ -1125,7 +1265,8 @@ def raze_fetch_remote_crates():
         build_file = Label("//cargo/remote:winapi-util-0.1.5.BUILD.bazel"),
     )
 
-    _new_http_archive(
+    maybe(
+        http_archive,
         name = "raze__winapi_x86_64_pc_windows_gnu__0_4_0",
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/winapi-x86_64-pc-windows-gnu/winapi-x86_64-pc-windows-gnu-0.4.0.crate",
         type = "tar.gz",
@@ -1133,4 +1274,3 @@ def raze_fetch_remote_crates():
         strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
         build_file = Label("//cargo/remote:winapi-x86_64-pc-windows-gnu-0.4.0.BUILD.bazel"),
     )
-

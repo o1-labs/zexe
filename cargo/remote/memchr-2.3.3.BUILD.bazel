@@ -1,33 +1,44 @@
 """
+@generated
 cargo-raze crate build file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
-package(default_visibility = [
-  # Public for visibility by "@raze__crate__version//" targets.
-  #
-  # Prefer access through "//cargo", which limits external
-  # visibility to explicit Cargo.toml dependencies.
-  "//visibility:public",
-])
 
-licenses([
-  "notice", # "MIT"
-  "unencumbered", # "Unlicense"
-])
-
+# buildifier: disable=load
 load(
     "@io_bazel_rules_rust//rust:rust.bzl",
-    "rust_library",
     "rust_binary",
+    "rust_library",
     "rust_test",
 )
 
-rust_binary(
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "unencumbered",  # Unlicense from expression "Unlicense OR MIT"
+])
+
+# Generated targets
+# buildifier: disable=load-on-top
+load(
+    "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    "cargo_build_script",
+)
+
+# buildifier: leave-alone
+cargo_build_script(
     name = "memchr_build_script",
     srcs = glob(["**/*.rs"]),
     crate_root = "build.rs",
     edition = "2015",
+    # buildifier: leave-alone
     deps = [
     ],
     rustc_flags = [
@@ -37,50 +48,38 @@ rust_binary(
       "std",
       "use_std",
     ],
-    data = glob(["*"]),
+    build_script_env = {
+    },
+    data = glob(["**"]),
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     version = "2.3.3",
     visibility = ["//visibility:private"],
 )
 
-genrule(
-    name = "memchr_build_script_executor",
-    srcs = glob(["*", "**/*.rs"]),
-    outs = ["memchr_out_dir_outputs.tar.gz"],
-    tools = [
-      ":memchr_build_script",
-    ],
-    tags = ["no-sandbox"],
-    cmd = "mkdir -p $$(dirname $@)/memchr_out_dir_outputs/;"
-        + " (export CARGO_MANIFEST_DIR=\"$$PWD/$$(dirname $(location :Cargo.toml))\";"
-        # TODO(acmcarther): This needs to be revisited as part of the cross compilation story.
-        #                   See also: https://github.com/google/cargo-raze/pull/54
-        + " export TARGET='x86_64-unknown-linux-gnu';"
-        + " export RUST_BACKTRACE=1;"
-        + " export CARGO_FEATURE_STD=1;"
-        + " export CARGO_FEATURE_USE_STD=1;"
-        + " export OUT_DIR=$$PWD/$$(dirname $@)/memchr_out_dir_outputs;"
-        + " export BINARY_PATH=\"$$PWD/$(location :memchr_build_script)\";"
-        + " export OUT_TAR=$$PWD/$@;"
-        + " cd $$(dirname $(location :Cargo.toml)) && $$BINARY_PATH && tar -czf $$OUT_TAR -C $$OUT_DIR .)"
-)
 
-
+# buildifier: leave-alone
 rust_library(
     name = "memchr",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
+        ":memchr_build_script",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
-    out_dir_tar = ":memchr_build_script_executor",
     version = "2.3.3",
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
     crate_features = [
         "std",
         "use_std",
     ],
 )
-

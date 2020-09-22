@@ -5,22 +5,30 @@ rust_library(
     name = "crypto_primitives",
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = ["//cargo:derivative"],
     deps = [
-        "//algebra",
-        "//r1cs-core:r1cs_core",
-        "//r1cs-std:r1cs_std",
+        "//algebra-core:algebra_core",
+        "//bench-utils:bench_utils",
+        "//ff-fft:ff_fft",
         "//gm17",
         "//groth16",
-        "//bench-utils:bench_utils",
+        "//r1cs-core:r1cs_core",
+        "//r1cs-std:r1cs_std",
 
         "//cargo:digest",
         "//cargo:blake2",
         "//cargo:rand",
-        "//cargo:derivative",
+        # "//cargo:rand_xorshift",
         "//cargo:rayon",
+        # "//cargo:typenum",
     ],
     crate_features = [
-        "r1cs", "r1cs-core", "r1cs-std",
-        "gm17"
+        "std",
+        "r1cs",
+        "r1cs-core",
+        "r1cs-std",
+        "gm17",
+        "parallel",
+        "use_core"
     ]
 )

@@ -5,7 +5,9 @@ rust_library(
     visibility = ["//visibility:public"],
     name = "dpc",
     srcs = glob(["src/**/*.rs"]),
-    # + glob(["field-assembly/**/*.rs"]),
+    proc_macro_deps = [
+        "//cargo:derivative",
+    ],
     deps = [
         "//algebra",
         "//r1cs-core:r1cs_core",
@@ -14,13 +16,12 @@ rust_library(
         "//gm17",
         "//bench-utils:bench_utils",
 
-        "//cargo:digest",
-        "//cargo:blake2",
         "//cargo:rand",
-        "//cargo:derivative",
-        "//cargo:rayon"
-        # [dev-dependencies]
-        # "//cargo:rand_xorshift"
     ],
-    crate_features = [ "bench-utils/print-trace" ]
+    crate_features = [
+        "bls12_377",
+        "edwards_bls12",
+        "edwards_sw6",
+        "sw6"
+    ]
 )
