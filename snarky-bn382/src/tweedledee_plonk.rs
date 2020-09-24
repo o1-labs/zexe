@@ -28,7 +28,49 @@ use plonk_protocol_dlog::index::{
 };
 use plonk_protocol_dlog::prover::ProverProof as DlogProof;
 
+use std::{
+    ffi::CStr,
+    fs::File,
+    io::{BufReader, BufWriter},
+    os::raw::c_char,
+};
+
 // Fp index stubs
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_index_read<'a>(
+    srs: *const SRS<GAffine>,
+    path: *const c_char,
+) -> *const DlogIndex<'a, GAffine> {
+    let srs = unsafe { &*srs };
+
+    let path = (unsafe { CStr::from_ptr(path) })
+        .to_string_lossy()
+        .into_owned();
+    let mut r = BufReader::new(File::open(path).unwrap());
+
+    let t = read_plonk_index(
+        oracle::tweedle::fp::params(),
+        oracle::tweedle::fq::params(),
+        srs,
+        &mut r);
+    Box::into_raw(Box::new(t.unwrap()))
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_index_write<'a>(
+    index: *const DlogIndex<GAffine>,
+    path: *const c_char,
+) {
+    let index = unsafe { &*index };
+
+    let path = (unsafe { CStr::from_ptr(path) })
+        .to_string_lossy()
+        .into_owned();
+    let mut w = BufWriter::new(File::create(path).unwrap());
+
+    write_plonk_index(index, &mut w).unwrap()
+}
+
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_index_domain_d1_size<'a>(
     i: *const DlogIndex<'a, GAffine>,
@@ -110,24 +152,51 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_public_inputs(
     index.cs.public
 }
 
-/*
+// Fp verifier index stubs
 #[no_mangle]
-pub extern "C" fn zexe_tweedle_plonk_fp_index_write<'a>(
-    index: *const DlogIndex<'a, GAffine>,
+pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_shifts(log2_size : usize) -> PointerPair<Fp, Fp> {
+    let (a, b) = ConstraintSystem::sample_shifts(&Domain::new(1 << log2_size).unwrap());
+    PointerPair {
+        a: Box::into_raw(Box::new(a)),
+        b: Box::into_raw(Box::new(b)),
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_read<'a>(
+    srs: *const SRS<GAffine>,
+    path: *const c_char,
+) -> *const DlogVerifierIndex<'a, GAffine> {
+    let srs = unsafe { &*srs };
+
+    let path = (unsafe { CStr::from_ptr(path) })
+        .to_string_lossy()
+        .into_owned();
+    let mut r = BufReader::new(File::open(path).unwrap());
+
+    let t = read_plonk_verifier_index(
+        oracle::tweedle::fp::params(),
+        oracle::tweedle::fq::params(),
+        srs,
+        &mut r);
+    Box::into_raw(Box::new(t.unwrap()))
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_write<'a>(
+    index: *const DlogVerifierIndex<GAffine>,
     path: *const c_char,
 ) {
-    // TODO
+    let index = unsafe { &*index };
+
+    let path = (unsafe { CStr::from_ptr(path) })
+        .to_string_lossy()
+        .into_owned();
+    let mut w = BufWriter::new(File::create(path).unwrap());
+
+    write_plonk_verifier_index(index, &mut w).unwrap()
 }
 
-#[no_mangle]
-pub extern "C" fn zexe_tweedle_plonk_fp_index_read<'a>(
-    path: *const c_char,
-) -> *const DlogIndex<'a, GAffine> {
-    // TODO
-}
-*/
-
-// Fp verifier index stubs
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_create(
     index: *const DlogIndex<GAffine>,
@@ -368,6 +437,16 @@ pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_o(
     Box::into_raw(Box::new((unsafe { &(*index).o }).clone()))
 }
 
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_domain_log2(x: *const DlogVerifierIndex<GAffine>) -> u32 {
+    (unsafe { &(*x) }).domain.log_size_of_group
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_domain_group_gen(x: *const DlogVerifierIndex<GAffine>) -> *const Fp {
+    Box::into_raw(Box::new((unsafe { &(*x) }).domain.group_gen))
+}
+
 // Fp proof
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_proof_create(
@@ -421,34 +500,46 @@ pub extern "C" fn zexe_tweedle_plonk_fp_proof_create(
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_proof_verify(
+    // A prefix of the sequence of lagrange commitments for the domain for this proof system
+    lgr_comm: *const Vec<PolyComm<GAffine>>,
     index: *const DlogVerifierIndex<GAffine>,
     proof: *const DlogProof<GAffine>,
 ) -> bool {
     let index = unsafe { &(*index) };
-    let proof = unsafe { (*proof).clone() };
+    let lgr_comm = unsafe { &(*lgr_comm) };
+    let proof = unsafe { &(*proof) };
     let group_map = <GAffine as CommitmentCurve>::Map::setup();
 
     DlogProof::verify::<
         DefaultFqSponge<TweedledeeParameters, PlonkSpongeConstants>,
         DefaultFrSponge<Fp, PlonkSpongeConstants>,
-    >(&group_map, &[proof].to_vec(), &index)
+    >(&group_map, &[(index, lgr_comm, proof)].to_vec())
     .is_ok()
 }
 
 // TODO: Batch verify across different indexes
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_proof_batch_verify(
-    index: *const DlogVerifierIndex<GAffine>,
+    // A prefix of the sequence of lagrange commitments for the domain for this proof system
+    lgr_comms: *const Vec<*const Vec<PolyComm<GAffine>>>,
+    indexes: *const Vec<*const DlogVerifierIndex<GAffine>>,
     proofs: *const Vec<DlogProof<GAffine>>,
 ) -> bool {
-    let index = unsafe { &(*index) };
+    let indexes = unsafe { &(*indexes) };
+    let lgr_comms = unsafe { &(*lgr_comms) };
     let proofs = unsafe { &(*proofs) };
     let group_map = <GAffine as CommitmentCurve>::Map::setup();
+
+    let ts : Vec<_> = indexes.iter().zip(lgr_comms.iter()).zip(proofs.iter()).map(|((i, l), p)| {
+        let i = unsafe { &(**i) };
+        let l = unsafe { &(**l) };
+        (i, l, p)
+    }).collect();
 
     DlogProof::<GAffine>::verify::<
         DefaultFqSponge<TweedledeeParameters, PlonkSpongeConstants>,
         DefaultFrSponge<Fp, PlonkSpongeConstants>,
-    >(&group_map, proofs, index)
+    >(&group_map, &ts)
     .is_ok()
 }
 
@@ -805,14 +896,16 @@ pub struct FpOracles {
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_oracles_create(
+    lgr_comm: *const Vec<PolyComm<GAffine>>,
     index: *const DlogVerifierIndex<GAffine>,
     proof: *const DlogProof<GAffine>,
 ) -> *const FpOracles {
     let index = unsafe { &(*index) };
+    let lgr_comm = unsafe { &(*lgr_comm) };
     let proof = unsafe { &(*proof) };
 
     let p_comm = PolyComm::<GAffine>::multi_scalar_mul(
-        &index.srs.get_ref().lgr_comm.iter().map(|l| l).collect(),
+        &lgr_comm.iter().take(proof.public.len()).map(|l| l).collect(),
         &proof.public.iter().map(|s| -*s).collect(),
     );
     let (mut sponge, digest_before_evaluations, o, _, p_eval, _, _) =
@@ -879,17 +972,17 @@ pub extern "C" fn zexe_tweedle_plonk_fp_oracles_gamma(oracles: *const FpOracles)
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_oracles_zeta(oracles: *const FpOracles) -> *const Fp {
-    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.zeta.clone()));
+    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.zeta_chal.0.clone()));
 }
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_oracles_v(oracles: *const FpOracles) -> *const Fp {
-    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.v.clone()));
+    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.v_chal.0.clone()));
 }
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_oracles_u(oracles: *const FpOracles) -> *const Fp {
-    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.u.clone()));
+    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.u_chal.0.clone()));
 }
 
 #[no_mangle]

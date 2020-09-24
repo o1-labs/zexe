@@ -756,6 +756,12 @@ pub extern "C" fn zexe_tweedle_fp_of_int(i: u64) -> *mut Fp {
     return Box::into_raw(Box::new(ret));
 }
 
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fp_domain_generator(log2_size: usize) -> *mut Fp {
+    let ret = Domain::new(1 << log2_size).unwrap().group_gen;
+    return Box::into_raw(Box::new(ret));
+}
+
 // TODO: Leaky
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_fp_to_string(x: *const Fp) -> *const u8 {
@@ -1966,4 +1972,37 @@ pub extern "C" fn zexe_tweedle_fp_poly_comm_make(
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_fp_poly_comm_delete(c: *mut PolyComm<GAffine>) {
     let _box = unsafe { Box::from_raw(c) };
+}
+
+// Fp poly comm vector stubs
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fp_poly_comm_vector_create() -> *mut Vec<PolyComm<GAffine>> {
+    return Box::into_raw(Box::new(Vec::new()));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fp_poly_comm_vector_length(v: *const Vec<PolyComm<GAffine>>) -> i32 {
+    let v_ = unsafe { &(*v) };
+    return v_.len() as i32;
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fp_poly_comm_vector_emplace_back(v: *mut Vec<PolyComm<GAffine>>, x: *const PolyComm<GAffine>) {
+    let v_ = unsafe { &mut (*v) };
+    let x_ = unsafe { &(*x) };
+    v_.push(x_.clone());
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fp_poly_comm_vector_get(v: *mut Vec<PolyComm<GAffine>>, i: u32) -> *mut PolyComm<GAffine> {
+    let v_ = unsafe { &mut (*v) };
+    return Box::into_raw(Box::new((*v_)[i as usize].clone()));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fp_poly_comm_vector_delete(v: *mut Vec<PolyComm<GAffine>>) {
+    // Deallocation happens automatically when a box variable goes out of
+    // scope.
+    let _box = unsafe { Box::from_raw(v) };
 }

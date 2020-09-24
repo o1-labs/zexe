@@ -35,6 +35,12 @@ module type Prefix_type_with_finalizer = sig
   include Type_with_finalizer
 end
 
+module Shifts = struct
+  type 'a t = {r: 'a; o: 'a}
+
+  let map {r; o} ~f = {r= f r; o= f o}
+end
+
 module Pair
     (F : Cstubs_applicative.Foreign_applicative)
     (P : Prefix)
@@ -162,6 +168,12 @@ struct
     foreign (prefix "find_wnaf") (size_t @-> typ @-> returning (ptr void))
 end
 
+module type Void_pointer_type = sig
+  include Type
+
+  val eq : (t, unit ptr) Type_equal.t
+end
+
 module Vector
     (F : Cstubs_applicative.Foreign_applicative)
     (P : Prefix)
@@ -181,8 +193,10 @@ struct
         type t = unit ptr
 
         let typ = ptr void
+
+        let eq = Type_equal.T
       end :
-      Type )
+      Void_pointer_type )
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
@@ -294,6 +308,25 @@ struct
     map3 mats (fun m -> map4 polys (fun p -> m_poly_comm m p))
 end
 
+module Pointer_vector_intf (F : Cstubs_applicative.Foreign_applicative) =
+struct
+  module type S = functor (T : Void_pointer_type) -> sig
+    type elt = T.t
+
+    include Type
+
+    val delete : t -> unit
+
+    val create : (unit -> t F.return) F.result
+
+    val length : (t -> int F.return) F.result
+
+    val emplace_back : (t -> elt -> unit F.return) F.result
+
+    val get : (t -> int -> elt F.return) F.result
+  end
+end
+
 module PlonkVerifierIndex
     (F : Cstubs_applicative.Foreign_applicative)
     (P : Prefix)
@@ -306,16 +339,19 @@ module PlonkVerifierIndex
                  and type 'a return := 'a F.return)
     (ScalarField : Type_with_finalizer
                    with type 'a result := 'a F.result
-                    and type 'a return := 'a F.return) =
+                    and type 'a return := 'a F.return)
+    (Pointer_vector : Pointer_vector_intf(F).S) =
 struct
-  include (
-    struct
-        type t = unit ptr
+  module T : Void_pointer_type = struct
+    type t = unit ptr
 
-        let typ = ptr void
-      end :
-      Type )
+    let typ = ptr void
 
+    let eq = Type_equal.T
+  end
+
+  include T
+  module Vector = Pointer_vector (T)
   open F
   open F.Let_syntax
 
@@ -331,6 +367,38 @@ struct
   (* Stub out delete to make sure we don't attempt to double-free. *)
   let delete : t -> unit = ignore
 
+  let shifts =
+    let module T = struct
+      type pair
+
+      type t = pair Ctypes_static.structure
+
+      let typ : t Ctypes.typ = Ctypes.structure "pointer_pair"
+
+      let a = Ctypes.field typ "a" ScalarField.typ
+
+      let b = Ctypes.field typ "b" ScalarField.typ
+
+      let () = seal typ
+    end in
+    let%map f = foreign (prefix "shifts") (size_t @-> returning T.typ)
+    and add_finalizer = ScalarField.add_finalizer in
+    fun ~log2_size ->
+      let r = f (Unsigned.Size_t.of_int log2_size) in
+      let a = add_finalizer (map_return r ~f:(Fn.flip getf T.a)) in
+      F.bind_return a ~f:(fun a ->
+          F.map_return
+            (map_return r ~f:(Fn.flip getf T.b))
+            ~f:(fun b -> {Shifts.r= a; o= b}) )
+
+  let read =
+    let%map read =
+      foreign (prefix "read") (Urs.typ @-> string @-> returning typ)
+    and add_finalizer = add_finalizer in
+    fun urs path -> add_finalizer (read urs path)
+
+  let write = foreign (prefix "write") (typ @-> string @-> returning void)
+
   let create =
     let%map create = foreign (prefix "create") (Index.typ @-> returning typ)
     and add_finalizer = add_finalizer in
@@ -340,6 +408,16 @@ struct
     let%map urs = foreign (prefix "urs") (typ @-> returning Urs.typ)
     and add_finalizer = Urs.add_finalizer in
     fun t -> add_finalizer (urs t)
+
+  let domain_log2 =
+    let%map f = foreign (prefix "domain_log2") (typ @-> returning uint32_t) in
+    fun t -> f t
+
+  let domain_group_gen =
+    let%map f =
+      foreign (prefix "domain_group_gen") (typ @-> returning ScalarField.typ)
+    and add_finalizer = ScalarField.add_finalizer in
+    fun t -> add_finalizer (f t)
 
   let make =
     let%map make =
@@ -575,6 +653,14 @@ struct
 
   let domain_d8_size =
     foreign (prefix "domain_d8_size") (typ @-> returning size_t)
+
+  let read =
+    let%map read =
+      foreign (prefix "read") (URS.typ @-> string @-> returning typ)
+    and add_finalizer = add_finalizer in
+    fun urs path -> add_finalizer (read urs path)
+
+  let write = foreign (prefix "write") (typ @-> string @-> returning void)
 
   let create =
     let%map create =
@@ -1014,27 +1100,42 @@ module Dlog_poly_comm
           Type_with_finalizer
           with type 'a result := 'a F.result
            and type 'a return := 'a F.return
-    end) =
+    end)
+    (Pointer_vector : Pointer_vector_intf(F).S) =
 struct
-  include (
-    struct
-        type t = unit ptr
-
-        let typ = ptr void
-      end :
-      Type )
-
-  let prefix = P.prefix
-
   open F
   open F.Let_syntax
 
-  let delete = foreign (prefix "delete") (typ @-> returning void)
+  module T = struct
+    include (
+      struct
+          type t = unit ptr
 
-  let add_finalizer =
-    F.map delete ~f:(fun delete x ->
-        Caml.Gc.finalise (bind_return ~f:delete) x ;
-        x )
+          let typ = ptr void
+        end :
+        Type )
+
+    let prefix = P.prefix
+
+    let delete = foreign (prefix "delete") (typ @-> returning void)
+
+    let add_finalizer =
+      F.map delete ~f:(fun delete x ->
+          Caml.Gc.finalise (bind_return ~f:delete) x ;
+          x )
+  end
+
+  include T
+
+  module Vector = struct
+    module V = Vector (F) (P) (T)
+
+    type t = V.t
+
+    include (V : module type of V with type t := t)
+
+    module Vector = Pointer_vector (V)
+  end
 
   (* Stub out delete to make sure we don't attempt to double-free. *)
   let delete : t -> unit = ignore
@@ -1380,17 +1481,28 @@ module Dlog_plonk_proof
     (ScalarField : Type_with_finalizer
                    with type 'a result := 'a F.result
                     and type 'a return := 'a F.return)
-    (Index : Type)
-    (VerifierIndex : Type)
+    (Index : Type) (VerifierIndex : sig
+        include Type
+
+        module Vector : Type
+    end)
     (ScalarFieldVector : Type_with_finalizer
                          with type 'a result := 'a F.result
                           and type 'a return := 'a F.return)
     (OpeningProof : Type_with_finalizer
                     with type 'a result := 'a F.result
-                     and type 'a return := 'a F.return)
-    (PolyComm : Type_with_finalizer
-                with type 'a result := 'a F.result
-                 and type 'a return := 'a F.return) =
+                     and type 'a return := 'a F.return) (PolyComm : sig
+        include
+          Type_with_finalizer
+          with type 'a result := 'a F.result
+           and type 'a return := 'a F.return
+
+        module Vector : sig
+          include Type
+
+          module Vector : Type
+        end
+    end) =
 struct
   open F
   open F.Let_syntax
@@ -1511,11 +1623,13 @@ struct
         (create index primary_input auxiliary_input prev_challenges prev_sgs)
 
   let verify =
-    foreign (prefix "verify") (VerifierIndex.typ @-> typ @-> returning bool)
+    foreign (prefix "verify")
+      (PolyComm.Vector.typ @-> VerifierIndex.typ @-> typ @-> returning bool)
 
   let batch_verify =
     foreign (prefix "batch_verify")
-      (VerifierIndex.typ @-> Vector.typ @-> returning bool)
+      ( PolyComm.Vector.Vector.typ @-> VerifierIndex.Vector.typ @-> Vector.typ
+      @-> returning bool )
 
   let f name f_typ add_finalizer =
     let%map f = foreign (prefix name) (typ @-> returning f_typ)
@@ -1712,7 +1826,8 @@ module Dlog_plonk_oracles
            and type 'a return := 'a F.return
     end)
     (VerifierIndex : Type)
-    (Proof : Type) =
+    (Proof : Type)
+    (PolyCommVector : Type) =
 struct
   open F
   open F.Let_syntax
@@ -1742,9 +1857,10 @@ struct
   let create =
     let%map create =
       foreign (prefix "create")
-        (VerifierIndex.typ @-> Proof.typ @-> returning typ)
+        ( PolyCommVector.typ @-> VerifierIndex.typ @-> Proof.typ
+        @-> returning typ )
     and add_finalizer = add_finalizer in
-    fun index proof -> add_finalizer (create index proof)
+    fun lgr_comm index proof -> add_finalizer (create lgr_comm index proof)
 
   let element name =
     let%map element = foreign (prefix name) (typ @-> returning Field.typ)
@@ -1885,6 +2001,11 @@ struct
     let%map of_int = foreign (prefix "of_int") (uint64_t @-> returning typ)
     and add_finalizer = add_finalizer in
     fun i -> add_finalizer (of_int i)
+
+  let domain_generator =
+    let%map f = foreign (prefix "domain_generator") (size_t @-> returning typ)
+    and add_finalizer = add_finalizer in
+    fun i -> add_finalizer (f i)
 
   let to_string = foreign (prefix "to_string") (typ @-> returning string)
 
@@ -2111,6 +2232,8 @@ end
 module Full (F : Cstubs_applicative.Foreign_applicative) = struct
   let zexe = with_prefix "zexe"
 
+  module Shifts = Shifts
+
   module Bigint256 =
     Bigint
       (F)
@@ -2138,6 +2261,48 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
 
         let add_finalizer = F.return Fn.id
       end)
+
+  module Pointer_vector =
+    Vector
+      (F)
+      (struct
+        let prefix = with_prefix "zexe_pointer"
+      end)
+      (struct
+        type t = unit ptr
+
+        let typ = ptr void
+
+        let add_finalizer = F.return Fn.id
+      end)
+
+  module Make_pointer_vector : Pointer_vector_intf(F).S =
+  functor
+    (T : Void_pointer_type)
+    ->
+    struct
+      open Pointer_vector
+
+      type elt = T.t
+
+      type nonrec t = t
+
+      let typ = typ
+
+      let delete = delete
+
+      let create : (unit -> t F.return) F.result = create
+
+      let length : (t -> int F.return) F.result = length
+
+      let emplace_back : (t -> elt -> unit F.return) F.result =
+        let T = T.eq in
+        emplace_back
+
+      let get : (t -> int -> elt F.return) F.result =
+        let T = T.eq in
+        get
+    end
 
   module Proof_system_common (Field : sig
     include
@@ -2198,6 +2363,7 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
           let prefix = with_prefix (prefix "poly_comm")
         end)
         (Curve.Affine)
+        (Make_pointer_vector)
 
     module Field_urs = struct
       let prefix = with_prefix (prefix "urs")
@@ -2489,6 +2655,7 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         (Field_urs)
         (Field_poly_comm)
         (Field)
+        (Make_pointer_vector)
 
     module Field_proof =
       Dlog_plonk_proof
@@ -2513,6 +2680,7 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
         (Field)
         (Field_verifier_index)
         (Field_proof)
+        (Field_poly_comm.Vector)
   end
 
   module Tweedle = struct
@@ -2747,6 +2915,7 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
           let prefix = with_prefix (prefix "fq_poly_comm")
         end)
         (G.Affine)
+        (Make_pointer_vector)
 
     module Fq_urs = struct
       let prefix = with_prefix (prefix "fq_urs")
