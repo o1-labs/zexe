@@ -22,7 +22,7 @@ use oracle::{
 use groupmap::GroupMap;
 
 use plonk_protocol_dlog::index::{
-    Index as DlogIndex, SRSSpec, SRSValue, VerifierIndex as DlogVerifierIndex,
+    Index as DlogIndex, SRSValue, VerifierIndex as DlogVerifierIndex,
 };
 use commitment_dlog::{
     commitment::{CommitmentCurve, OpeningProof, PolyComm},
@@ -55,7 +55,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_domain_d8_size<'a>(
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
     gates: *const Vec<Gate<Fq>>,
-    max_poly_size: usize,
+    public: usize,
     srs: *mut SRS<GAffine>,
 ) -> *mut DlogIndex<'a, GAffine> {
     let gates = unsafe { &*gates };
@@ -80,15 +80,16 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
         }
     ).collect();
 
-    return Box::into_raw(Box::new(
-        DlogIndex::<GAffine>::create(
-            ConstraintSystem::<Fq>::create(gates, oracle::tweedle::fq::params(), 0).unwrap(),
-            max_poly_size,
-            oracle::tweedle::fp::params(),
-            SRSSpec::Use(srs),
-        )
-    ));
-}
+    return Box::into_raw(Box::new
+        (
+            DlogIndex::<GAffine>::create_cs_srs
+            (
+                ConstraintSystem::<Fq>::create(gates, oracle::tweedle::fq::params(), public).unwrap(),
+                oracle::tweedle::fp::params(),
+                srs,
+            )
+        ));
+    }
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fq_index_delete(x: *mut DlogIndex<GAffine>) {
@@ -950,6 +951,23 @@ pub extern "C" fn zexe_tweedle_plonk_fq_gate_vector_add(
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fq_gate_vector_wrap(
+    v: *mut Vec<Gate<Fq>>,
+    trow: usize,
+    tcol: Col,
+    hrow: usize,
+    hcol: Col,
+) {
+    let v = unsafe { &mut (*v) };
+    match tcol
+    {
+        Col::L => (v[trow]).wires.l = Wire {row: hrow, col: hcol},
+        Col::R => (v[trow]).wires.r = Wire {row: hrow, col: hcol},
+        Col::O => (v[trow]).wires.o = Wire {row: hrow, col: hcol},
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fq_gate_vector_delete(v: *mut Vec<CircuitGate<Fq>>) {
     // Deallocation happens automatically when a box variable goes out of
     // scope.
@@ -972,25 +990,25 @@ pub extern "C" fn zexe_tweedle_plonk_fq_constraint_system_delete(v: *mut Constra
 
 // Fq double
 #[no_mangle]
-pub extern "C" fn zexe_tweedle_fq_double_0(evals: *const [Fq; 2]) -> *const Fq {
+pub extern "C" fn zexe_tweedle_fq_plonk_double_0(evals: *const [Fq; 2]) -> *const Fq {
     let x = (unsafe { *evals })[0].clone();
     return Box::into_raw(Box::new(x));
 }
 
 #[no_mangle]
-pub extern "C" fn zexe_tweedle_fq_double_1(evals: *const [Fq; 2]) -> *const Fq {
+pub extern "C" fn zexe_tweedle_fq_plonk_double_1(evals: *const [Fq; 2]) -> *const Fq {
     let x = (unsafe { *evals })[1].clone();
     return Box::into_raw(Box::new(x));
 }
 
 #[no_mangle]
-pub extern "C" fn zexe_tweedle_fq_vector_double_0(evals: *const [Vec<Fq>; 2]) -> *const Vec<Fq> {
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_double_0(evals: *const [Vec<Fq>; 2]) -> *const Vec<Fq> {
     let x = (unsafe { &(*evals) })[0].clone();
     return Box::into_raw(Box::new(x));
 }
 
 #[no_mangle]
-pub extern "C" fn zexe_tweedle_fq_vector_double_1(evals: *const [Vec<Fq>; 2]) -> *const Vec<Fq> {
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_double_1(evals: *const [Vec<Fq>; 2]) -> *const Vec<Fq> {
     let x = (unsafe { &(*evals) })[1].clone();
     return Box::into_raw(Box::new(x));
 }
@@ -1009,4 +1027,37 @@ pub extern "C" fn zexe_tweedle_plonk_fq_proof_evaluations_double_1(
 ) -> *const DlogProofEvaluations<Fq> {
     let x = (unsafe { &(*e)[1] }).clone();
     return Box::into_raw(Box::new(x));
+}
+
+// Fq vector stubs
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_create() -> *mut Vec<Fq> {
+    return Box::into_raw(Box::new(Vec::new()));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_length(v: *const Vec<Fq>) -> i32 {
+    let v_ = unsafe { &(*v) };
+    return v_.len() as i32;
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_emplace_back(v: *mut Vec<Fq>, x: *const Fq) {
+    let v_ = unsafe { &mut (*v) };
+    let x_ = unsafe { &(*x) };
+    v_.push(*x_);
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_get(v: *mut Vec<Fq>, i: u32) -> *mut Fq {
+    let v_ = unsafe { &mut (*v) };
+    return Box::into_raw(Box::new((*v_)[i as usize]));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_tweedle_fq_plonk_vector_delete(v: *mut Vec<Fq>) {
+    // Deallocation happens automatically when a box variable goes out of
+    // scope.
+    let _box = unsafe { Box::from_raw(v) };
 }

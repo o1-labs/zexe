@@ -1112,8 +1112,8 @@ void *zexe_tweedle_fp_vector_triple_1(void *);
 void *zexe_tweedle_fp_vector_triple_2(void *);
 
 // Fp double
-void *zexe_tweedle_fp_double_0(void *);
-void *zexe_tweedle_fp_double_1(void *);
+void *zexe_tweedle_fp_plonk_double_0(void *);
+void *zexe_tweedle_fp_plonk_double_1(void *);
 void *zexe_tweedle_fp_vector_double_0(void *);
 void *zexe_tweedle_fp_vector_double_1(void *);
 
@@ -1342,6 +1342,12 @@ void zexe_tweedle_plonk_fp_gate_vector_add(
     size_t,
     int,
     void *c);
+void zexe_tweedle_plonk_fp_gate_vector_wrap(
+    void *,
+    size_t,
+    int,
+    size_t,
+    int);
 
 // Fp constraint system
 void *zexe_tweedle_plonk_fp_constraint_system_create(void *, size_t);
@@ -1524,7 +1530,29 @@ void zexe_tweedle_plonk_fq_gate_vector_add(
     size_t,
     int,
     void *c);
+void zexe_tweedle_plonk_fq_gate_vector_wrap(
+    void *,
+    size_t,
+    int,
+    size_t,
+    int);
 
 // Fq constraint system
 void *zexe_tweedle_plonk_fq_constraint_system_create(void *, size_t);
 void zexe_tweedle_plonk_fq_constraint_system_delete(void *);
+
+// Fq vector
+
+void *zexe_tweedle_fq_plonk_vector_create();
+int zexe_tweedle_fq_plonk_vector_length(void *);
+void zexe_tweedle_fq_plonk_vector_emplace_back(void *, void *);
+void *zexe_tweedle_fq_plonk_vector_get(void *, int);
+void zexe_tweedle_fq_plonk_vector_delete(void *);
+
+// Fq vector
+
+void *zexe_tweedle_fp_plonk_vector_create();
+int zexe_tweedle_fp_plonk_vector_length(void *);
+void zexe_tweedle_fp_plonk_vector_emplace_back(void *, void *);
+void *zexe_tweedle_fp_plonk_vector_get(void *, int);
+void zexe_tweedle_fp_plonk_vector_delete(void *);

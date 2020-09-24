@@ -1305,7 +1305,7 @@ struct
   module Vector = struct
     module T =
       Vector (struct
-          let prefix = prefix
+          let prefix = with_prefix (P.prefix "plonk")
         end)
         (T)
         (F)
@@ -1352,6 +1352,18 @@ struct
         size_t @->
         int @->
         Field_vector.typ @->
+        returning void
+      )
+
+  let wrap_gate =
+    foreign
+      (prefix "wrap")
+      (
+        typ @->
+        size_t @->
+        int @->
+        size_t @->
+        int @->
         returning void
       )
 end
