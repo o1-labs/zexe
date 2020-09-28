@@ -2175,6 +2175,8 @@ struct
         Caml.Gc.finalise (bind_return ~f:delete) x ;
         x )
 
+  let add_finalizer = F.return Fn.id
+
   (* Stub out delete to make sure we don't attempt to double-free. *)
   let delete : t -> unit = ignore
 
@@ -2227,6 +2229,17 @@ struct
     in
     fun t ~gate_enum ~row ~lrow ~lcol ~rrow ~rcol ~orow ~ocol v ->
       add_gate t gate_enum row lrow lcol rrow rcol orow ocol v
+
+  let wrap_gate =
+    foreign
+      (prefix "wrap")
+      (
+        typ @->
+        size_t @->
+        int @->
+        size_t @->
+        int @->
+        returning void )
 end
 
 module Full (F : Cstubs_applicative.Foreign_applicative) = struct

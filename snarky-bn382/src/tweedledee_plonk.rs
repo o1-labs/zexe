@@ -1219,6 +1219,23 @@ pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_add_endomul4(
 }
 
 #[no_mangle]
+pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_wrap(
+    v: *mut Vec<Gate<Fp>>,
+    trow: usize,
+    tcol: Col,
+    hrow: usize,
+    hcol: Col,
+) {
+    let v = unsafe { &mut (*v) };
+    match tcol
+    {
+        Col::L => (v[trow]).wires.l = Wire {row: hrow, col: hcol},
+        Col::R => (v[trow]).wires.r = Wire {row: hrow, col: hcol},
+        Col::O => (v[trow]).wires.o = Wire {row: hrow, col: hcol},
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_gate_vector_delete(v: *mut Vec<Gate<Fp>>) {
     // Deallocation happens automatically when a box variable goes out of
     // scope.

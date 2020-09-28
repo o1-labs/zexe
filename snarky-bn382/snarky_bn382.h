@@ -1271,6 +1271,8 @@ size_t zexe_tweedle_plonk_fp_index_domain_d8_size(void *);
 
 void *zexe_tweedle_plonk_fp_index_create(void *, size_t, void *);
 void zexe_tweedle_plonk_fp_index_delete(void *);
+void zexe_tweedle_plonk_fp_index_write(void *, void *);
+void* zexe_tweedle_plonk_fp_index_read(void *, void*);
 
 size_t zexe_tweedle_plonk_fp_index_max_degree(void *);
 size_t zexe_tweedle_plonk_fp_index_public_inputs(void *);
@@ -1331,6 +1333,8 @@ void *zexe_tweedle_plonk_fp_verifier_index_r(void *);
 void *zexe_tweedle_plonk_fp_verifier_index_o(void *);
 uint32_t zexe_tweedle_plonk_fp_verifier_index_domain_log2(void *);
 void* zexe_tweedle_plonk_fp_verifier_index_domain_group_gen(void *);
+void zexe_tweedle_plonk_fp_verifier_index_write(void *, void *);
+void* zexe_tweedle_plonk_fp_verifier_index_read(void *, void *);
 
 // Fp proof
 void *zexe_tweedle_plonk_fp_proof_create(
@@ -1497,6 +1501,13 @@ void zexe_tweedle_plonk_fp_gate_vector_add_endomul4(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
 
+void zexe_tweedle_plonk_fp_gate_vector_wrap(
+    void *,
+    size_t,
+    int,
+    size_t,
+    int);
+
 // Fp constraint system
 void *zexe_tweedle_plonk_fp_constraint_system_create(void *, size_t);
 void zexe_tweedle_plonk_fp_constraint_system_delete(void *);
@@ -1508,6 +1519,8 @@ size_t zexe_tweedle_plonk_fq_index_domain_d8_size(void *);
 
 void *zexe_tweedle_plonk_fq_index_create(void *, size_t, void *);
 void zexe_tweedle_plonk_fq_index_delete(void *);
+void zexe_tweedle_plonk_fq_index_write(void *, void *);
+void* zexe_tweedle_plonk_fq_index_read(void *, void*);
 
 size_t zexe_tweedle_plonk_fq_index_max_degree(void *);
 size_t zexe_tweedle_plonk_fq_index_public_inputs(void *);
@@ -1515,6 +1528,8 @@ size_t zexe_tweedle_plonk_fq_index_public_inputs(void *);
 // Fq verifier index stubs
 struct pointer_pair zexe_tweedle_plonk_fq_verifier_index_shifts(size_t);
 
+void zexe_tweedle_plonk_fq_verifier_index_write(void *, void *);
+void* zexe_tweedle_plonk_fq_verifier_index_read(void *, void*);
 void *zexe_tweedle_plonk_fq_verifier_index_create(void *);
 
 void *zexe_tweedle_plonk_fq_verifier_index_urs(void *);
