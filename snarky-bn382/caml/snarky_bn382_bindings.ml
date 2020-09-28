@@ -2170,7 +2170,7 @@ struct
 
   let delete = foreign (prefix "delete") (typ @-> returning void)
 
-  let add_finalizer =
+  let _add_finalizer =
     F.map delete ~f:(fun delete x ->
         Caml.Gc.finalise (bind_return ~f:delete) x ;
         x )
