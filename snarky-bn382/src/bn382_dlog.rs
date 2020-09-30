@@ -51,10 +51,8 @@ use algebra::bn_382::g::Affine;
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fq_urs_create(
     depth: usize,
-    public: usize,
-    size: usize,
 ) -> *const SRS<GAffine> {
-    Box::into_raw(Box::new(SRS::create(depth, public, size)))
+    Box::into_raw(Box::new(SRS::create(depth)))
 }
 
 #[no_mangle]

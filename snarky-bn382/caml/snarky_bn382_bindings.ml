@@ -665,9 +665,9 @@ struct
   let create =
     let%map create =
       foreign (prefix "create")
-        (Plonk_gate_vector.typ @-> size_t @-> URS.typ @-> returning typ)
+        (Plonk_gate_vector.typ @-> URS.typ @-> returning typ)
     and add_finalizer = add_finalizer in
-    fun cs sz urs -> add_finalizer (create cs sz urs)
+    fun cs urs -> add_finalizer (create cs urs)
 
   let metadata s = foreign (prefix s) (typ @-> returning size_t)
 
@@ -2405,9 +2405,9 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
       let create =
         let%map create =
           foreign (prefix "create")
-            (size_t @-> size_t @-> size_t @-> returning typ)
+            (size_t @-> returning typ)
         and add_finalizer = add_finalizer in
-        fun depth public size -> add_finalizer (create depth public size)
+        fun depth -> add_finalizer (create depth)
 
       let read =
         let%map read = foreign (prefix "read") (string @-> returning typ)
@@ -2957,9 +2957,9 @@ module Full (F : Cstubs_applicative.Foreign_applicative) = struct
       let create =
         let%map create =
           foreign (prefix "create")
-            (size_t @-> size_t @-> size_t @-> returning typ)
+            (size_t @-> returning typ)
         and add_finalizer = add_finalizer in
-        fun depth public size -> add_finalizer (create depth public size)
+        fun depth -> add_finalizer (create depth)
 
       let read =
         let%map read = foreign (prefix "read") (string @-> returning typ)

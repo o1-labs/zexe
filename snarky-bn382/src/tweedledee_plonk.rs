@@ -95,7 +95,6 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_domain_d8_size<'a>(
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_index_create<'a>(
     gates: *const Vec<Gate<Fp>>,
-    max_poly_size: usize,
     srs: *const SRS<GAffine>,
 ) -> *mut DlogIndex<'a, GAffine> {
     let gates = unsafe { &*gates };
@@ -125,7 +124,6 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_create<'a>(
 
     return Box::into_raw(Box::new(DlogIndex::<GAffine>::create(
         ConstraintSystem::<Fp>::create(gates, oracle::tweedle::fp::params(), 0).unwrap(),
-        max_poly_size,
         oracle::tweedle::fq::params(),
         SRSSpec::Use(srs),
     )));
@@ -957,7 +955,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_oracles_p_eval2(
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_oracles_alpha(oracles: *const FpOracles) -> *const Fp {
-    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.alpha.clone()));
+    return Box::into_raw(Box::new((unsafe { &(*oracles) }).o.alpha_chal.0.clone()));
 }
 
 #[no_mangle]

@@ -377,7 +377,7 @@ void* zexe_bn382_fp_urs_dummy_opening_check(void*);
 void* zexe_bn382_fp_urs_dummy_degree_bound_checks(void*, void*);
 
 // Fq URS
-void *zexe_bn382_fq_urs_create(size_t, size_t, size_t);
+void *zexe_bn382_fq_urs_create(size_t);
 void zexe_bn382_fq_urs_delete(void *);
 void zexe_bn382_fq_urs_write(void*, char*);
 void* zexe_bn382_fq_urs_read(char*);
@@ -794,7 +794,7 @@ void *zexe_tweedle_fq_verifier_index_vector_get(void *, int);
 void zexe_tweedle_fq_verifier_index_vector_delete(void *);
 
 // Fq URS
-void *zexe_tweedle_fq_urs_create(size_t, size_t, size_t);
+void *zexe_tweedle_fq_urs_create(size_t);
 void zexe_tweedle_fq_urs_delete(void*);
 void zexe_tweedle_fq_urs_write(void*, char*);
 void* zexe_tweedle_fq_urs_read(char*);
@@ -1084,7 +1084,7 @@ void *zexe_tweedle_fp_verifier_index_vector_get(void *, int);
 void zexe_tweedle_fp_verifier_index_vector_delete(void *);
 
 // Fp URS
-void *zexe_tweedle_fp_urs_create(size_t, size_t, size_t);
+void *zexe_tweedle_fp_urs_create(size_t);
 void zexe_tweedle_fp_urs_delete(void*);
 void zexe_tweedle_fp_urs_write(void*, char*);
 void* zexe_tweedle_fp_urs_read(char*);
@@ -1269,7 +1269,7 @@ size_t zexe_tweedle_plonk_fp_index_domain_d1_size(void *);
 size_t zexe_tweedle_plonk_fp_index_domain_d4_size(void *);
 size_t zexe_tweedle_plonk_fp_index_domain_d8_size(void *);
 
-void *zexe_tweedle_plonk_fp_index_create(void *, size_t, void *);
+void *zexe_tweedle_plonk_fp_index_create(void *, void *);
 void zexe_tweedle_plonk_fp_index_delete(void *);
 void zexe_tweedle_plonk_fp_index_write(void *, void *);
 void* zexe_tweedle_plonk_fp_index_read(void *, void*);
@@ -1517,7 +1517,7 @@ size_t zexe_tweedle_plonk_fq_index_domain_d1_size(void *);
 size_t zexe_tweedle_plonk_fq_index_domain_d4_size(void *);
 size_t zexe_tweedle_plonk_fq_index_domain_d8_size(void *);
 
-void *zexe_tweedle_plonk_fq_index_create(void *, size_t, void *);
+void *zexe_tweedle_plonk_fq_index_create(void *, void *);
 void zexe_tweedle_plonk_fq_index_delete(void *);
 void zexe_tweedle_plonk_fq_index_write(void *, void *);
 void* zexe_tweedle_plonk_fq_index_read(void *, void*);
@@ -1748,6 +1748,13 @@ void zexe_tweedle_plonk_fq_gate_vector_add_endomul3(
 void zexe_tweedle_plonk_fq_gate_vector_add_endomul4(
     void *v, size_t row, size_t lrow, int lcol, size_t rrow, int rcol, size_t orow,
     int ocol, void *c);
+
+void zexe_tweedle_plonk_fq_gate_vector_wrap(
+    void *,
+    size_t,
+    int,
+    size_t,
+    int);
 
 // Fq constraint system
 void *zexe_tweedle_plonk_fq_constraint_system_create(void *, size_t);
