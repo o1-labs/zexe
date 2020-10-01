@@ -1269,7 +1269,7 @@ size_t zexe_tweedle_plonk_fp_index_domain_d1_size(void *);
 size_t zexe_tweedle_plonk_fp_index_domain_d4_size(void *);
 size_t zexe_tweedle_plonk_fp_index_domain_d8_size(void *);
 
-void *zexe_tweedle_plonk_fp_index_create(void *, void *);
+void *zexe_tweedle_plonk_fp_index_create(void *, size_t, void *);
 void zexe_tweedle_plonk_fp_index_delete(void *);
 void zexe_tweedle_plonk_fp_index_write(void *, void *);
 void* zexe_tweedle_plonk_fp_index_read(void *, void*);
@@ -1517,7 +1517,7 @@ size_t zexe_tweedle_plonk_fq_index_domain_d1_size(void *);
 size_t zexe_tweedle_plonk_fq_index_domain_d4_size(void *);
 size_t zexe_tweedle_plonk_fq_index_domain_d8_size(void *);
 
-void *zexe_tweedle_plonk_fq_index_create(void *, void *);
+void *zexe_tweedle_plonk_fq_index_create(void *, size_t, void *);
 void zexe_tweedle_plonk_fq_index_delete(void *);
 void zexe_tweedle_plonk_fq_index_write(void *, void *);
 void* zexe_tweedle_plonk_fq_index_read(void *, void*);

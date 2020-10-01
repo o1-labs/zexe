@@ -46,7 +46,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_read<'a>(
     let path = (unsafe { CStr::from_ptr(path) })
         .to_string_lossy()
         .into_owned();
-    let mut r = BufReader::new(File::open(path).unwrap());
+    let mut r = BufReader::new(File::open(&path).unwrap());
 
     let t = read_plonk_index(
         oracle::tweedle::fq::params(),
@@ -95,6 +95,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_domain_d8_size<'a>(
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
     gates: *const Vec<Gate<Fq>>,
+    public: usize,
     srs: *mut SRS<GAffine>,
 ) -> *mut DlogIndex<'a, GAffine> {
     let gates = unsafe { &*gates };
@@ -123,7 +124,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
         .collect();
 
     return Box::into_raw(Box::new(DlogIndex::<GAffine>::create(
-        ConstraintSystem::<Fq>::create(gates, oracle::tweedle::fq::params(), 0).unwrap(),
+        ConstraintSystem::<Fq>::create(gates, oracle::tweedle::fq::params(), public).unwrap(),
         oracle::tweedle::fp::params(),
         SRSSpec::Use(srs),
     )));

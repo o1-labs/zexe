@@ -665,9 +665,9 @@ struct
   let create =
     let%map create =
       foreign (prefix "create")
-        (Plonk_gate_vector.typ @-> URS.typ @-> returning typ)
+        (Plonk_gate_vector.typ @-> size_t @-> URS.typ @-> returning typ)
     and add_finalizer = add_finalizer in
-    fun cs urs -> add_finalizer (create cs urs)
+    fun cs public urs -> add_finalizer (create cs public urs)
 
   let metadata s = foreign (prefix s) (typ @-> returning size_t)
 
