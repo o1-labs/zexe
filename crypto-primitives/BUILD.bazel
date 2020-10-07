@@ -18,9 +18,7 @@ rust_library(
         "//cargo:digest",
         "//cargo:blake2",
         "//cargo:rand",
-        # "//cargo:rand_xorshift",
         "//cargo:rayon",
-        # "//cargo:typenum",
     ],
     crate_features = [
         "std",

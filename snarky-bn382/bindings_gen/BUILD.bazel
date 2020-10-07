@@ -7,21 +7,11 @@ load(
     "ocaml_ns_module",
 )
 
-# (executable
-#  (name snarky_bn382_ctypes_stubs)
-#  (libraries snarky_bn382_bindings ctypes ctypes.stubs))
+EXEC_OPTS = []
 
-# COMMON_OPTS = select({
-#     "//bzl/config:enable_verbose": ["-verbose"],
-#     "//conditions:default": [],
-# }) + ["-thread"]
+INTF_OPTS = []
 
-# EXEC_OPTS = COMMON_OPTS
-EXEC_OPTS = ["-verbose"]
-
-INTF_OPTS = [] # "-verbose"]
-
-IMPL_OPTS = [] # "-verbose"]
+IMPL_OPTS = []
 
 filegroup(
     name = "snarky_bn382_c",

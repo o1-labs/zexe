@@ -21,16 +21,6 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     deps = [
         ":build_script",
-        # "//cargo:blake2",
-        # "//cargo:rand",
-        # "//cargo:rand_xorshift",
-        # "//cargo:paste",
     ],
-    # crate_features = [
-    #     "n_fold",
-    #     # "asm",
-    #     # "mnt4_298",
-    #     # etc.
-    # ],
 )
 

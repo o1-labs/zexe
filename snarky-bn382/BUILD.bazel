@@ -63,14 +63,6 @@ ocaml_module(
     ],
 )
 
-## emitting data_only_dirs
-
-## genrule()
-
-## genrule()
-
-## library: snarky_bn382_stubs
-
 SNARKY_BN382_STUBS_NS = "Snarky_bn382_stubs"
 
 SNARKY_BN382_STUBS_PPX = "//src/ppx:"
@@ -118,31 +110,10 @@ cc_library(
     visibility = ["//visibility:private"],
 )
 
-# ocaml_ns_module(
-#     name = "snarky_bn382_stubs_ns_module",
-#     ns = SNARKY_BN382_STUBS_NS,
-#     submodules = [
-#         # do not sort (buildifier)
-#         "snarky_bn382_stubs.ml",
-#     ],
-# )
-
-# ocaml_archive(
-#     name = "snarky_bn382_stubs",
-#     opts = INTF_OPTS,
-#     visibility = ["//visibility:public"],
-#     deps = [
-#         # do not sort (buildifier)
-#         ":snarky_bn382_stubs_ns_module",
-#         ":snarky_bn382_stubs.cm_",
-#     ],
-# )
-## library: snarky_bn382
-
 rust_library(
-    edition = "2018",
     # output will be libsnarky_bn382_stubs_stubs.a
     name = "snarky_bn382_stubs_stubs",
+    edition = "2018",
     visibility = ["//visibility:public"],
     crate_type = "staticlib",
     srcs = glob(["src/**/*.rs"]),
@@ -150,7 +121,7 @@ rust_library(
         ## Using @zexe prevents clash with @marlin packages.
         ## Without this (and the corresponding local_repository rule in WORKSPACE)
         ## we get duplicate copies of these packages. This is because we import @marlin,
-        ## which imports @zexe, so marlin's targets depend on @zexe// labels.
+        ## which imports @zexe, so (some of) marlin's targets depend on @zexe// labels.
         "@zexe//algebra",
         "@zexe//bench-utils:bench_utils",
         "@zexe//crypto-primitives:crypto_primitives",

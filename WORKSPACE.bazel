@@ -1,11 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
-# local_repository(
-#     name = "io_bazel_rules_rust",
-#     path = "/Users/gar/bazel/rules_rust"
-# )
-
 http_archive(
     name = "bazel_skylib",
     urls = [
@@ -52,30 +47,10 @@ rust_repositories(version = "1.43.1", edition="2018")
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 bazel_version(name = "bazel_version")
 
-
-####
-
-# load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
-# bazel_version(name = "bazel_version")
-
-# load("@io_bazel_rules_rust//rust:repositories.bzl",
-#      "rust_repositories", "rust_repository_set")
-# rust_repositories(version = "1.43.1")
-# to set default edition to 2018:
-
-# rust_repository_set(name = "coda_rust_toolchain",
-#                     exec_triple = "x86_64-apple-darwin",
-#                     # "x86_64-unknown-linux-gnu"
-#                     edition = "2018",
-#                     version = "1.43.1")
-
-
-# load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
-# bazel_version(name = "bazel_version")
-
+################################################################
 # This local repo allows us to import marlin, which imports zexe. Some
 # of marlin's targets depend on @zexe// packages; this repo allows
-# Bazel to resolve them here. In addition, zexe targets the depend on
+# Bazel to resolve them here. In addition, zexe targets that depend on
 # both zexe and marlin packages must use @zexe// labels for the
 # former; otherwise we get duplicate copies of the packages.
 # See //snarky-bn382:libsnarky_bn382_stubs_stubs.
@@ -84,15 +59,20 @@ local_repository(
     path = "."
 )
 
-http_archive(
+################################################################
+# http_archive(
+#     name = "marlin",
+#     urls = [
+#         "https://github.com/o1-labs/marlin/archive/master.zip"
+#     ],
+# )
+
+git_repository(
     name = "marlin",
-    urls = [
-        "https://github.com/o1-labs/marlin/archive/master.zip"
-        # "https://github.com/o1-labs/marlin/archive/43a351fe47f2d481d2254ce88b4c338127bcc6f3.zip",
-        # "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
-        # "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
-    ],
-    # sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+    remote = "https://github.com/obazl/marlin",
+    branch = "bazel",  ## temporary, until release is published
+    # commit =
+    # shallow_since =
 )
 
 load("//cargo:crates.bzl", "raze_fetch_remote_crates")
@@ -104,17 +84,18 @@ raze_fetch_remote_crates()
 git_repository(
     name = "obazl_rules_ocaml",
     remote = "https://github.com/obazl/rules_ocaml",
-    branch = "master",
+    branch = "dev",
     # commit = "feef897197b36b14b65ffdf00b9badcbdb8f42f4",
     # shallow_since = "1593623637 -0500"
 )
 
 load("@obazl_rules_ocaml//ocaml:deps.bzl",
-     "ocaml_configure_tooling",
-     # "ocaml_repositories",
-     # "ocaml_home_sdk",
-     "ocaml_register_toolchains")
+     "ocaml_configure",
+     "ocaml_register_toolchains",
+     "opam_configure")
 
-ocaml_configure_tooling()
+opam_configure()
+
+ocaml_configure()
 
 ocaml_register_toolchains(installation="host")

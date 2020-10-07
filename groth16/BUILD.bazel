@@ -13,7 +13,6 @@ rust_library(
 
         "//cargo:rand",
         "//cargo:rayon",
-        # "//cargo:smallvec"
     ],
     crate_features = [
         "derive",

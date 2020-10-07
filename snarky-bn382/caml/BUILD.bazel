@@ -12,8 +12,8 @@ ocaml_module(
     name = "snarky_bn382_bindings",
     impl = "snarky_bn382_bindings.ml",
     opts = IMPL_OPTS,
-    ppx_bin = ":ppx",
-    ppx_bin_opts = [
+    ppx =  ":ppx",
+    ppx_args = [
         # do not sort (buildifier)
         "-cookie",
         "library-name=\"bitstring_lib\"",
@@ -49,7 +49,7 @@ ppx_executable(
         # do not sort (buildifier)
         "@obazl//ppxlib:driver_standalone_shim",
     ],
-    build_deps = [
+    deps = [
         # do not sort (buildifier)
         "@opam//pkg:ppx_let",
     ],
