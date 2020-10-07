@@ -755,9 +755,8 @@ pub fn prepare_plonk_witness<F: PrimeField>(
     auxiliary_input: &Vec<F>,
 ) -> Vec<F> {
     // TODO: Check that this is correct.
-    let mut witness: Vec<F> = Vec::with_capacity(primary_input.len() + auxiliary_input.len() + 1);
+    let mut witness: Vec<F> = Vec::with_capacity(primary_input.len() + auxiliary_input.len());
 
-    witness.push(F::one());
     witness.extend_from_slice(primary_input.as_slice());
     witness.extend_from_slice(auxiliary_input.as_slice());
 
