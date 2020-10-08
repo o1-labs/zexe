@@ -906,7 +906,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_oracles_create(
 
     let p_comm = PolyComm::<GAffine>::multi_scalar_mul(
         &lgr_comm.iter().take(proof.public.len()).map(|l| l).collect(),
-        &proof.public.iter().map(|s| -*s).collect(),
+        &proof.public.iter().map(|s| *s).collect(),
     );
     let (mut sponge, digest_before_evaluations, o, _, p_eval, _, _) =
         proof.oracles::<DefaultFqSponge<TweedledeeParameters, PlonkSpongeConstants>, DefaultFrSponge<Fp, PlonkSpongeConstants>>(index, &p_comm);
