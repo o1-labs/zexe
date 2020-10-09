@@ -2,6 +2,7 @@ use crate::common::*;
 use algebra::curves::{AffineCurve, ProjectiveCurve};
 use algebra::tweedle::{
     dum::{Affine as GAffine, TweedledumParameters},
+    dee::{Affine as GAffineOther},
     fq::Fq,
 };
 
@@ -127,9 +128,11 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
         })
         .collect();
 
+    let (endo_q, _endo_r) = commitment_dlog::srs::endos::<GAffineOther>();
     return Box::into_raw(Box::new(DlogIndex::<GAffine>::create(
         ConstraintSystem::<Fq>::create(gates, oracle::tweedle::fq::params(), public).unwrap(),
         oracle::tweedle::fp::params(),
+        endo_q,
         SRSSpec::Use(srs),
     )));
 }

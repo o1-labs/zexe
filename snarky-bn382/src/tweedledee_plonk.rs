@@ -1,6 +1,7 @@
 use crate::common::*;
 use algebra::tweedle::{
     dee::{Affine as GAffine, TweedledeeParameters},
+    dum::{Affine as GAffineOther},
     fp::Fp,
 };
 
@@ -123,9 +124,11 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_create<'a>(
         })
         .collect();
 
+    let (endo_q, _endo_r) = commitment_dlog::srs::endos::<GAffineOther>();
     return Box::into_raw(Box::new(DlogIndex::<GAffine>::create(
         ConstraintSystem::<Fp>::create(gates, oracle::tweedle::fp::params(), public).unwrap(),
         oracle::tweedle::fq::params(),
+        endo_q,
         SRSSpec::Use(srs),
     )));
 }
