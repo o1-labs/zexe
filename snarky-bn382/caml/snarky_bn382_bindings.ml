@@ -1614,13 +1614,13 @@ struct
   let create =
     let%map create =
       foreign (prefix "create")
-        ( Index.typ @-> ScalarFieldVector.typ @-> ScalarFieldVector.typ
+        ( Index.typ @-> ScalarFieldVector.typ
         @-> ScalarFieldVector.typ @-> AffineCurve.Vector.typ @-> returning typ
         )
     and add_finalizer = add_finalizer in
-    fun index primary_input auxiliary_input prev_challenges prev_sgs ->
+    fun index witness prev_challenges prev_sgs ->
       add_finalizer
-        (create index primary_input auxiliary_input prev_challenges prev_sgs)
+        (create index witness prev_challenges prev_sgs)
 
   let verify =
     foreign (prefix "verify")

@@ -1339,8 +1339,7 @@ void* zexe_tweedle_plonk_fp_verifier_index_read(void *, void *);
 // Fp proof
 void *zexe_tweedle_plonk_fp_proof_create(
     void *index,
-    void *primary_input,
-    void *auxiliary_input,
+    void *witness,
     void *prev_challenges,
     void *prev_sgs);
 
@@ -1587,8 +1586,7 @@ void* zexe_tweedle_plonk_fq_verifier_index_domain_group_gen(void *);
 // Fq proof
 void *zexe_tweedle_plonk_fq_proof_create(
     void *index,
-    void *primary_input,
-    void *auxiliary_input,
+    void *witness,
     void *prev_challenges,
     void *prev_sgs);
 

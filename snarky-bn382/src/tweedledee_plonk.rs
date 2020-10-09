@@ -451,16 +451,12 @@ pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_domain_group_gen(x: *cons
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fp_proof_create(
     index: *const DlogIndex<GAffine>,
-    primary_input: *const Vec<Fp>,
-    auxiliary_input: *const Vec<Fp>,
+    witness: *const Vec<Fp>,
     prev_challenges: *const Vec<Fp>,
     prev_sgs: *const Vec<GAffine>,
 ) -> *const DlogProof<GAffine> {
     let index = unsafe { &(*index) };
-    let primary_input = unsafe { &(*primary_input) };
-    let auxiliary_input = unsafe { &(*auxiliary_input) };
-
-    let witness = prepare_plonk_witness(primary_input, auxiliary_input);
+    let witness = unsafe { &(*witness) };
 
     let prev: Vec<(Vec<Fp>, PolyComm<GAffine>)> = {
         let prev_challenges = unsafe { &*prev_challenges };
