@@ -53,7 +53,6 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_read<'a>(
         oracle::tweedle::fq::params(),
         srs,
         &mut r);
-    println!("path = {}", path);
     Box::into_raw(Box::new(t.unwrap()))
 }
 
@@ -111,7 +110,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_index_create<'a>(
         }
     };
 
-    let gates = gates
+    let gates : Vec<_> = gates
         .iter()
         .map(|gate| CircuitGate::<Fp> {
             typ: gate.typ.clone(),
@@ -460,7 +459,8 @@ pub extern "C" fn zexe_tweedle_plonk_fp_proof_create(
     let primary_input = unsafe { &(*primary_input) };
     let auxiliary_input = unsafe { &(*auxiliary_input) };
 
-    let witness = prepare_plonk_witness(primary_input, auxiliary_input);
+    let witness = auxiliary_input;
+//    let witness = prepare_plonk_witness(primary_input, auxiliary_input);
 
     let prev: Vec<(Vec<Fp>, PolyComm<GAffine>)> = {
         let prev_challenges = unsafe { &*prev_challenges };
@@ -906,7 +906,7 @@ pub extern "C" fn zexe_tweedle_plonk_fp_oracles_create(
 
     let p_comm = PolyComm::<GAffine>::multi_scalar_mul(
         &lgr_comm.iter().take(proof.public.len()).map(|l| l).collect(),
-        &proof.public.iter().map(|s| -*s).collect(),
+        &proof.public.iter().map(|s| *s).collect(),
     );
     let (mut sponge, digest_before_evaluations, o, _, p_eval, _, _) =
         proof.oracles::<DefaultFqSponge<TweedledeeParameters, PlonkSpongeConstants>, DefaultFrSponge<Fp, PlonkSpongeConstants>>(index, &p_comm);

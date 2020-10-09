@@ -1,4 +1,5 @@
 use crate::common::*;
+use algebra::curves::{AffineCurve, ProjectiveCurve};
 use algebra::tweedle::{
     dum::{Affine as GAffine, TweedledumParameters},
     fq::Fq,
@@ -101,7 +102,8 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
     let gates = unsafe { &*gates };
     let srs = unsafe { &*srs };
 
-    let n = Domain::<Fq>::compute_size_of_domain(gates.len()).unwrap();
+    let n = Domain::<Fq>::compute_size_of_domain(public + gates.len()).unwrap();
+    println!("n = {}", n);
     let wire = |w: Wire| -> usize {
         match w.col {
             L => w.row,
@@ -109,6 +111,8 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
             O => w.row + 2 * n,
         }
     };
+
+    println!("{:?}", gates[554].wires);
 
     let gates = gates
         .iter()
@@ -476,7 +480,8 @@ pub extern "C" fn zexe_tweedle_plonk_fq_proof_create(
     let primary_input = unsafe { &(*primary_input) };
     let auxiliary_input = unsafe { &(*auxiliary_input) };
 
-    let witness = prepare_plonk_witness(primary_input, auxiliary_input);
+    let witness = auxiliary_input;
+//    let witness = prepare_plonk_witness(primary_input, auxiliary_input);
 
     let prev: Vec<(Vec<Fq>, PolyComm<GAffine>)> = {
         let prev_challenges = unsafe { &*prev_challenges };
@@ -922,7 +927,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_oracles_create(
 
     let p_comm = PolyComm::<GAffine>::multi_scalar_mul(
         &lgr_comm.iter().take(proof.public.len()).map(|l| l).collect(),
-        &proof.public.iter().map(|s| -*s).collect(),
+        &proof.public.iter().map(|s| *s).collect(),
     );
     let (mut sponge, digest_before_evaluations, o, _, p_eval, _, _) =
         proof.oracles::<DefaultFqSponge<TweedledumParameters, PlonkSpongeConstants>, DefaultFrSponge<Fq, PlonkSpongeConstants>>(index, &p_comm);
