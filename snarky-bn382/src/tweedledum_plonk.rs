@@ -104,7 +104,6 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
     let srs = unsafe { &*srs };
 
     let n = Domain::<Fq>::compute_size_of_domain(public + gates.len()).unwrap();
-    println!("n = {}", n);
     let wire = |w: Wire| -> usize {
         match w.col {
             L => w.row,
@@ -112,8 +111,6 @@ pub extern "C" fn zexe_tweedle_plonk_fq_index_create<'a>(
             O => w.row + 2 * n,
         }
     };
-
-    println!("{:?}", gates[554].wires);
 
     let gates = gates
         .iter()
@@ -197,9 +194,11 @@ pub extern "C" fn zexe_tweedle_plonk_fq_verifier_index_read<'a>(
         .into_owned();
     let mut r = BufReader::new(File::open(path).unwrap());
 
+    let (endo_q, _endo_r) = commitment_dlog::srs::endos::<GAffineOther>();
     let t = read_plonk_verifier_index(
         oracle::tweedle::fq::params(),
         oracle::tweedle::fp::params(),
+        endo_q,
         srs,
         &mut r);
     Box::into_raw(Box::new(t.unwrap()))
@@ -263,6 +262,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_verifier_index_make<'a>(
     o: *const Fq,
 ) -> *const DlogVerifierIndex<'a, GAffine> {
     let srs = unsafe { &*urs };
+    let (endo_q, _endo_r) = commitment_dlog::srs::endos::<GAffineOther>();
     let index = DlogVerifierIndex::<GAffine> {
         domain: Domain::<Fq>::new(max_poly_size).unwrap(),
         max_poly_size,
@@ -294,6 +294,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_verifier_index_make<'a>(
         o: (unsafe { &*o }).clone(),
         fq_sponge_params: oracle::tweedle::fp::params(),
         fr_sponge_params: oracle::tweedle::fq::params(),
+        endo: endo_q,
     };
     Box::into_raw(Box::new(index))
 }
@@ -930,7 +931,7 @@ pub extern "C" fn zexe_tweedle_plonk_fq_oracles_create(
 
     let p_comm = PolyComm::<GAffine>::multi_scalar_mul(
         &lgr_comm.iter().take(proof.public.len()).map(|l| l).collect(),
-        &proof.public.iter().map(|s| *s).collect(),
+        &proof.public.iter().map(|s| -*s).collect(),
     );
     let (mut sponge, digest_before_evaluations, o, _, p_eval, _, _) =
         proof.oracles::<DefaultFqSponge<TweedledumParameters, PlonkSpongeConstants>, DefaultFrSponge<Fq, PlonkSpongeConstants>>(index, &p_comm);
@@ -968,15 +969,19 @@ pub extern "C" fn zexe_tweedle_plonk_fq_oracles_digest_before_evaluations(
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fq_oracles_p_eval1(
     oracles: *const FqOracles,
-) -> *const Vec<Fq> {
-    return Box::into_raw(Box::new((unsafe { &(*oracles) }).p_eval[0].clone()));
+) -> *const Fq {
+    let v = &(unsafe { &(*oracles) }).p_eval[0];
+    assert_eq!(v.len(), 1);
+    return Box::into_raw(Box::new(v[0]));
 }
 
 #[no_mangle]
 pub extern "C" fn zexe_tweedle_plonk_fq_oracles_p_eval2(
     oracles: *const FqOracles,
-) -> *const Vec<Fq> {
-    return Box::into_raw(Box::new((unsafe { &(*oracles) }).p_eval[1].clone()));
+) -> *const Fq {
+    let v = &(unsafe { &(*oracles) }).p_eval[1];
+    assert_eq!(v.len(), 1);
+    return Box::into_raw(Box::new(v[0]));
 }
 
 #[no_mangle]

@@ -42,6 +42,7 @@ pub struct PointerPair<A, B> {
     pub b: *const B
 }
 
+// TODO: Not compatible with variable rounds
 pub fn batch_dlog_accumulator_check<G: CommitmentCurve>(
     urs: &SRS<G>,
     comms: &Vec<G>,
@@ -386,6 +387,7 @@ where G::ScalarField : CommitmentField + ToBytes
 pub fn read_plonk_verifier_index<'a, G: CommitmentCurve, R: Read>(
     fr_sponge_params:ArithmeticSpongeParams<G::ScalarField>,
     fq_sponge_params:ArithmeticSpongeParams<G::BaseField>,
+    endo : G::ScalarField,
     srs: *const SRS<G>,
     mut r: R) -> IoResult<PlonkVerifierIndex<'a, G>> 
 where G::ScalarField : CommitmentField + FromBytes
@@ -445,6 +447,7 @@ where G::ScalarField : CommitmentField + FromBytes
         o,
         fr_sponge_params,
         fq_sponge_params,
+        endo,
     })
 }
 
