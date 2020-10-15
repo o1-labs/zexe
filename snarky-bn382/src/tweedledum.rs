@@ -120,9 +120,7 @@ pub extern "C" fn zexe_tweedle_fq_urs_b_poly_commitment(
     let chals = unsafe { &*chals };
     let urs = unsafe { &*urs };
 
-    let s0 = product(chals.iter().map(|x| *x)).inverse().unwrap();
-    let chal_squareds: Vec<Fq> = chals.iter().map(|x| x.square()).collect();
-    let coeffs = b_poly_coefficients(s0, &chal_squareds);
+    let coeffs = b_poly_coefficients(&chals);
     let p = DensePolynomial::<Fq>::from_coefficients_vec(coeffs);
     let g = urs.commit(&p, None);
 

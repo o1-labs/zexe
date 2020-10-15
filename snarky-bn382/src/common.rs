@@ -86,11 +86,8 @@ pub fn batch_dlog_accumulator_check<G: CommitmentCurve>(
         .chunks(rounds)
         .zip(rs)
         .map(|(chunk, r)| {
-            let s0 = chunk
-                .iter()
-                .fold(G::ScalarField::one(), |x, (_, c_inv)| x * c_inv);
-            let c_squareds: Vec<_> = chunk.iter().map(|(c, _)| c.square()).collect();
-            let mut s = b_poly_coefficients(s0, &c_squareds);
+            let chals: Vec<_> = chunk.iter().map(|(c, _)| **c).collect();
+            let mut s = b_poly_coefficients(&chals);
             s.iter_mut().for_each(|c| *c *= &r);
             s
         })
@@ -251,7 +248,7 @@ pub fn read_dense_polynomial<A: ToBytes + Field, R: Read>(r: R) -> IoResult<Dens
 }
 
 pub fn write_domain<A: ToBytes + PrimeField, W: Write>(d: &Domain<A>, mut w: W) -> IoResult<()> {
-    d.size.write(&mut w)?;
+    (d.size as u64).write(&mut w)?;
     Ok(())
 }
 
@@ -345,6 +342,53 @@ where G::ScalarField : CommitmentField + FromBytes
     })
 }
 
+fn print_comm<G: CommitmentCurve>(s : &str, g: &PolyComm<G>) {
+    for (i, t) in g.unshifted.iter().enumerate() {
+        let (x, y) = t.to_coordinates().unwrap();
+        println!("{}.unshifted[{}] = {}, {}", s, i, x, y);
+    }
+    match g.shifted {
+        None => (),
+        Some(s) => {
+            let (x, y) = s.to_coordinates().unwrap();
+            println!("{}.shifted = {}, {}", s, x, y);
+        }
+    }
+}
+
+pub fn print_plonk_verifier_index<'a, G: CommitmentCurve>(
+    vk: & PlonkVerifierIndex<'a, G>) {
+
+    println!("domain {}", vk.domain.size);
+    println!("max_poly_size {}", vk.max_poly_size);
+    println!("max_quot_size {}", vk.max_quot_size);
+
+    print_comm("s0", &vk.sigma_comm[0]);
+    print_comm("s1", &vk.sigma_comm[1]);
+    print_comm("s2", &vk.sigma_comm[2]);
+
+    print_comm("ql_comm", &vk.ql_comm);
+    print_comm("qr_comm", &vk.qr_comm);
+    print_comm("qo_comm", &vk.qo_comm);
+    print_comm("qm_comm", &vk.qm_comm);
+    print_comm("qc_comm", &vk.qc_comm);
+
+    print_comm("rcm_comm[0] ", &vk.rcm_comm[0]);
+    print_comm("rcm_comm[1] ", &vk.rcm_comm[1]);
+    print_comm("rcm_comm[2] ", &vk.rcm_comm[2]);
+
+    print_comm("psm_comm ", &vk.psm_comm);
+    print_comm("add_comm ", &vk.add_comm);
+    print_comm("mul1_comm ", &vk.mul1_comm);
+    print_comm("mul2_comm ", &vk.mul2_comm);
+    print_comm("emul1_comm ", &vk.emul1_comm);
+    print_comm("emul2_comm ", &vk.emul2_comm);
+    print_comm("emul3_comm ", &vk.emul3_comm);
+
+    println!("r {}", vk.r);
+    println!("o {}", vk.o);
+}
+
 pub fn write_plonk_verifier_index<'a, G: CommitmentCurve, W: Write>(
     vk: *const PlonkVerifierIndex<'a, G>,
     mut w: W) -> IoResult<()> 
@@ -424,7 +468,7 @@ where G::ScalarField : CommitmentField + FromBytes
     let r_value = G::ScalarField::read(&mut r)?;
     let o = G::ScalarField::read(&mut r)?;
     let srs = PlonkSRSValue::Ref(unsafe { &(*srs) });
-    Ok(PlonkVerifierIndex {
+    let vk = PlonkVerifierIndex {
         domain,
         max_poly_size,
         max_quot_size,
@@ -448,7 +492,8 @@ where G::ScalarField : CommitmentField + FromBytes
         fr_sponge_params,
         fq_sponge_params,
         endo,
-    })
+    };
+    Ok(vk)
 }
 
 pub fn write_plonk_constraint_system<G: CommitmentCurve, W: Write>(

@@ -17,7 +17,7 @@ crate-type = ["staticlib"]
 groupmap = { path = "../groupmap" }
 libc = { version = "0.2.0" }
 algebra = { path = "../algebra", features = [ "asm", "parallel", "bn_382", "tweedle" ] }
-ff-fft = { path = "../ff-fft" }
+ff-fft = { path = "../ff-fft", features = [ "parallel" ] }
 rand = { version = "0.7" }
 num-bigint = { version = "0.2.3" }
 sprs = { version = "0.7.1" }
