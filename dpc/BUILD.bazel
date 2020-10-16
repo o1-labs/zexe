@@ -10,11 +10,11 @@ rust_library(
     ],
     deps = [
         "//algebra",
-        "//r1cs-core:r1cs_core",
-        "//r1cs-std:r1cs_std",
-        "//crypto-primitives:crypto_primitives",
+        "//r1cs-core",
+        "//r1cs-std",
+        "//crypto-primitives",
         "//gm17",
-        "//bench-utils:bench_utils",
+        "//bench-utils",
 
         "//cargo:rand",
     ],

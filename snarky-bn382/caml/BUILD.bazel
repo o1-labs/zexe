@@ -1,5 +1,5 @@
 load(
-    "@obazl_rules_ocaml//ocaml:build.bzl",
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
     "ocaml_module",
     "ppx_executable"
 )
@@ -10,7 +10,7 @@ IMPL_OPTS = [
 
 ocaml_module(
     name = "snarky_bn382_bindings",
-    impl = "snarky_bn382_bindings.ml",
+    src  = "snarky_bn382_bindings.ml",
     opts = IMPL_OPTS,
     ppx =  ":ppx",
     ppx_args = [
@@ -32,7 +32,7 @@ ocaml_module(
 
 ocaml_module(
     name = "cstubs_applicative.cm_",
-    impl = "cstubs_applicative.ml",
+    src  = "cstubs_applicative.ml",
     opts = IMPL_OPTS,
     deps = [
         # do not sort (buildifier)

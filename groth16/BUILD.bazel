@@ -6,10 +6,10 @@ rust_library(
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     deps = [
-        "//algebra-core:algebra_core",
-        "//bench-utils:bench_utils",
-        "//ff-fft:ff_fft",
-        "//r1cs-core:r1cs_core",
+        "//algebra-core",
+        "//bench-utils",
+        "//ff-fft",
+        "//r1cs-core",
 
         "//cargo:rand",
         "//cargo:rayon",

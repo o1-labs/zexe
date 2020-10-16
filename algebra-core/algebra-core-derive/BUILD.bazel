@@ -4,7 +4,7 @@ load(
 )
 
 rust_library(
-    name = "algebra_core_derive",
+    name = "algebra-core-derive",
     visibility = ["//visibility:public"],
     crate_type = "proc-macro",
     edition = "2018",

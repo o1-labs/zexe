@@ -2,7 +2,7 @@ load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
 
 rust_library(
     edition = "2018",
-    name = "r1cs_std",
+    name = "r1cs-std",
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     proc_macro_deps = [
@@ -10,7 +10,7 @@ rust_library(
     ],
     deps = [
         "//algebra",
-        "//r1cs-core:r1cs_core",
+        "//r1cs-core"
     ],
     crate_features = [
         "bls12_377", "edwards_bls12", "edwards_sw6"

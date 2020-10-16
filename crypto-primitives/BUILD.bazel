@@ -2,18 +2,18 @@ load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
 
 rust_library(
     edition = "2018",
-    name = "crypto_primitives",
+    name = "crypto-primitives",
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     proc_macro_deps = ["//cargo:derivative"],
     deps = [
-        "//algebra-core:algebra_core",
-        "//bench-utils:bench_utils",
-        "//ff-fft:ff_fft",
+        "//algebra-core",
+        "//bench-utils",
+        "//ff-fft",
         "//gm17",
         "//groth16",
-        "//r1cs-core:r1cs_core",
-        "//r1cs-std:r1cs_std",
+        "//r1cs-core",
+        "//r1cs-std",
 
         "//cargo:digest",
         "//cargo:blake2",

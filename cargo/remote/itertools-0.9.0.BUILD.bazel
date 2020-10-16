@@ -38,7 +38,7 @@ rust_library(
     name = "itertools",
     crate_type = "lib",
     deps = [
-        "@raze__either__1_5_3//:either",
+        "@raze__either__1_6_1//:either",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

@@ -1,5 +1,5 @@
 load(
-    "@obazl_rules_ocaml//ocaml:build.bzl",
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
     "ocaml_archive",
     "ocaml_executable",
     "ocaml_interface",
@@ -21,7 +21,7 @@ filegroup(
 
 ocaml_module(
     name = "snarky_bn382_generated_stubs",
-    impl = ":snarky_bn382_generated_stubs_ml",
+    src  = ":snarky_bn382_generated_stubs_ml",
     opts = IMPL_OPTS,
     visibility = ["//visibility:public"],
     deps = [
@@ -65,7 +65,7 @@ ocaml_executable(
 
 ocaml_module(
     name = "snarky_bn382_ctypes_stubs.cm_",
-    impl = "snarky_bn382_ctypes_stubs.ml",
+    src  = "snarky_bn382_ctypes_stubs.ml",
     opts = IMPL_OPTS,
     visibility = ["//visibility:public"],
     deps = [

@@ -15,12 +15,12 @@ cargo_build_script(
 )
 
 rust_library(
-    name = "algebra_core",
+    name = "algebra-core",
     visibility = ["//visibility:public"],
     edition = "2018",
     srcs = glob(["**/*.rs"]),
     proc_macro_deps = [
-        "//algebra-core/algebra-core-derive:algebra_core_derive",
+        "//algebra-core/algebra-core-derive",
         "//cargo:derivative",
         "//cargo:unroll",
     ],

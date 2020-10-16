@@ -36,8 +36,8 @@ rust_library(
     name = "rand",
     crate_type = "lib",
     deps = [
-        "@raze__getrandom__0_1_14//:getrandom",
-        "@raze__libc__0_2_70//:libc",
+        "@raze__getrandom__0_1_15//:getrandom",
+        "@raze__libc__0_2_79//:libc",
         "@raze__rand_chacha__0_2_2//:rand_chacha",
         "@raze__rand_core__0_5_1//:rand_core",
     ],
@@ -61,7 +61,7 @@ rust_library(
         "std",
     ],
     aliases = {
-        "@raze__getrandom__0_1_14//:getrandom": "getrandom_package",
+        "@raze__getrandom__0_1_15//:getrandom": "getrandom_package",
     },
 )
 # Unsupported target "seq" with type "bench" omitted

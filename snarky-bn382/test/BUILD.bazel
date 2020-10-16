@@ -1,6 +1,6 @@
 ## BUILD.bazel for /Users/gar/coda/gitfork/src/lib/zexe/snarky-bn382/test/dune
 load(
-    "@obazl_rules_ocaml//ocaml:build.bzl",
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
     "ocaml_executable",
     "ocaml_module",
 )
@@ -19,9 +19,9 @@ ocaml_executable(
 
 ocaml_module(
     name = "test.cm_",
-    impl = "test.ml",
+    src = "test.ml",
     deps = [
-        "//snarky-bn382:snarky_bn382"
+        "//snarky-bn382:snarky-bn382"
     ],
     visibility = ["//visibility:public"],
 )

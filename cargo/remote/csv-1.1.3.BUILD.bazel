@@ -41,9 +41,9 @@ rust_library(
     deps = [
         "@raze__bstr__0_2_13//:bstr",
         "@raze__csv_core__0_1_10//:csv_core",
-        "@raze__itoa__0_4_5//:itoa",
-        "@raze__ryu__1_0_4//:ryu",
-        "@raze__serde__1_0_110//:serde",
+        "@raze__itoa__0_4_6//:itoa",
+        "@raze__ryu__1_0_5//:ryu",
+        "@raze__serde__1_0_117//:serde",
     ],
     srcs = glob(["**/*.rs"]),
     crate_root = "src/lib.rs",

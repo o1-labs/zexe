@@ -11,7 +11,7 @@ rust_library(
         "//cargo:derivative",
     ],
     deps = [
-        "//algebra-core:algebra_core",
+        "//algebra-core",
     ],
     crate_features = [
         "asm",
