@@ -144,12 +144,12 @@ rust_library(
         "@marlin//dlog/marlin:marlin_protocol_dlog",
         "@marlin//dlog/plonk:plonk_protocol_dlog",
 
-        "//cargo:libc",
-        "//cargo:rand",
-        "//cargo:rand_core",
-        "//cargo:num_bigint",
-        "//cargo:sprs",
-        "//cargo:rayon"
+        "//bzl/cargo:libc",
+        "//bzl/cargo:rand",
+        "//bzl/cargo:rand_core",
+        "//bzl/cargo:num_bigint",
+        "//bzl/cargo:sprs",
+        "//bzl/cargo:rayon"
     ],
     crate_features = [
         "bn_382",

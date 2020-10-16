@@ -11,8 +11,8 @@ rust_library(
         "//ff-fft",
         "//r1cs-core",
 
-        "//cargo:rand",
-        "//cargo:rayon",
+        "//bzl/cargo:rand",
+        "//bzl/cargo:rayon",
     ],
     crate_features = [
         "derive",

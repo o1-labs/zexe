@@ -6,7 +6,7 @@ rust_library(
     name = "dpc",
     srcs = glob(["src/**/*.rs"]),
     proc_macro_deps = [
-        "//cargo:derivative",
+        "//bzl/cargo:derivative",
     ],
     deps = [
         "//algebra",
@@ -16,7 +16,7 @@ rust_library(
         "//gm17",
         "//bench-utils",
 
-        "//cargo:rand",
+        "//bzl/cargo:rand",
     ],
     crate_features = [
         "bls12_377",

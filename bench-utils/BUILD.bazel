@@ -5,7 +5,7 @@ rust_library(
     visibility = ["//visibility:public"],
     srcs = ["src/lib.rs"],
     deps = [
-        "//cargo:colored",
+        "//bzl/cargo:colored",
     ],
     crate_features = ["print-trace=colored"]
 )

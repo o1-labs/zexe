@@ -5,7 +5,7 @@ rust_library(
     name = "crypto-primitives",
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
-    proc_macro_deps = ["//cargo:derivative"],
+    proc_macro_deps = ["//bzl/cargo:derivative"],
     deps = [
         "//algebra-core",
         "//bench-utils",
@@ -15,10 +15,10 @@ rust_library(
         "//r1cs-core",
         "//r1cs-std",
 
-        "//cargo:digest",
-        "//cargo:blake2",
-        "//cargo:rand",
-        "//cargo:rayon",
+        "//bzl/cargo:digest",
+        "//bzl/cargo:blake2",
+        "//bzl/cargo:rand",
+        "//bzl/cargo:rayon",
     ],
     crate_features = [
         "std",

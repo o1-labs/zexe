@@ -10,7 +10,7 @@ List visible targets:
 
 `$ bazel query 'attr(visibility, "//visibility:public", //...:all)' | sort`
 
-You can ignore the `//cargo` and `//bzl` targets. `//:verbose` is a
+You can ignore the `//bzl` targets. `//:verbose` is a
 command line switch, to use it pass `--//:verbose`.
 
 Bazel supports CLI completion, so you can type e.g. `$ bazel build
@@ -72,7 +72,7 @@ $ bazel query "allpaths(//dpc, @raze__rand__0_7_3//:rand)"
 //r1cs-core:r1cs-core
 //ff-fft:ff-fft
 //algebra:algebra
-//cargo:rand
+//bzl/cargo:rand
 @raze__rand__0_7_3//:rand
 ```
 
@@ -80,7 +80,7 @@ Since `rand` is aliased, the previous query can be expressed more
 succinctly as
 
 ```
-bazel query "allpaths(//dpc, //cargo:rand)"
+bazel query "allpaths(//dpc, //bzl/cargo:rand)"
 ```
 
 ## Maintenance
@@ -89,13 +89,13 @@ Use [cargo-raze](https://github.com/google/cargo-raze) to manage Bazel support.
 
 To update:
 
-* edit `cargo/Cargo.toml`
-* from within `cargo/` run `$ cargo raze`
+* edit `bzl/cargo/Cargo.toml`
+* from within `bzl/cargo/` run `$ cargo raze`
 * test the build
-* to pin versions, from within `cargo` run `$ cargo generate-lockfile`
+* to pin versions, from within `bzl/cargo` run `$ cargo generate-lockfile`
 * commit changes to git
 
-IMPORTANT: the cargo/Cargo.toml file must list the deps of marlin as
+IMPORTANT: the bzl/cargo/Cargo.toml file must list the deps of marlin as
 well as those of zexe. The workspace file can import the Marlin
 repository, but it will not evaluate Marlin's WORKSPACE rules to acquire
 its dependencies. So they must be included here.
@@ -104,20 +104,20 @@ its dependencies. So they must be included here.
 ## NOTES
 
 * External deps are managed in the [cargo](./cargo) subdirectory.
-  * Configuration is based on the output of [cargo raze](https://github.com/google/cargo-raze), which generates `BUILD.bazel` files from `Cargo.toml` files.  The details are a little gory (better docs are in the works), but in short, `cargo raze` does the following for the transitive dependency graph of each dependency listed in [cargo/Cargo.toml](./cargo/Cargo.toml):
+  * Configuration is based on the output of [cargo raze](https://github.com/google/cargo-raze), which generates `BUILD.bazel` files from `Cargo.toml` files.  The details are a little gory (better docs are in the works), but in short, `cargo raze` does the following for the transitive dependency graph of each dependency listed in [bzl/cargo/Cargo.toml](./bzl/cargo/Cargo.toml):
   * Adds a `new_git_repository` or `new_http_archive` entry to
-    [cargo/crates.bzl](./cargo/BUILD.bazel).  At build time, Bazel
+    [bzl/cargo/crates.bzl](./bzl/cargo/BUILD.bazel).  At build time, Bazel
     will use these to dynamically set up the repositories in its local
     cache.  The entries are available as Bazel labels, e.g. for
     `_new_git_repository( name = "raze__algebra__0_1_0"` we get
     `@raze__algebra__0_1_0//pkg:target`.
-  * Adds a BUILD.bazel file in [cargo/remote](./cargo/remote). These
+  * Adds a BUILD.bazel file in [bzl/cargo/remote](./bzl/cargo/remote). These
     files are generated from the `Cargo.toml` files in the source.
     They contain the Bazel rules (mostly `rust_binary` and
     `rust_library`) needed to build the outputs.
   * Adds an alias entry to
-    [cargo/BUILD.bazel](./cargo/BUILD.bazel). This is for convenience;
-    it means we can say e.g. `//cargo:algebra` instead of
+    [bzl/cargo/BUILD.bazel](./bzl/cargo/BUILD.bazel). This is for convenience;
+    it means we can say e.g. `//bzl/cargo:algebra` instead of
     `@raze__algebra__0_1_0//:algebra`.
 
 WARNING: the translation from `Cargo.toml` to `BUILD.bazel` is not

@@ -10,9 +10,9 @@ rust_library(
     edition = "2018",
     srcs = glob(["**/*.rs"]),
     deps = [
-        "//cargo:proc_macro2",
-        "//cargo:syn",
-        "//cargo:quote",
+        "//bzl/cargo:proc_macro2",
+        "//bzl/cargo:syn",
+        "//bzl/cargo:quote",
     ],
 )
 

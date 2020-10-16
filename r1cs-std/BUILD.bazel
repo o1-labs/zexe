@@ -6,7 +6,7 @@ rust_library(
     visibility = ["//visibility:public"],
     srcs = glob(["src/**/*.rs"]),
     proc_macro_deps = [
-        "//cargo:derivative",
+        "//bzl/cargo:derivative",
     ],
     deps = [
         "//algebra",

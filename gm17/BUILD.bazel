@@ -11,9 +11,9 @@ rust_library(
         "//ff-fft",  # default-features = false
         "//r1cs-core", # default-features = false
 
-        "//cargo:rand", #default-features = false
-        "//cargo:rayon", # optional
-        "//cargo:smallvec",
+        "//bzl/cargo:rand", #default-features = false
+        "//bzl/cargo:rayon", # optional
+        "//bzl/cargo:smallvec",
     ],
     crate_features = [
         "parallel",

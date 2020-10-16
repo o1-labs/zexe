@@ -7,8 +7,8 @@ rust_library(
     srcs = glob(["src/**/*.rs"]),
     deps = [
         "//algebra-core",
-        "//cargo:rand", #default-features = false
-        "//cargo:rayon", # optional
+        "//bzl/cargo:rand", #default-features = false
+        "//bzl/cargo:rayon", # optional
     ],
     crate_features = ["parallel", "std", "algebra-core/std", "proc-macro"]
 )
