@@ -25,7 +25,7 @@ SNARKY_BN382_NS = "Snarky_bn382"
 SNARKY_BN382_PPX = "//src/ppx:"
 
 ocaml_archive(
-    name = "snarky-bn382",
+    name = "snarky_bn382",
     opts = INTF_OPTS,
     visibility = ["//visibility:public"],
     deps = [
@@ -93,11 +93,12 @@ cc_library(
     name = "snarky_bn382_a",
     srcs = [
         "//snarky-bn382/bindings_gen:snarky_bn382_c",
-        ":snarky_bn382.h"
+        "snarky_bn382.h"
     ],
     copts = [
         "-std=c11",
         "-Isnarky-bn382",
+        "-Iexternal/zexe/snarky-bn382",
         ## overlook implicit decl error for
         ## 'zexe_tweedle_plonk_fq_verifier_index_write'
         "-Wno-implicit-function-declaration",

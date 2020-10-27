@@ -95,10 +95,18 @@ To update:
 * to pin versions, from within `bzl/cargo` run `$ cargo generate-lockfile`
 * commit changes to git
 
-IMPORTANT: the bzl/cargo/Cargo.toml file must list the deps of marlin as
-well as those of zexe. The workspace file can import the Marlin
-repository, but it will not evaluate Marlin's WORKSPACE rules to acquire
-its dependencies. So they must be included here.
+WARNING: Do NOT use `gen_workspace_prefix` in the `raze` section of
+`bzl/cargo/Cargo.toml`. That would affect the names of the repos
+boostrapped by crates.bzl, which would result in duplicates between
+zexe and marlin. The default uses prefix `raze__`; using this in both
+@marlin and @zexe means only one copy of each repo will be created. If
+multiple copies are created the build will fail.
+
+After re-running `cargo raze` you can edit the fetch command in
+`bzl/cargo/crates.bzl` from `raze_fetch_remote_crates` to
+`zexe_fetch_remote_crates`. Do this for marlin as well and you can
+load each set by name; the logic of the `maybe` function used to load
+repos prevents duplicates.
 
 
 ## NOTES
