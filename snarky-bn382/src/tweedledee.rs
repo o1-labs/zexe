@@ -35,7 +35,7 @@ use std::{
 };
 
 use commitment_dlog::{
-    commitment::{b_poly_coefficients, product, CommitmentCurve, OpeningProof, PolyComm},
+    commitment::{b_poly_coefficients, CommitmentCurve, OpeningProof, PolyComm},
     srs::SRS,
 };
 use marlin_protocol_dlog::index::{
@@ -91,7 +91,7 @@ pub extern "C" fn zexe_tweedle_fp_urs_lagrange_commitment(
         .map(|j| if i == j { Fp::one() } else { Fp::zero() })
         .collect();
     let p = Evaluations::<Fp>::from_vec_and_domain(evals, x_domain).interpolate();
-    let res = urs.commit(&p, None);
+    let res = urs.commit_non_hiding(&p, None);
 
     Box::into_raw(Box::new(res))
 }
@@ -107,7 +107,7 @@ pub extern "C" fn zexe_tweedle_fp_urs_commit_evaluations(
 
     let evals = unsafe { &*evals };
     let p = Evaluations::<Fp>::from_vec_and_domain(evals.clone(), x_domain).interpolate();
-    let res = urs.commit(&p, None);
+    let res = urs.commit_non_hiding(&p, None);
 
     Box::into_raw(Box::new(res))
 }
@@ -122,7 +122,7 @@ pub extern "C" fn zexe_tweedle_fp_urs_b_poly_commitment(
 
     let coeffs = b_poly_coefficients(&chals);
     let p = DensePolynomial::<Fp>::from_coefficients_vec(coeffs);
-    let g = urs.commit(&p, None);
+    let g = urs.commit_non_hiding(&p, None);
 
     Box::into_raw(Box::new(g))
 }
@@ -1255,7 +1255,7 @@ pub extern "C" fn zexe_tweedle_fp_oracles_create(
 
     let x_hat = evals_from_coeffs(proof.public.clone(), index.domains.x).interpolate();
     // TODO: Should have no degree bound when we add the correct degree bound method
-    let x_hat_comm = index.srs.get_ref().commit(&x_hat, None);
+    let x_hat_comm = index.srs.get_ref().commit_non_hiding(&x_hat, None);
 
     let (mut sponge, o) = proof
         .oracles::<DefaultFqSponge<TweedledeeParameters, MarlinSpongeConstants>, DefaultFrSponge<Fp, MarlinSpongeConstants>>(

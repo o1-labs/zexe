@@ -5,7 +5,7 @@ use algebra::tweedle::{
     fp::Fp,
 };
 
-use plonk_circuits::constraints::ConstraintSystem;
+use plonk_circuits::constraints::{zk_w, zk_polynomial, ConstraintSystem};
 use plonk_circuits::gate::{CircuitGate, Gate, GateType, GateType::*};
 use plonk_circuits::scalars::ProofEvaluations as DlogProofEvaluations;
 use plonk_circuits::wires::{Col, Col::*, GateWires, Wire, Wires};
@@ -245,8 +245,11 @@ pub extern "C" fn zexe_tweedle_plonk_fp_verifier_index_make<'a>(
 ) -> *const DlogVerifierIndex<'a, GAffine> {
     let srs = unsafe { &*urs };
     let (endo_q, _endo_r) = commitment_dlog::srs::endos::<GAffineOther>();
+    let domain = Domain::<Fp>::new(max_poly_size).unwrap();
     let index = DlogVerifierIndex::<GAffine> {
-        domain: Domain::<Fp>::new(max_poly_size).unwrap(),
+        domain,
+        w: zk_w(domain),
+        zkpm: zk_polynomial(domain),
         max_poly_size,
         max_quot_size,
         srs: SRSValue::Ref(srs),
