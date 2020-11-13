@@ -51,10 +51,8 @@ use algebra::bn_382::g::Affine;
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fq_urs_create(
     depth: usize,
-    public: usize,
-    size: usize,
 ) -> *const SRS<GAffine> {
-    Box::into_raw(Box::new(SRS::create(depth, public, size)))
+    Box::into_raw(Box::new(SRS::create(depth)))
 }
 
 #[no_mangle]
@@ -124,9 +122,7 @@ pub extern "C" fn zexe_bn382_fq_urs_b_poly_commitment(
     let chals = unsafe { &*chals };
     let urs = unsafe { &*urs };
 
-    let s0 = product(chals.iter().map(|x| *x)).inverse().unwrap();
-    let chal_squareds: Vec<Fq> = chals.iter().map(|x| x.square()).collect();
-    let coeffs = b_poly_coefficients(s0, &chal_squareds);
+    let coeffs = b_poly_coefficients(&chals);
     let p = DensePolynomial::<Fq>::from_coefficients_vec(coeffs);
     let g = urs.commit(&p, None);
 
@@ -750,6 +746,12 @@ pub extern "C" fn zexe_bn382_fq_random() -> *mut Fq {
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fq_of_int(i: u64) -> *mut Fq {
     let ret = Fq::from(i);
+    return Box::into_raw(Box::new(ret));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_domain_generator(log2_size: usize) -> *mut Fq {
+    let ret = Domain::new(1 << log2_size).unwrap().group_gen;
     return Box::into_raw(Box::new(ret));
 }
 
@@ -1953,4 +1955,37 @@ pub extern "C" fn zexe_bn382_fq_poly_comm_make(
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fq_poly_comm_delete(c: *mut PolyComm<GAffine>) {
     let _box = unsafe { Box::from_raw(c) };
+}
+
+// Fq poly comm vector stubs
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_poly_comm_vector_create() -> *mut Vec<PolyComm<GAffine>> {
+    return Box::into_raw(Box::new(Vec::new()));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_poly_comm_vector_length(v: *const Vec<PolyComm<GAffine>>) -> i32 {
+    let v_ = unsafe { &(*v) };
+    return v_.len() as i32;
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_poly_comm_vector_emplace_back(v: *mut Vec<PolyComm<GAffine>>, x: *const PolyComm<GAffine>) {
+    let v_ = unsafe { &mut (*v) };
+    let x_ = unsafe { &(*x) };
+    v_.push(x_.clone());
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_poly_comm_vector_get(v: *mut Vec<PolyComm<GAffine>>, i: u32) -> *mut PolyComm<GAffine> {
+    let v_ = unsafe { &mut (*v) };
+    return Box::into_raw(Box::new((*v_)[i as usize].clone()));
+}
+
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fq_poly_comm_vector_delete(v: *mut Vec<PolyComm<GAffine>>) {
+    // Deallocation happens automatically when a box variable goes out of
+    // scope.
+    let _box = unsafe { Box::from_raw(v) };
 }

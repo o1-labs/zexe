@@ -126,6 +126,12 @@ pub extern "C" fn zexe_bn382_fp_of_int(i: u64) -> *mut Fp {
     return Box::into_raw(Box::new(ret));
 }
 
+#[no_mangle]
+pub extern "C" fn zexe_bn382_fp_domain_generator(log2_size: usize) -> *mut Fp {
+    let ret = Domain::new(1 << log2_size).unwrap().group_gen;
+    return Box::into_raw(Box::new(ret));
+}
+
 // TODO: Leaky
 #[no_mangle]
 pub extern "C" fn zexe_bn382_fp_to_string(x: *const Fp) -> *const u8 {
