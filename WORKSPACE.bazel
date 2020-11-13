@@ -70,13 +70,15 @@ git_repository(
     branch = "master",
 )
 
-load("@obazl_rules_ocaml//ocaml:bootstrap.bzl",
-     "ocaml_configure",
-     "ocaml_register_toolchains",
-     "opam_configure")
-
-opam_configure()
+load("@obazl_rules_ocaml//ocaml:bootstrap.bzl", "ocaml_configure")
 
 ocaml_configure()
 
-ocaml_register_toolchains(installation="host")
+################################################################
+git_repository(
+    name = "ppx_version",
+    remote = "https://github.com/o1-labs/ppx_version",
+    branch = "master",
+    # tag    = use tag instead of branch once a release tag has been published
+)
+

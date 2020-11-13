@@ -4,7 +4,7 @@ load(
 )
 
 rust_library(
-    name = "field_assembly",
+    name = "field-assembly",
     visibility = ["//visibility:public"],
     srcs = glob(["**/*.rs"]),
     proc_macro_deps = [

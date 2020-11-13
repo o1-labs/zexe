@@ -1,0 +1,38 @@
+load(
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
+    "ocaml_module",
+    "ppx_module",
+    "ppx_executable"
+)
+
+ocaml_module(
+    name = "Cstubs_applicative",
+    opts =  ["-linkall"],
+    src = "cstubs_applicative.ml",
+    ppx = ":ppx[ppx_version][bisect_ppx]",
+    ppx_args = ["--conditional"],
+    deps = [
+        # do not sort (buildifier)
+        "@opam//pkg:base",
+        "@opam//pkg:ctypes",
+        "@opam//pkg:ctypes.stubs",
+    ],
+    visibility = ["//visibility:public"]
+)
+
+################################################################
+ppx_executable(
+    name = "ppx[ppx_version][bisect_ppx]",
+    main = "//bzl/ppx:Driver",
+    lazy_deps = ["@opam//pkg:bisect_ppx.runtime"],
+    opts = [
+        "-thread",
+        "-linkall",
+        "-predicates",
+        "ppx_driver",
+    ],
+    deps = [
+        "@ppx_version//src:ppx_version",
+        "@opam//pkg:bisect_ppx",
+    ],
+)

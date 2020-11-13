@@ -13,16 +13,23 @@ ocaml_executable(
     name = "test",
     deps = [
         # do not sort (buildifier)
-        ":test.cm_",
+        "//snarky-bn382:snarky_bn382",
+        ":Test",
     ],
+    # cc_deps = {
+    #     "//snarky-bn382:snarky_bn382.a": "default",
+    #     "//snarky-bn382:snarky_bn382_stubs_stubs": "default"
+    # }
 )
 
 ocaml_module(
-    name = "test.cm_",
+    name = "Test",
     src = "test.ml",
+    opts = ["-open", "Snarky_bn382"],
     deps = [
-        "//snarky-bn382:snarky-bn382"
+        "//snarky-bn382:snarky_bn382"
     ],
+    # cc_deps = {"//snarky-bn382:snarky_bn382_a": "default"},
     visibility = ["//visibility:public"],
 )
 

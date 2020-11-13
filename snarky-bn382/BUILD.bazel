@@ -1,70 +1,37 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-load(
-    "@obazl_rules_ocaml//ocaml:rules.bzl",
-    "ocaml_archive",
-    "ocaml_interface",
-    "ocaml_module",
-    "ocaml_ns_module",
-    "ppx_archive",
-    "ppx_module",
-)
+load("@obazl_rules_ocaml//ocaml:rules.bzl", "ocaml_module")
 
 load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
 
+load("@//bzl/config/rust:BUILD.bzl", "RUST_CRATE_TYPE", "RUST_PROFILE_RELEASE")
+
 INTF_OPTS = [
-    # "-verbose"
+    "-linkall"
 ]
 
 IMPL_OPTS = [
-    # "-verbose"
+    "-linkall"
 ]
 
-SNARKY_BN382_NS = "Snarky_bn382"
-
-SNARKY_BN382_PPX = "//src/ppx:"
-
-ocaml_archive(
-    name = "snarky_bn382",
-    opts = INTF_OPTS,
-    visibility = ["//visibility:public"],
-    deps = [
-        # do not sort (buildifier)
-        ":snarky_bn382_ns_module",
-        ":snarky_bn382.cm_",
-    ],
-    cc_deps = {
-        ":snarky_bn382_stubs_stubs": "default"
-    }
-)
-
-ocaml_ns_module(
-    name = "snarky_bn382_ns_module",
-    ns = SNARKY_BN382_NS,
-    submodules = [
-        # do not sort (buildifier)
-        "snarky_bn382.ml",
-    ],
-)
-
 ocaml_module(
-    name = "snarky_bn382.cm_",
+    name = "snarky-bn382",
     src  = "snarky_bn382.ml",
-    # ns_module = ":snarky_bn382_ns_module",
     opts = IMPL_OPTS,
-    visibility = ["//visibility:public"],
     deps = [
         # do not sort (buildifier)
         "@opam//pkg:ctypes",
-        ":snarky_bn382_stubs",
-        "//snarky-bn382/bindings_gen:snarky_bn382_generated_stubs",
-        "//snarky-bn382/caml:snarky_bn382_bindings",
+        ":Snarky_bn382_stubs",
+        "//snarky-bn382/bindings_gen:Snarky_bn382_generated_stubs",
+        "//snarky-bn382/caml:Snarky_bn382_bindings",
     ],
+    cc_deps = {
+        # this is a statically compiled Rust lib:
+        # ":snarky_bn382_stubs_stubs": "static"
+        ":snarky_bn382_stubs_stubs": "default"
+    },
+    visibility = ["//visibility:public"]
 )
-
-SNARKY_BN382_STUBS_NS = "Snarky_bn382_stubs"
-
-SNARKY_BN382_STUBS_PPX = "//src/ppx:"
 
 ## (self_build_stubs_archive (snarky_bn382_stubs))
 ## means we expect snarky_bn382_stubs.a
@@ -77,22 +44,17 @@ SNARKY_BN382_STUBS_PPX = "//src/ppx:"
 ## it is "now deleted." evidently, refers to c files to be compiled by dune
 ## and "packaged together with" the lib.
 ocaml_module(
-    name = "snarky_bn382_stubs",
-    # name = "snarky_bn382_stubs.cm_",
+    name = "Snarky_bn382_stubs",
     src  = "snarky_bn382_stubs.ml",
-    # ns_module = ":snarky_bn382_stubs_ns_module",
-    opts = IMPL_OPTS,
-    cc_deps = {
-        # do not sort (buildifier)
-        ":snarky_bn382_a": "default"
-    },
+    opts = IMPL_OPTS + ["-linkall"],
+    cc_deps = {":snarky_bn382": "default"},
     visibility = ["//visibility:public"],
 )
 
 cc_library(
-    name = "snarky_bn382_a",
+    name = "snarky_bn382",
     srcs = [
-        "//snarky-bn382/bindings_gen:snarky_bn382_c",
+        "//snarky-bn382/bindings_gen:snarky_bn382.c",
         "snarky_bn382.h"
     ],
     copts = [
@@ -107,15 +69,21 @@ cc_library(
     deps = [
         "@ocaml//csdk/ctypes"
     ],
-    visibility = ["//visibility:private"],
+    visibility = ["//visibility:public"],
 )
 
 rust_library(
     # output will be libsnarky_bn382_stubs_stubs.a
     name = "snarky_bn382_stubs_stubs",
     edition = "2018",
-    visibility = ["//visibility:public"],
-    crate_type = "staticlib",
+    crate_type = RUST_CRATE_TYPE,
+    crate_features = [
+        "bn_382",
+        "std",
+        "use_core",
+        "i128"
+    ],
+    rustc_flags = RUST_PROFILE_RELEASE + ["-C", "target-feature=+bmi2,+adx"],
     srcs = glob(["src/**/*.rs"]),
     deps = [
         ## Using @zexe prevents clash with @marlin packages.
@@ -152,11 +120,5 @@ rust_library(
         "//bzl/cargo:sprs",
         "//bzl/cargo:rayon"
     ],
-    crate_features = [
-        "bn_382",
-        "std",
-        "use_core",
-        "i128"
-    ]
 )
 

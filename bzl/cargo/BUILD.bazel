@@ -1,6 +1,6 @@
 """
 @generated
-cargo-raze workspace build file.
+cargo-raze generated Bazel file.
 
 DO NOT EDIT! Replaced on runs of cargo-raze
 """
@@ -158,7 +158,7 @@ alias(
 
 alias(
     name = "rand",
-    actual = "@raze__rand__0_7_3//:rand",
+    actual = "@raze__rand__0_7_0//:rand",
     tags = [
         "cargo-raze",
         "manual",

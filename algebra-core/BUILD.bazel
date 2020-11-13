@@ -11,7 +11,7 @@ cargo_build_script(
     name = "build_script",
     srcs = ["build.rs"],
     deps = ["//bzl/cargo:rustc_version",
-            "//algebra-core/field-assembly:field_assembly"],
+            "//algebra-core/field-assembly:field-assembly"],
 )
 
 rust_library(
@@ -26,7 +26,7 @@ rust_library(
     ],
     deps = [
         ":build_script",
-        "//algebra-core/field-assembly:field_assembly",
+        "//algebra-core/field-assembly:field-assembly",
         "//bzl/cargo:num_traits",
         "//bzl/cargo:rand",
         "//bzl/cargo:rayon",

@@ -1,77 +1,42 @@
 load(
     "@obazl_rules_ocaml//ocaml:rules.bzl",
-    "ocaml_archive",
     "ocaml_executable",
-    "ocaml_interface",
     "ocaml_module",
-    "ocaml_ns_module",
 )
-
-EXEC_OPTS = []
-
-INTF_OPTS = []
 
 IMPL_OPTS = []
 
-filegroup(
-    name = "snarky_bn382_c",
-    srcs = [":snarky_bn382.c"],
-    visibility = ["//snarky-bn382:__pkg__"],
-)
-
 ocaml_module(
-    name = "snarky_bn382_generated_stubs",
-    src  = ":snarky_bn382_generated_stubs_ml",
+    name = "Snarky_bn382_generated_stubs",
+    src  = ":snarky_bn382_generated_stubs.ml",
     opts = IMPL_OPTS,
     visibility = ["//visibility:public"],
-    deps = [
-        # do not sort (buildifier)
-        "@opam//pkg:ctypes",
-        "@opam//pkg:ctypes.foreign",
-        "//snarky-bn382/caml:snarky_bn382_bindings"
-    ],
-)
-
-filegroup(
-    name = "snarky_bn382_generated_stubs_ml",
-    srcs = [":snarky_bn382_generated_stubs.ml"]
+    deps = ["//snarky-bn382/caml:Snarky_bn382_bindings"],
 )
 
 genrule(
     name = "snarky_bn382_ctypes_stubs_srcs",
-    tools = [":snarky_bn382_ctypes_stubs_exe"],
+    tools = [":snarky_bn382_ctypes_stubs.exe"],
     outs = [
         "snarky_bn382.c",
         "snarky_bn382_generated_stubs.ml"
     ],
     cmd = "\n".join([
-        "./$(location :snarky_bn382_ctypes_stubs_exe);",
-        "cp snarky_bn382.c \"$(@D)/\"",
-        "cp snarky_bn382_generated_stubs.ml \"$(@D)/\"",
+        "$(execpath :snarky_bn382_ctypes_stubs.exe);",
+        "cp snarky_bn382.c \"$(RULEDIR)/\"",
+        "cp snarky_bn382_generated_stubs.ml \"$(RULEDIR)/\"",
     ]),
     visibility = ["//visibility:public"],
 )
 
 ocaml_executable(
-    name = "snarky_bn382_ctypes_stubs_exe",
-    opts = EXEC_OPTS,
-    deps = [
-        # do not sort (buildifier)
-        # "@opam//pkg:ctypes",
-        "@opam//pkg:ctypes.stubs",
-        ":snarky_bn382_ctypes_stubs.cm_"
-    ],
+    name = "snarky_bn382_ctypes_stubs.exe",
+    main = ":Snarky_bn382_ctypes_stubs"
 )
 
 ocaml_module(
-    name = "snarky_bn382_ctypes_stubs.cm_",
+    name = "Snarky_bn382_ctypes_stubs",
     src  = "snarky_bn382_ctypes_stubs.ml",
     opts = IMPL_OPTS,
-    visibility = ["//visibility:public"],
-    deps = [
-        # do not sort (buildifier)
-        "@opam//pkg:ctypes",
-        "@opam//pkg:ctypes.foreign",
-        "//snarky-bn382/caml:snarky_bn382_bindings"
-    ],
+    deps = ["//snarky-bn382/caml:Snarky_bn382_bindings"],
 )

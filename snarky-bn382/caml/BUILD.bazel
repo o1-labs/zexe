@@ -4,62 +4,31 @@ load(
     "ppx_executable"
 )
 
-IMPL_OPTS = [
-    # "-verbose"
-]
-
 ocaml_module(
-    name = "snarky_bn382_bindings",
+    name = "Snarky_bn382_bindings",
     src  = "snarky_bn382_bindings.ml",
-    opts = IMPL_OPTS,
-    ppx =  ":ppx",
-    ppx_args = [
-        # do not sort (buildifier)
-        "-cookie",
-        "library-name=\"bitstring_lib\"",
-        "-corrected-suffix",
-        ".ppx-corrected",
-    ],
+    ppx =  ":ppx[ppx_let]",
     deps = [
         # do not sort (buildifier)
         "@opam//pkg:core_kernel",
         "@opam//pkg:ctypes",
         "@opam//pkg:ctypes.foreign",
-        ":cstubs_applicative.cm_"
+        "//Cstubs_applicative"
     ],
     visibility = ["//visibility:public"],
 )
 
-ocaml_module(
-    name = "cstubs_applicative.cm_",
-    src  = "cstubs_applicative.ml",
-    opts = IMPL_OPTS,
-    deps = [
-        # do not sort (buildifier)
-        "@opam//pkg:base",
-        "@opam//pkg:ctypes",
-        "@opam//pkg:ctypes.stubs",
-    ],
-    visibility = ["//visibility:private"],
-)
-
+################################################################
 ppx_executable(
-    name = "ppx",
-    srcs = [
-        # do not sort (buildifier)
-        "@obazl//ppxlib:driver_standalone_shim",
-    ],
-    deps = [
-        # do not sort (buildifier)
-        "@opam//pkg:ppx_let",
-    ],
+    name = "ppx[ppx_let]",
+    main = "//bzl/ppx:Driver",
+    deps = ["@opam//pkg:ppx_let"],
     opts = select({
         "//bzl/config:enable_verbose": ["-verbose"],
-        "//conditions:default": ["-thread"],
+        "//conditions:default": [],
     }) + [
         "-linkall",
         "-predicates",
         "ppx_driver",
-    ],
-    visibility = ["//visibility:private"],
+    ]
 )
