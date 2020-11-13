@@ -1,0 +1,27 @@
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+)
+
+rust_library(
+    name = "algebra",
+    visibility = ["//visibility:public"],
+    srcs = glob(["**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    deps = [
+        "//algebra-core",
+    ],
+    crate_features = [
+        "asm",
+        "bls12_377",
+        "bn_382",
+        "edwards_bls12",
+        "edwards_sw6",
+        "parallel",
+        "sw6",
+        "tweedle",
+    ],
+)
+

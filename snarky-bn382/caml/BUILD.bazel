@@ -1,0 +1,34 @@
+load(
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
+    "ocaml_module",
+    "ppx_executable"
+)
+
+ocaml_module(
+    name = "Snarky_bn382_bindings",
+    src  = "snarky_bn382_bindings.ml",
+    ppx =  ":ppx[ppx_let]",
+    deps = [
+        # do not sort (buildifier)
+        "@opam//pkg:core_kernel",
+        "@opam//pkg:ctypes",
+        "@opam//pkg:ctypes.foreign",
+        "//cstubs_applicative"
+    ],
+    visibility = ["//visibility:public"],
+)
+
+################################################################
+ppx_executable(
+    name = "ppx[ppx_let]",
+    main = "//bzl/ppx:Driver",
+    deps = ["@opam//pkg:ppx_let"],
+    opts = select({
+        "//:enable_verbose": ["-verbose"],
+        "//conditions:default": [],
+    }) + [
+        "-linkall",
+        "-predicates",
+        "ppx_driver",
+    ]
+)

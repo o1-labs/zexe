@@ -1,0 +1,42 @@
+load(
+    "@obazl_rules_ocaml//ocaml:rules.bzl",
+    "ocaml_executable",
+    "ocaml_module",
+)
+
+IMPL_OPTS = []
+
+ocaml_module(
+    name = "Snarky_bn382_generated_stubs",
+    src  = ":snarky_bn382_generated_stubs.ml",
+    opts = IMPL_OPTS,
+    visibility = ["//visibility:public"],
+    deps = ["//snarky-bn382/caml:Snarky_bn382_bindings"],
+)
+
+genrule(
+    name = "snarky_bn382_ctypes_stubs_srcs",
+    tools = [":snarky_bn382_ctypes_stubs.exe"],
+    outs = [
+        "snarky_bn382.c",
+        "snarky_bn382_generated_stubs.ml"
+    ],
+    cmd = "\n".join([
+        "$(execpath :snarky_bn382_ctypes_stubs.exe);",
+        "cp snarky_bn382.c \"$(RULEDIR)/\"",
+        "cp snarky_bn382_generated_stubs.ml \"$(RULEDIR)/\"",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+ocaml_executable(
+    name = "snarky_bn382_ctypes_stubs.exe",
+    main = ":Snarky_bn382_ctypes_stubs"
+)
+
+ocaml_module(
+    name = "Snarky_bn382_ctypes_stubs",
+    src  = "snarky_bn382_ctypes_stubs.ml",
+    opts = IMPL_OPTS,
+    deps = ["//snarky-bn382/caml:Snarky_bn382_bindings"],
+)

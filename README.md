@@ -50,6 +50,12 @@ In addition, there is a  [`bench-utils`](bench-utils) crate which contains infra
 
 ## Build guide
 
+### Bazel
+
+See [docs/BAZEL.md](docs/BAZEL.md)
+
+### Legacy
+
 The library compiles on the `stable` toolchain of the Rust compiler. To install the latest version of Rust, first install `rustup` by following the instructions [here](https://rustup.rs/), or via your platform's package manager. Once `rustup` is installed, install the Rust toolchain by invoking:
 ```bash
 rustup install stable

@@ -1,3 +1,9 @@
+bazel-*
+.bazel
+user.bazelrc
+.cpcache
+*.log
+
 target
 Cargo.lock
 .DS_Store
