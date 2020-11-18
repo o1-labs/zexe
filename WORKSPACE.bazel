@@ -1,0 +1,85 @@
+## workspace( name = "zexe" ) ## DO NOT ENABLE - clashes with local_repository below
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+################################################
+################  RUST SUPPORT  ################
+load("//bzl/external:rust_deps.bzl", "rust_bootstrap")
+rust_bootstrap()
+
+load("@io_bazel_rules_rust//rust:repositories.bzl",
+     "rust_repositories", "rust_repository_set")
+rust_repositories(version = "1.47.0", edition="2018")
+
+load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+bazel_version(name = "bazel_version")
+
+################################################################
+################################################################
+# For local (independent) builds, this local repo allows us to import
+# marlin, which imports zexe. Some of marlin's targets depend on
+# @zexe// packages; this repo allows Bazel to resolve them here. In
+# addition, zexe targets that depend on both zexe and marlin packages
+# must use @zexe// labels for the former; otherwise we get duplicate
+# copies of the packages.
+# This has no effect when this repo is imported as an external repo.
+local_repository(name = "zexe", path = ".")
+load("//bzl/cargo:crates.bzl", "zexe_fetch_remote_crates")
+zexe_fetch_remote_crates()
+
+###############
+# git_repository(
+#     name = "marlin",
+#     remote = "https://github.com/obazl/marlin",
+#     branch = "master",
+#     # tag    = use tag instead of branch once a release tag has been published
+# )
+load("@marlin//bzl/cargo:crates.bzl", "marlin_fetch_remote_crates")
+marlin_fetch_remote_crates()
+
+###########################
+#### OCAML BAZEL RULES ####
+#############
+http_archive(
+    name = "bazel_skylib",
+    urls = [
+        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.3/bazel-skylib-1.0.3.tar.gz",
+    ],
+    sha256 = "1c531376ac7e5a180e0237938a2536de0c54d93f5c278634818e0efc952dd56c",
+)
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()
+
+############### Bootstrap OPAM Rules ###############
+git_repository(
+    name = "obazl_rules_opam",
+    remote = "https://github.com/obazl/rules_opam",
+    branch = "dev",
+)
+load("@obazl_rules_opam//opam:bootstrap.bzl", "opam_configure")
+load("//bzl:opam.bzl", "opam")
+opam_configure(opam = opam)
+
+############### Bootstrap OCaml Rules ###############
+git_repository(
+    name = "obazl_rules_ocaml",
+    remote = "https://github.com/obazl/rules_ocaml",
+    branch = "dev",
+    # commit = "feef897197b36b14b65ffdf00b9badcbdb8f42f4",
+    # shallow_since = "1593623637 -0500"
+)
+
+load("@obazl_rules_ocaml//ocaml:bootstrap.bzl", "ocaml_configure")
+ocaml_configure()
+
+###############
+git_repository(
+    name = "ppx_version",
+    remote = "https://github.com/o1-labs/ppx_version",
+    branch = "master",
+    # tag    = use tag instead of branch once a release tag has been published
+)
+

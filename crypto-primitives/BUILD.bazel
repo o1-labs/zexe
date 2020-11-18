@@ -1,0 +1,32 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    edition = "2018",
+    name = "crypto-primitives",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = ["//bzl/cargo:derivative"],
+    deps = [
+        "//algebra-core",
+        "//bench-utils",
+        "//ff-fft",
+        "//gm17",
+        "//groth16",
+        "//r1cs-core",
+        "//r1cs-std",
+
+        "//bzl/cargo:digest",
+        "//bzl/cargo:blake2",
+        "//bzl/cargo:rand",
+        "//bzl/cargo:rayon",
+    ],
+    crate_features = [
+        "std",
+        "r1cs",
+        "r1cs-core",
+        "r1cs-std",
+        "gm17",
+        "parallel",
+        "use_core"
+    ]
+)

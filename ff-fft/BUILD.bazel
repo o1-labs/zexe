@@ -1,0 +1,14 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    edition = "2018",
+    name = "ff-fft",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        "//algebra-core",
+        "//bzl/cargo:rand", #default-features = false
+        "//bzl/cargo:rayon", # optional
+    ],
+    crate_features = ["parallel", "std", "algebra-core/std", "proc-macro"]
+)
