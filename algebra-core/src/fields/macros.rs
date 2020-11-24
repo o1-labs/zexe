@@ -457,25 +457,21 @@ macro_rules! impl_Fp {
         #[cfg(feature = "ocaml_types")]
         unsafe impl<P> ocaml::FromValue for $Fp<P> {
             fn from_value(value: ocaml::Value) -> Self {
-                ocaml::frame!((value) {
-                    let x: ocaml::Pointer<Self> = ocaml::FromValue::from_value(value);
-                    x.as_ref().clone()
-                })
+                let x: ocaml::Pointer<Self> = ocaml::FromValue::from_value(value);
+                x.as_ref().clone()
             }
         }
 
         #[cfg(feature = "ocaml_types")]
         impl<P: $FpParameters> $Fp<P> {
             extern "C" fn $ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
-                ocaml::body!((x, y) {
-                    let x: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(x);
-                    let y: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(y);
-                    match x.as_ref().cmp(y.as_ref()) {
-                        Less => -1,
-                        Equal => 0,
-                        Greater => 1,
-                    }
-                })
+                let x: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(x);
+                let y: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(y);
+                match x.as_ref().cmp(y.as_ref()) {
+                    Less => -1,
+                    Equal => 0,
+                    Greater => 1,
+                }
             }
         }
 
