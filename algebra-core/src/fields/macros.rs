@@ -1,5 +1,5 @@
 macro_rules! impl_Fp {
-    ($Fp:ident, $FpParameters:ident, $BigInteger:ident, $BigIntegerType:ty, $limbs:expr) => {
+    ($Fp:ident, $FpParameters:ident, $BigInteger:ident, $BigIntegerType:ty, $limbs:expr, $ocaml_compare:ident) => {
         pub trait $FpParameters: FpParameters<BigInt = $BigIntegerType> {}
 
         #[derive(Derivative)]
@@ -466,7 +466,7 @@ macro_rules! impl_Fp {
 
         #[cfg(feature = "ocaml_types")]
         impl<P: $FpParameters> $Fp<P> {
-            extern "C" fn ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
+            extern "C" fn $ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
                 ocaml::body!((x, y) {
                     let x: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(x);
                     let y: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(y);
@@ -483,7 +483,7 @@ macro_rules! impl_Fp {
         impl<P: $FpParameters> ocaml::Custom for $Fp<P> {
             ocaml::custom! {
                 name: concat!("rust.", stringify!($Fp)),
-                compare: $Fp::<P>::ocaml_compare,
+                compare: $Fp::<P>::$ocaml_compare,
             }
         }
     }
