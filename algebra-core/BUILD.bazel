@@ -39,7 +39,32 @@ rust_library(
         "llvm_asm",
         "parallel",
         "rayon",
-        "algebra-core-derive"
+        "algebra-core-derive",
+        "std"
+    ],
+)
+
+rust_library(
+    name = "no-default",
+    visibility = ["//visibility:public"],
+    edition = "2018",
+    srcs = glob(["**/*.rs"]),
+    proc_macro_deps = [
+        "//algebra-core/algebra-core-derive",
+        "//bzl/cargo:derivative",
+        "//bzl/cargo:unroll",
+    ],
+    deps = [
+        ":build_script",
+        "//algebra-core/field-assembly:field-assembly",
+        "//bzl/cargo:num_traits",
+        "//bzl/cargo:rand",
+        "//bzl/cargo:rayon",
+    ],
+    crate_features = [
+        "parallel",
+        "algebra-core-derive",
+        "std"
     ],
 )
 

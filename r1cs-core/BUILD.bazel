@@ -4,13 +4,12 @@ rust_library(
     name = "r1cs-core",
     edition = "2018",
     visibility = ["//visibility:public"],
-    # crate_type = "lib",
     srcs = glob(["src/**/*.rs"]),
     deps = [
         "//algebra-core",
         "//bzl/cargo:smallvec",
     ],
-    crate_features = ["std",
-                      "algebra-core/std",
-                      ]
+    crate_features = [
+        "std"
+    ]
 )

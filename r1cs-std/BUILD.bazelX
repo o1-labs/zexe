@@ -13,6 +13,14 @@ rust_library(
         "//r1cs-core"
     ],
     crate_features = [
-        "bls12_377", "edwards_bls12", "edwards_sw6"
+        ## full = [
+        "bls12_377",
+        "jubjub",
+        "edwards_bls12",
+        "edwards_sw6",
+        "mnt4_298",
+        "mnt4_753",
+        "mnt6_298",
+        "mnt6_753"
     ]
 )

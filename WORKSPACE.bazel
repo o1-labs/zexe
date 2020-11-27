@@ -57,7 +57,7 @@ bazel_skylib_workspace()
 git_repository(
     name = "obazl_rules_opam",
     remote = "https://github.com/obazl/rules_opam",
-    branch = "dev",
+    branch = "main",
 )
 load("@obazl_rules_opam//opam:bootstrap.bzl", "opam_configure")
 load("//bzl:opam.bzl", "opam")
@@ -67,9 +67,7 @@ opam_configure(opam = opam)
 git_repository(
     name = "obazl_rules_ocaml",
     remote = "https://github.com/obazl/rules_ocaml",
-    branch = "dev",
-    # commit = "feef897197b36b14b65ffdf00b9badcbdb8f42f4",
-    # shallow_since = "1593623637 -0500"
+    branch = "main",
 )
 
 load("@obazl_rules_ocaml//ocaml:bootstrap.bzl", "ocaml_configure")
@@ -80,6 +78,5 @@ git_repository(
     name = "ppx_version",
     remote = "https://github.com/o1-labs/ppx_version",
     branch = "master",
-    # tag    = use tag instead of branch once a release tag has been published
 )
 
