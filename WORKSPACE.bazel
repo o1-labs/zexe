@@ -28,13 +28,7 @@ local_repository(name = "zexe", path = ".")
 load("//bzl/cargo:crates.bzl", "zexe_fetch_remote_crates")
 zexe_fetch_remote_crates()
 
-###############
-# git_repository(
-#     name = "marlin",
-#     remote = "https://github.com/obazl/marlin",
-#     branch = "master",
-#     # tag    = use tag instead of branch once a release tag has been published
-# )
+# marlin repo fetched above by rust_bootstrap
 load("@marlin//bzl/cargo:crates.bzl", "marlin_fetch_remote_crates")
 marlin_fetch_remote_crates()
 

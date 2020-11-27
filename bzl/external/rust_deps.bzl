@@ -23,8 +23,7 @@ def rust_bootstrap():
         git_repository,
         name = "marlin",
         remote = "https://github.com/obazl/marlin",
-        branch = "master",
-        # tag    = use tag instead of branch once a release tag has been published
+        branch = "bzl/49f81ed",
     )
 
     # maybe(
