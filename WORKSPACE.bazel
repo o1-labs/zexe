@@ -1,4 +1,4 @@
-## workspace( name = "zexe" ) ## DO NOT ENABLE - clashes with local_repository below
+workspace( name = "zexe" )
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
@@ -15,20 +15,10 @@ rust_repositories(version = "1.47.0", edition="2018")
 load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
 bazel_version(name = "bazel_version")
 
-################################################################
-################################################################
-# For local (independent) builds, this local repo allows us to import
-# marlin, which imports zexe. Some of marlin's targets depend on
-# @zexe// packages; this repo allows Bazel to resolve them here. In
-# addition, zexe targets that depend on both zexe and marlin packages
-# must use @zexe// labels for the former; otherwise we get duplicate
-# copies of the packages.
-# This has no effect when this repo is imported as an external repo.
-local_repository(name = "zexe", path = ".")
 load("//bzl/cargo:crates.bzl", "zexe_fetch_remote_crates")
 zexe_fetch_remote_crates()
 
-# marlin repo fetched above by rust_bootstrap
+# remote marlin repo fetched above by rust_bootstrap; now we fetch its deps
 load("@marlin//bzl/cargo:crates.bzl", "marlin_fetch_remote_crates")
 marlin_fetch_remote_crates()
 
