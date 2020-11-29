@@ -63,4 +63,3 @@ git_repository(
     remote = "https://github.com/o1-labs/ppx_version",
     branch = "master",
 )
-
