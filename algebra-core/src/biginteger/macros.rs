@@ -1,5 +1,5 @@
 macro_rules! bigint_impl {
-    ($name:ident, $num_limbs:expr, $ocaml_compare:ident) => {
+    ($name:ident, $num_limbs:expr) => {
         #[derive(Copy, Clone, PartialEq, Eq, Debug, Default, Hash)]
         pub struct $name(pub [u64; $num_limbs]);
 
@@ -299,20 +299,20 @@ macro_rules! bigint_impl {
 
         #[cfg(feature = "ocaml_types")]
         impl $name {
-            extern "C" fn $ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
+            extern "C" fn ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
                 let x: ocaml::Pointer<$name> = ocaml::FromValue::from_value(x);
                 let y: ocaml::Pointer<$name> = ocaml::FromValue::from_value(y);
                 match x.as_ref().cmp(y.as_ref()) {
-                    Less => -1,
-                    Equal => 0,
-                    Greater => 1,
+                    core::cmp::Ordering::Less => -1,
+                    core::cmp::Ordering::Equal => 0,
+                    core::cmp::Ordering::Greater => 1,
                 }
             }
         }
 
         #[cfg(feature = "ocaml_types")]
         ocaml::custom!($name {
-            compare: $name::$ocaml_compare,
+            compare: $name::ocaml_compare,
         });
     };
 }

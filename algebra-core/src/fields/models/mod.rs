@@ -25,11 +25,11 @@ use std::mem::MaybeUninit;
 #[cfg(use_asm)]
 include!(concat!(env!("OUT_DIR"), "/field_assembly.rs"));
 
-impl_Fp!(Fp256, Fp256Parameters, BigInteger256, BigInteger256, 4, ocaml_compare_fp256);
-impl_Fp!(Fp320, Fp320Parameters, BigInteger320, BigInteger320, 5, ocaml_compare_fp320);
-impl_Fp!(Fp384, Fp384Parameters, BigInteger384, BigInteger384, 6, ocaml_compare_fp384);
-impl_Fp!(Fp768, Fp768Parameters, BigInteger768, BigInteger768, 12, ocaml_compare_fp768);
-impl_Fp!(Fp832, Fp832Parameters, BigInteger832, BigInteger832, 13, ocaml_compare_fp832);
+impl_Fp!(Fp256, Fp256Parameters, BigInteger256, BigInteger256, 4);
+impl_Fp!(Fp320, Fp320Parameters, BigInteger320, BigInteger320, 5);
+impl_Fp!(Fp384, Fp384Parameters, BigInteger384, BigInteger384, 6);
+impl_Fp!(Fp768, Fp768Parameters, BigInteger768, BigInteger768, 12);
+impl_Fp!(Fp832, Fp832Parameters, BigInteger832, BigInteger832, 13);
 
 pub mod fp2;
 pub use self::fp2::*;

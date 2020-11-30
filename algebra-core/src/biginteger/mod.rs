@@ -14,13 +14,13 @@ use rand::{
 #[macro_use]
 mod macros;
 
-bigint_impl!(BigInteger64, 1, ocaml_compare_biginteger64);
-bigint_impl!(BigInteger128, 2, ocaml_compare_biginteger128);
-bigint_impl!(BigInteger256, 4, ocaml_compare_biginteger256);
-bigint_impl!(BigInteger320, 5, ocaml_compare_biginteger320);
-bigint_impl!(BigInteger384, 6, ocaml_compare_biginteger384);
-bigint_impl!(BigInteger768, 12, ocaml_compare_biginteger768);
-bigint_impl!(BigInteger832, 13, ocaml_compare_biginteger832);
+bigint_impl!(BigInteger64, 1);
+bigint_impl!(BigInteger128, 2);
+bigint_impl!(BigInteger256, 4);
+bigint_impl!(BigInteger320, 5);
+bigint_impl!(BigInteger384, 6);
+bigint_impl!(BigInteger768, 12);
+bigint_impl!(BigInteger832, 13);
 
 impl<T: BigInteger> CanonicalSerialize for T {
     #[inline]
