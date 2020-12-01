@@ -1,12 +1,9 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl",
-     "git_repository", "new_git_repository")  # buildifier: disable=load
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
-all_content = """filegroup(name = "all", srcs = glob(["**"]), visibility = ["//visibility:public"])"""
-
 def rust_bootstrap():
-    """This bootstraps (loads) Golang repos"""
+    """This bootstraps (loads) Golang rules and repos"""
 
     maybe(
         http_archive,
@@ -22,15 +19,6 @@ def rust_bootstrap():
     maybe(
         git_repository,
         name = "marlin",
-        remote = "https://github.com/obazl/marlin",
-        branch = "bzl/49f81ed",
+        remote = "https://github.com/o1-labs/marlin",
+        branch = "master",
     )
-
-    # maybe(
-    #     git_repository,
-    #     name = "zexe",
-    #     remote = "https://github.com/o1-labs/zexe",
-    #     branch = "master",
-    #     # tag    = use tag instead of branch once a release tag has been published
-    # )
-
