@@ -453,5 +453,34 @@ macro_rules! impl_Fp {
                 self.mul_assign(&other.inverse().unwrap());
             }
         }
+
+        #[cfg(feature = "ocaml_types")]
+        unsafe impl<P> ocaml::FromValue for $Fp<P> {
+            fn from_value(value: ocaml::Value) -> Self {
+                let x: ocaml::Pointer<Self> = ocaml::FromValue::from_value(value);
+                x.as_ref().clone()
+            }
+        }
+
+        #[cfg(feature = "ocaml_types")]
+        impl<P: $FpParameters> $Fp<P> {
+            extern "C" fn ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
+                let x: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(x);
+                let y: ocaml::Pointer<$Fp<P>> = ocaml::FromValue::from_value(y);
+                match x.as_ref().cmp(y.as_ref()) {
+                    core::cmp::Ordering::Less => -1,
+                    core::cmp::Ordering::Equal => 0,
+                    core::cmp::Ordering::Greater => 1,
+                }
+            }
+        }
+
+        #[cfg(feature = "ocaml_types")]
+        impl<P: $FpParameters> ocaml::Custom for $Fp<P> {
+            ocaml::custom! {
+                name: concat!("rust.", stringify!($Fp)),
+                compare: $Fp::<P>::ocaml_compare,
+            }
+        }
     }
 }
