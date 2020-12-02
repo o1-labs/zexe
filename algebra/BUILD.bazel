@@ -14,19 +14,49 @@ rust_library(
         "@zexe//algebra-core",
     ],
     crate_features = [
-        "bls12_377",
-        "bls12_381",
-        "sw6",
-        "mnt4_298",
-        "mnt4_753",
-        "mnt6_298",
-        "mnt6_753",
-        "edwards_bls12",
-        "edwards_sw6",
-        "jubjub",
+        ## feature deps
+        # marlin: [ "asm", "parallel", "bn_382", "tweedle" ]
+        # marlin_plonk_bindings: [ "asm", "parallel", "bn_382", "tweedle", "ocaml_types" ]
+
+        # "bls12_377",
+        # "bls12_381",
+        # "sw6",
+        # "mnt4_298",
+        # "mnt4_753",
+        # "mnt6_298",
+        # "mnt6_753",
+        # "edwards_bls12",
+        # "edwards_sw6",
+        # "jubjub",
+
         "tweedle",
         "bn_382",
+        "parallel",
+        "asm",
+        "ocaml_types"
+        # "derive",
+    ],
+)
 
-        "parallel"
+rust_library(
+    name = "dpc",
+    visibility = ["//visibility:public"],
+    srcs = glob(["**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    deps = [
+        "@zexe//algebra-core",
+    ],
+    crate_features = [
+        "bls12_377",
+        "edwards_bls12",
+        "edwards_sw6",
+        "sw6",
+
+        # "parallel",
+        # # "derive",
+        # "asm",
+        # "ocaml_types"
     ],
 )

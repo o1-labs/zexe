@@ -10,6 +10,7 @@ rust_library(
         "//bzl/cargo:smallvec",
     ],
     crate_features = [
-        "std"
+        "std",
+        "parallel"
     ]
 )

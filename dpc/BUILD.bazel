@@ -8,11 +8,16 @@ rust_library(
     proc_macro_deps = [
         "//bzl/cargo:derivative",
     ],
+    aliases = {
+        "//algebra:dpc": "algebra",
+        "//crypto-primitives:dpc" : "crypto_primitives",
+        "//r1cs-std:dpc" : "r1cs_std"
+    },
     deps = [
-        "//algebra",
+        "//algebra:dpc",
         "//r1cs-core",
-        "//r1cs-std",
-        "//crypto-primitives",
+        "//r1cs-std:dpc",
+        "//crypto-primitives:dpc",
         "//gm17",
         "//bench-utils",
 

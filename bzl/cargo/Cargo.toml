@@ -14,6 +14,9 @@ digest = "0.8"
 libc = "0.2.0"
 num-bigint = { version = "= 0.2.3" }
 num-traits = { version = "= 0.2.11", default-features = false }
+ocaml = { version = "0.19.0", features = ["without-ocamlopt"] }
+ocaml-derive = { version = "0.19.0" }
+ocaml-sys = { version = "0.19.0", features = ["without-ocamlopt"]}
 paste = "0.1"
 proc-macro2 = "= 1.0.17"
 quote = "= 1.0.6"
@@ -38,6 +41,9 @@ genmode = "Remote"
 targets = ["x86_64-apple-darwin", "x86_64-unknown-linux-gnu"]
 output_buildfile_suffix = "BUILD.bazel"
 default_gen_buildrs = true
+
+[package.metadata.raze.crates.ocaml-sys.'0.19.0']
+additional_env = {"OCAMLOPT"= "ocamlopt"}
 
 [package.metadata.raze.crates.typenum.'1.12.0']
 gen_buildrs = true

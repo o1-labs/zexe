@@ -25,35 +25,21 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # MIT from expression "MIT"
 ])
 
 # Generated Targets
 
-# Unsupported target "defer" with type "bench" omitted
-
-# Unsupported target "flush" with type "bench" omitted
-
-# Unsupported target "pin" with type "bench" omitted
-
-# Unsupported target "sanitize" with type "example" omitted
-
-# Unsupported target "treiber_stack" with type "example" omitted
-
 rust_library(
-    name = "crossbeam_epoch",
+    name = "synstructure",
     srcs = glob(["**/*.rs"]),
     crate_features = [
-        "alloc",
-        "lazy_static",
-        "std",
+        "default",
+        "proc-macro",
     ],
     crate_root = "src/lib.rs",
     crate_type = "lib",
     edition = "2018",
-    proc_macro_deps = [
-        "@raze__const_fn__0_4_3//:const_fn",
-    ],
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -61,13 +47,12 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.9.0",
+    version = "0.12.4",
     # buildifier: leave-alone
     deps = [
-        "@raze__cfg_if__1_0_0//:cfg_if",
-        "@raze__crossbeam_utils__0_8_0//:crossbeam_utils",
-        "@raze__lazy_static__1_4_0//:lazy_static",
-        "@raze__memoffset__0_5_6//:memoffset",
-        "@raze__scopeguard__1_1_0//:scopeguard",
+        "@raze__proc_macro2__1_0_17//:proc_macro2",
+        "@raze__quote__1_0_6//:quote",
+        "@raze__syn__1_0_17//:syn",
+        "@raze__unicode_xid__0_2_1//:unicode_xid",
     ],
 )

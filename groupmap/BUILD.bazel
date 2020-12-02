@@ -9,7 +9,4 @@ rust_library(
         "//algebra",
         "//bzl/cargo:rand",
     ],
-    crate_features = [
-        "parallel",
-    ]
 )

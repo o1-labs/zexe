@@ -8,7 +8,7 @@ ocaml_module(
     name = "Snarky_bn382_bindings",
     src  = "snarky_bn382_bindings.ml",
     opts = ["-linkall"],
-    ppx =  ":ppx[ppx_let]",
+    ppx =  ":ppx.exe",
     deps = [
         # do not sort (buildifier)
         "@opam//pkg:core_kernel",
@@ -21,15 +21,8 @@ ocaml_module(
 
 ################################################################
 ppx_executable(
-    name = "ppx[ppx_let]",
-    main = "//bzl/ppx:Driver",
+    name = "ppx.exe",
+    main = "//bzl/ppx/exe:Driver",
     deps = ["@opam//pkg:ppx_let"],
-    opts = select({
-        "//:enable_verbose": ["-verbose"],
-        "//conditions:default": [],
-    }) + [
-        "-linkall",
-        "-predicates",
-        "ppx_driver",
-    ]
+    opts = []
 )

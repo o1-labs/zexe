@@ -22,7 +22,7 @@ ocaml_module(
 ################################################################
 ppx_executable(
     name = "_ppx.exe",
-    main = "//bzl/ppx:Driver",
+    main = "//bzl/ppx/exe:Driver",
     lazy_deps = ["@opam//pkg:bisect_ppx.runtime"],
     opts = [
         "-thread",

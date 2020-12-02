@@ -25,23 +25,26 @@ package(default_visibility = [
 ])
 
 licenses([
-    "notice",  # MIT from expression "MIT OR Apache-2.0"
+    "notice",  # MIT from expression "MIT"
 ])
 
-# Generated Targets
+# Generated Targets# buildifier: disable=load-on-top
+load(
+    "@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    "cargo_build_script",
+)
 
-rust_library(
-    name = "crossbeam_deque",
+cargo_build_script(
+    name = "memoffset_build_script",
     srcs = glob(["**/*.rs"]),
+    build_script_env = {
+    },
     crate_features = [
-        "crossbeam-epoch",
-        "crossbeam-utils",
         "default",
-        "std",
     ],
-    crate_root = "src/lib.rs",
-    crate_type = "lib",
-    edition = "2018",
+    crate_root = "build.rs",
+    data = glob(["**"]),
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -49,19 +52,32 @@ rust_library(
         "cargo-raze",
         "manual",
     ],
-    version = "0.8.0",
-    # buildifier: leave-alone
+    version = "0.6.1",
+    visibility = ["//visibility:private"],
     deps = [
-        "@raze__cfg_if__1_0_0//:cfg_if",
-        "@raze__crossbeam_epoch__0_9_1//:crossbeam_epoch",
-        "@raze__crossbeam_utils__0_8_1//:crossbeam_utils",
+        "@raze__autocfg__1_0_1//:autocfg",
     ],
 )
 
-# Unsupported target "fifo" with type "test" omitted
-
-# Unsupported target "injector" with type "test" omitted
-
-# Unsupported target "lifo" with type "test" omitted
-
-# Unsupported target "steal" with type "test" omitted
+rust_library(
+    name = "memoffset",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.6.1",
+    # buildifier: leave-alone
+    deps = [
+        ":memoffset_build_script",
+    ],
+)
