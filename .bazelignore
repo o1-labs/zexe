@@ -1,0 +1,11 @@
+algebra-benches
+cp-benches
+crypto-primitives
+dpc
+ff-fft-benches
+gm17
+groth16
+r1cs-core
+r1cs-std
+snarky-bn382
+target

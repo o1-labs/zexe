@@ -50,6 +50,7 @@ In addition, there is a  [`bench-utils`](bench-utils) crate which contains infra
 
 ## Build guide
 
+### Legacy
 The library compiles on the `stable` toolchain of the Rust compiler. To install the latest version of Rust, first install `rustup` by following the instructions [here](https://rustup.rs/), or via your platform's package manager. Once `rustup` is installed, install the Rust toolchain by invoking:
 ```bash
 rustup install stable
@@ -88,6 +89,14 @@ To bench `algebra-benches` with greater accuracy, especially for functions with 
 cargo +nightly bench --features "n_fold bls12_381"
 ```
 
+### Bazel
+
+**IMPORTANT** Currently Bazel support is not complete; it is just
+sufficient to support the Mina project. Some packages will fail to
+compile; they have been excluded by renaming their build files from
+`BUILD.bazel` to `BUILD.bazelX`.
+
+To build all targets: `$ bazel build //...` (NB: three dots)
 
 ## License
 
