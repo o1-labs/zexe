@@ -4,29 +4,8 @@ load(
     "rust_binary",
     "rust_test",
 )
-# macos (per https://crates.io/crates/ocaml):
-# [build]
-# rustflags = ["-C", "link-args=-Wl,-undefined,dynamic_lookup"]
 
 load("@io_bazel_rules_rust//cargo:cargo_build_script.bzl", "cargo_build_script")
-
-# [dependencies]
-# algebra-core-derive = { path = "algebra-core-derive", optional = true }
-# derivative = { version = "2", features = ["use_core"] }
-# num-traits = { version = "0.2", default-features = false }
-# ocaml = { version = "0.18.1", optional = true }
-# rand = { version = "0.7", default-features = false }
-# rayon = { version = "1", optional = true }
-# unroll = "0.1.4"
-
-# [features]
-# default = [ "std" ]
-# std = []  # BUG? depends on parallel
-# parallel = [ "std", "rayon" ]
-# derive = [ "algebra-core-derive" ]
-# llvm_asm = []
-# ocaml_types = [ "ocaml" ]
-
 cargo_build_script(
     name = "build_script",
     srcs = ["build.rs"],
@@ -34,13 +13,8 @@ cargo_build_script(
             "//algebra-core/field-assembly:field-assembly"],
 )
 
-# groth deps: algebra-core: default-features = false, features = [ "derive" ]
-# groth features:
-#     default = ["parallel"]
-#     parallel = ["std", "algebra-core/parallel", "ff-fft/parallel", "rayon"]
-
 rust_library(
-    name = "algebra-core", # "derive-parallel",
+    name = "algebra-core",
     visibility = ["//visibility:public"],
     edition = "2018",
     srcs = glob(["**/*.rs"]),
@@ -66,118 +40,3 @@ rust_library(
         "llvm_asm",
     ],
 )
-
-alias(
-    name   = "default",
-    actual = ":std"
-)
-
-rust_library(
-    name = "std",
-    visibility = ["//visibility:public"],
-    edition = "2018",
-    srcs = glob(["**/*.rs"]),
-    proc_macro_deps = [
-        "//algebra-core/algebra-core-derive",
-        "//bzl/cargo:derivative",
-        "//bzl/cargo:unroll",
-    ],
-    deps = [
-        ":build_script",
-        "//algebra-core/field-assembly:field-assembly",
-        "//bzl/cargo:num_traits",
-        "//bzl/cargo:ocaml",
-        "//bzl/cargo:rand",
-        "//bzl/cargo:rayon",
-    ],
-    crate_features = [
-        "std",
-        "parallel", ## BUG - not listed as std dep; implies std, rayon
-    ],
-)
-
-# default = [ "std" ]
-# std = []  # BUG? depends on parallel
-rust_library(
-    name = "no-default",
-    visibility = ["//visibility:public"],
-    edition = "2018",
-    srcs = glob(["**/*.rs"]),
-    proc_macro_deps = [
-        # "//algebra-core/algebra-core-derive",
-        "//bzl/cargo:derivative",
-        "//bzl/cargo:unroll",
-    ],
-    deps = [
-        ":build_script",
-        "//algebra-core/field-assembly:field-assembly",
-        "//bzl/cargo:num_traits",
-        "//bzl/cargo:ocaml",
-        "//bzl/cargo:rand",
-        "//bzl/cargo:rayon",
-    ],
-    crate_features = [
-        "std",      ## BUG - will not compile without this
-        "parallel", ## BUG - not listed as std dep; implies std, rayon
-    ],
-)
-
-# default = [ "std" ]
-# std = []  # BUG? depends on parallel
-# parallel = [ "std", "rayon" ]
-rust_library(
-    name = "parallel",
-    visibility = ["//visibility:public"],
-    edition = "2018",
-    srcs = glob(["**/*.rs"]),
-    proc_macro_deps = [
-        # "//algebra-core/algebra-core-derive",
-        "//bzl/cargo:derivative",
-        "//bzl/cargo:unroll",
-    ],
-    deps = [
-        ":build_script",
-        "//algebra-core/field-assembly:field-assembly",
-        "//bzl/cargo:num_traits",
-        "//bzl/cargo:ocaml",
-        "//bzl/cargo:rand",
-        "//bzl/cargo:rayon",
-    ],
-    crate_features = [
-        "std",
-        # "derive",
-        "parallel",
-        # "rayon"
-        # "llvm_asm",
-        # "ocaml_types"
-        # "std",
-    ],
-)
-
-# rust_library(
-#     name = "algebra-core",
-#     visibility = ["//visibility:public"],
-#     edition = "2018",
-#     srcs = glob(["**/*.rs"]),
-#     proc_macro_deps = [
-#         "//algebra-core/algebra-core-derive",
-#         "//bzl/cargo:derivative",
-#         "//bzl/cargo:unroll",
-#     ],
-#     deps = [
-#         ":build_script",
-#         "//algebra-core/field-assembly:field-assembly",
-#         "//bzl/cargo:num_traits",
-#         "//bzl/cargo:ocaml",
-#         "//bzl/cargo:rand",
-#         "//bzl/cargo:rayon",
-#     ],
-#     crate_features = [
-#         "std",
-#         "parallel",
-#         # "derive",
-#         "llvm_asm",
-#         "ocaml_types"
-#     ],
-# )
-
