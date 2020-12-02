@@ -1,5 +1,7 @@
 #!/bin/sh
 
+## wss - WorkSpaceS.  Browse the external repo workspaces created by Bazel.
+
 for LAST; do true; done
 
 ARGS=

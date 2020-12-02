@@ -1,5 +1,6 @@
 ## Rust Build Configuration
 
+## Not currently used. Contains the beginnings of Bazelized support for Rust/Cargo profiles.
 
 ## RELEASE profile defaults
 # [profile.release]

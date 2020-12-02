@@ -1,9 +1,7 @@
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")  # buildifier: disable=load
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")  # buildifier: disable=load
 
-def rust_bootstrap():
-    """This bootstraps (loads) Golang rules and repos"""
+def rust_fetch_rules():
 
     maybe(
         http_archive,
@@ -14,11 +12,4 @@ def rust_bootstrap():
             # Master branch as of 2020-09-24
             "https://github.com/bazelbuild/rules_rust/archive/5998baf9016eca24fafbad60e15f4125dd1c5f46.tar.gz",
         ],
-    )
-
-    maybe(
-        git_repository,
-        name = "marlin",
-        remote = "https://github.com/o1-labs/marlin",
-        branch = "master",
     )

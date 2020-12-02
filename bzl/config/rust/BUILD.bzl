@@ -1,3 +1,5 @@
+## Not currently used. Contains the beginnings of Bazelized support for Rust/Cargo profiles.
+
 RUST_CRATE_TYPE = select({
     "//bzl/host:macos": "cdylib",
     "//bzl/host:linux": "staticlib",
