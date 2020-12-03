@@ -6,7 +6,7 @@ jobs:
             - image: rust:1.44.1-buster
         steps:
             - checkout
-            - run: cargo test
+            - run: cargo test --exclude snarky-bn382
 
 workflows:
     version: 2
