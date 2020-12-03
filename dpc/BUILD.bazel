@@ -1,0 +1,32 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    edition = "2018",
+    visibility = ["//visibility:public"],
+    name = "dpc",
+    srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    aliases = {
+        "//algebra:dpc": "algebra",
+        "//crypto-primitives:dpc" : "crypto_primitives",
+        "//r1cs-std:dpc" : "r1cs_std"
+    },
+    deps = [
+        "//algebra:dpc",
+        "//r1cs-core",
+        "//r1cs-std:dpc",
+        "//crypto-primitives:dpc",
+        "//gm17",
+        "//bench-utils",
+
+        "//bzl/cargo:rand",
+    ],
+    crate_features = [
+        "bls12_377",
+        "edwards_bls12",
+        "edwards_sw6",
+        "sw6"
+    ]
+)

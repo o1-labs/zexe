@@ -1,0 +1,40 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    name = "r1cs-std",
+    edition = "2018",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    deps = [
+        "//algebra",
+        "//r1cs-core"
+    ],
+    crate_features = [
+        "std"
+    ]
+)
+
+rust_library(
+    name = "dpc",
+    edition = "2018",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    aliases = { "//algebra:dpc": "algebra" },
+    deps = [
+        "//algebra:dpc",
+        "//r1cs-core"
+    ],
+    crate_features = [
+        "std",
+        "bls12_377",
+        "edwards_bls12",
+        "edwards_sw6",
+        "sw6"
+    ]
+)

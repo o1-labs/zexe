@@ -3,6 +3,7 @@
 use crate::{DensePolynomial, EvaluationDomain, GeneralEvaluationDomain, Vec};
 use algebra_core::FftField;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Sub, SubAssign};
+use rayon::prelude::*;
 
 /// Stores a polynomial in evaluation form.
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -60,7 +61,7 @@ impl<'a, F: FftField, D: EvaluationDomain<F>> MulAssign<&'a Evaluations<F, D>>
     fn mul_assign(&mut self, other: &'a Evaluations<F, D>) {
         assert_eq!(self.domain, other.domain, "domains are unequal");
         self.evals
-            .iter_mut()
+            .par_iter_mut()
             .zip(&other.evals)
             .for_each(|(a, b)| *a *= b);
     }
@@ -86,7 +87,7 @@ impl<'a, F: FftField, D: EvaluationDomain<F>> AddAssign<&'a Evaluations<F, D>>
     fn add_assign(&mut self, other: &'a Evaluations<F, D>) {
         assert_eq!(self.domain, other.domain, "domains are unequal");
         self.evals
-            .iter_mut()
+            .par_iter_mut()
             .zip(&other.evals)
             .for_each(|(a, b)| *a += b);
     }
@@ -112,7 +113,7 @@ impl<'a, F: FftField, D: EvaluationDomain<F>> SubAssign<&'a Evaluations<F, D>>
     fn sub_assign(&mut self, other: &'a Evaluations<F, D>) {
         assert_eq!(self.domain, other.domain, "domains are unequal");
         self.evals
-            .iter_mut()
+            .par_iter_mut()
             .zip(&other.evals)
             .for_each(|(a, b)| *a -= b);
     }
@@ -137,8 +138,9 @@ impl<'a, F: FftField, D: EvaluationDomain<F>> DivAssign<&'a Evaluations<F, D>>
     #[inline]
     fn div_assign(&mut self, other: &'a Evaluations<F, D>) {
         assert_eq!(self.domain, other.domain, "domains are unequal");
+        // TODO: Batch inversion
         self.evals
-            .iter_mut()
+            .par_iter_mut()
             .zip(&other.evals)
             .for_each(|(a, b)| *a /= b);
     }
