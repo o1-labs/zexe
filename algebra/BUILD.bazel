@@ -1,0 +1,41 @@
+load(
+    "@io_bazel_rules_rust//rust:rust.bzl",
+    "rust_library",
+)
+
+rust_library(
+    name = "algebra",
+    visibility = ["//visibility:public"],
+    srcs = glob(["**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    deps = [
+        "@zexe//algebra-core",
+    ],
+    crate_features = [
+        "tweedle",
+        "bn_382",
+        "parallel",
+        "asm",
+        "ocaml_types"
+    ],
+)
+
+rust_library(
+    name = "dpc",
+    visibility = ["//visibility:public"],
+    srcs = glob(["**/*.rs"]),
+    proc_macro_deps = [
+        "//bzl/cargo:derivative",
+    ],
+    deps = [
+        "@zexe//algebra-core",
+    ],
+    crate_features = [
+        "bls12_377",
+        "edwards_bls12",
+        "edwards_sw6",
+        "sw6",
+    ],
+)

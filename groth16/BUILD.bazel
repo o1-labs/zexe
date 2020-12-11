@@ -1,0 +1,24 @@
+load("@io_bazel_rules_rust//rust:rust.bzl", "rust_library")
+
+rust_library(
+    name = "groth16",
+    edition = "2018",
+    visibility = ["//visibility:public"],
+    srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = [
+        "//algebra-core/algebra-core-derive",
+    ],
+    deps = [
+        "//algebra-core",
+        "//bench-utils",
+        "//ff-fft",
+        "//r1cs-core",
+        "//bzl/cargo:rand",
+        "//bzl/cargo:rayon",
+    ],
+    crate_features = [
+        "std",
+        "derive",
+        "parallel",
+    ]
+)
