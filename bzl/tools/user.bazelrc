@@ -1,0 +1,16 @@
+## copy this to <root>/user.bazelrc and customize (do not put under version control)
+## or pass "--bazelrc=bzl/tools/user.bazelrc" as first arg to build cmd.
+## you can also use ${HOME}/.bazelrc to control all Bazel projects in your local env.
+
+build --color=yes
+# build --subcommands=pretty_print # delete "=pretty_print" for compact output
+# build --verbose_failures
+# build --sandbox_debug
+# build --show_timestamps
+# build --keep_going
+# build --jobs 600
+# query --keep_going
+
+## Use with caution; symlinks may confuse Bazel in some situations
+# build --symlink_prefix=.bazel/   # use hidden dir instead of top-level symlinks
+# build --experimental_no_product_name_out_symlink # do not create `bazel-out` symlink
