@@ -42,6 +42,37 @@ pub struct GroupAffine<P: Parameters> {
     _params: PhantomData<P>,
 }
 
+#[cfg(feature = "ocaml_types")]
+#[derive(ocaml::ToValue, ocaml::FromValue)]
+enum CamlGroupAffine<T> {
+    Infinity,
+    Finite((T, T)),
+}
+
+#[cfg(feature = "ocaml_types")]
+unsafe impl<P: Parameters> ocaml::ToValue for GroupAffine<P> where
+    P::BaseField: ocaml::ToValue {
+    fn to_value(self) -> ocaml::Value {
+        if self.infinity {
+           ocaml::ToValue::to_value(CamlGroupAffine::<P::BaseField>::Infinity)
+        } else {
+           ocaml::ToValue::to_value(CamlGroupAffine::Finite((self.x, self.y)))
+        }
+    }
+}
+
+#[cfg(feature = "ocaml_types")]
+unsafe impl<P: Parameters> ocaml::FromValue for GroupAffine<P> where
+    P::BaseField: ocaml::FromValue {
+    fn from_value(v: ocaml::Value) -> Self {
+        let g: CamlGroupAffine<P::BaseField> = ocaml::FromValue::from_value(v);
+        match g {
+            CamlGroupAffine::Infinity => Self::zero(),
+            CamlGroupAffine::Finite((x, y)) => Self::new(x, y, false),
+        }
+    }
+}
+
 impl<P: Parameters> Display for GroupAffine<P> {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
         if self.infinity {
@@ -387,6 +418,21 @@ pub struct GroupProjective<P: Parameters> {
     pub y: P::BaseField,
     pub z: P::BaseField,
     _params: PhantomData<P>,
+}
+
+#[cfg(feature = "ocaml_types")]
+impl<P: Parameters> ocaml::Custom for GroupProjective<P> {
+    ocaml::custom! {
+        name: concat!("rust.", stringify!(GroupProjective<P>))
+    }
+}
+
+#[cfg(feature = "ocaml_types")]
+unsafe impl<P: Parameters> ocaml::FromValue for GroupProjective<P> {
+    fn from_value(v: ocaml::Value) -> Self {
+        let x: ocaml::Pointer<Self> = ocaml::FromValue::from_value(v);
+        x.as_ref().clone()
+    }
 }
 
 impl<P: Parameters> Display for GroupProjective<P> {

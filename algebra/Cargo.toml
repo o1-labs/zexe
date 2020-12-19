@@ -51,3 +51,5 @@ std = [ "algebra-core/std" ]
 parallel = [ "std", "algebra-core/parallel" ]
 derive = [ "algebra-core/derive" ]
 asm = [ "algebra-core/llvm_asm" ]
+
+ocaml_types = [ "algebra-core/ocaml_types" ]

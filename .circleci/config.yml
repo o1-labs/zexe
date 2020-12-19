@@ -1,0 +1,15 @@
+version: 2.1
+
+jobs:
+    run-tests:
+        docker:
+            - image: rust:1.44.1-buster
+        steps:
+            - checkout
+            - run: cargo test
+
+workflows:
+    version: 2
+    zexe_parallel:
+        jobs:
+        - run-tests
