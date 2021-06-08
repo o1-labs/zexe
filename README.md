@@ -93,8 +93,7 @@ cargo +nightly bench --features "n_fold bls12_381"
 
 **IMPORTANT** Currently Bazel support is not complete; it is just
 sufficient to support the Mina project. Some packages will fail to
-compile; they have been excluded by renaming their build files from
-`BUILD.bazel` to `BUILD.bazelX`.
+compile; they have been excluded by adding them to `.bazelignore`
 
 To build all targets: `$ bazel build //...` (NB: three dots)
 
