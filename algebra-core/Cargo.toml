@@ -26,7 +26,7 @@ build = "build.rs"
 algebra-core-derive = { path = "algebra-core-derive", optional = true }
 derivative = { version = "2", features = ["use_core"] }
 num-traits = { version = "0.2", default-features = false }
-ocaml = { version = "0.18.1", optional = true }
+ocaml = { version = "0.22.0", optional = true }
 rand = { version = "0.7", default-features = false }
 rayon = { version = "1", optional = true }
 unroll = "0.1.4"

@@ -43,27 +43,27 @@ pub struct GroupAffine<P: Parameters> {
 }
 
 #[cfg(feature = "ocaml_types")]
-#[derive(ocaml::ToValue, ocaml::FromValue)]
+#[derive(ocaml::IntoValue, ocaml::FromValue)]
 enum CamlGroupAffine<T> {
     Infinity,
     Finite((T, T)),
 }
 
 #[cfg(feature = "ocaml_types")]
-unsafe impl<P: Parameters> ocaml::ToValue for GroupAffine<P> where
-    P::BaseField: ocaml::ToValue {
-    fn to_value(self) -> ocaml::Value {
+unsafe impl<P: Parameters> ocaml::IntoValue for GroupAffine<P> where
+    P::BaseField: ocaml::IntoValue {
+    fn into_value(self, runtime: &ocaml::Runtime) -> ocaml::Value {
         if self.infinity {
-           ocaml::ToValue::to_value(CamlGroupAffine::<P::BaseField>::Infinity)
+           ocaml::IntoValue::into_value(CamlGroupAffine::<P::BaseField>::Infinity, runtime)
         } else {
-           ocaml::ToValue::to_value(CamlGroupAffine::Finite((self.x, self.y)))
+           ocaml::IntoValue::into_value(CamlGroupAffine::Finite((self.x, self.y)), runtime)
         }
     }
 }
 
 #[cfg(feature = "ocaml_types")]
-unsafe impl<P: Parameters> ocaml::FromValue for GroupAffine<P> where
-    P::BaseField: ocaml::FromValue {
+unsafe impl<'a, P: Parameters> ocaml::FromValue<'a> for GroupAffine<P> where
+    P::BaseField: ocaml::FromValue<'a> {
     fn from_value(v: ocaml::Value) -> Self {
         let g: CamlGroupAffine<P::BaseField> = ocaml::FromValue::from_value(v);
         match g {
@@ -428,7 +428,7 @@ impl<P: Parameters> ocaml::Custom for GroupProjective<P> {
 }
 
 #[cfg(feature = "ocaml_types")]
-unsafe impl<P: Parameters> ocaml::FromValue for GroupProjective<P> {
+unsafe impl<'a, P: Parameters> ocaml::FromValue<'a> for GroupProjective<P> {
     fn from_value(v: ocaml::Value) -> Self {
         let x: ocaml::Pointer<Self> = ocaml::FromValue::from_value(v);
         x.as_ref().clone()

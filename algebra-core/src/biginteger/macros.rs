@@ -290,7 +290,7 @@ macro_rules! bigint_impl {
         }
 
         #[cfg(feature = "ocaml_types")]
-        unsafe impl ocaml::FromValue for $name {
+        unsafe impl<'a> ocaml::FromValue<'a> for $name {
             fn from_value(value: ocaml::Value) -> Self {
                 let x: ocaml::Pointer<Self> = ocaml::FromValue::from_value(value);
                 x.as_ref().clone()
@@ -299,9 +299,9 @@ macro_rules! bigint_impl {
 
         #[cfg(feature = "ocaml_types")]
         impl $name {
-            extern "C" fn ocaml_compare (x: ocaml::Value, y: ocaml::Value) -> i32 {
-                let x: ocaml::Pointer<$name> = ocaml::FromValue::from_value(x);
-                let y: ocaml::Pointer<$name> = ocaml::FromValue::from_value(y);
+            extern "C" fn ocaml_compare (x: ocaml::Raw, y: ocaml::Raw) -> i32 {
+                let x: ocaml::Pointer<$name> = unsafe { x.as_pointer() };
+                let y: ocaml::Pointer<$name> = unsafe { y.as_pointer() };
                 match x.as_ref().cmp(y.as_ref()) {
                     core::cmp::Ordering::Less => -1,
                     core::cmp::Ordering::Equal => 0,
